@@ -18,7 +18,7 @@ import { LoadingSkeletonComponent } from '../../shared/components/loading-skelet
         @for (p of products(); track p.id) {
           <a [routerLink]="[p.id]" class="fs-card block hover:shadow-md transition">
             <div class="h-36 bg-gray-100 dark:bg-gray-700 rounded-lg mb-3 flex items-center justify-center text-gray-400">
-              @if (p.images?.length) { <img [src]="p.images[0]" class="h-full w-full object-cover rounded-lg" alt="" /> }
+              @if (p.images.length) { <img [src]="p.images[0]" class="h-full w-full object-cover rounded-lg" alt="" /> }
               @else { <span class="material-icons text-4xl">image</span> }
             </div>
             <h3 class="font-semibold line-clamp-1">{{ p.title }}</h3>

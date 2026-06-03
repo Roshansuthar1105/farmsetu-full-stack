@@ -12,7 +12,7 @@ th {
 }
 
 td {
-  @apply border-b border-gray-250 dark:border-gray-750;
+  @apply border-b border-gray-200 dark:border-gray-700;
 }
 
 /* Modal fade animations */
@@ -24,6 +24,7 @@ td {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

@@ -15,7 +15,7 @@ import { LoadingSkeletonComponent } from '../../shared/components/loading-skelet
     } @else if (product()) {
       <div class="grid lg:grid-cols-2 gap-6">
         <div class="fs-card h-80 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-          @if (product()!.images?.length) {
+          @if (product()!.images.length) {
             <img [src]="product()!.images[0]" class="max-h-full rounded-lg" alt="" />
           }
         </div>
