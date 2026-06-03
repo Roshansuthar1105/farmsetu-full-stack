@@ -1,0 +1,23 @@
+{
+  "app.name": "FarmSetu",
+  "nav.dashboard": "Dashboard",
+  "nav.marketplace": "Marketplace",
+  "nav.chat": "Chat",
+  "nav.community": "Community",
+  "nav.market": "Market Prices",
+  "nav.weather": "Weather",
+  "nav.news": "News",
+  "nav.resources": "Resources",
+  "nav.schemes": "Govt Schemes",
+  "nav.insurance": "Insurance",
+  "nav.cropRec": "Crop Recommendation",
+  "nav.calendar": "Crop Calendar",
+  "nav.disease": "Disease Detection",
+  "nav.mandi": "Mandi Finder",
+  "nav.finance": "Financial Tools",
+  "nav.notifications": "Notifications",
+  "nav.profile": "Profile",
+  "auth.login": "Login",
+  "auth.register": "Register",
+  "landing.tagline": "Your complete agricultural ecosystem"
+}

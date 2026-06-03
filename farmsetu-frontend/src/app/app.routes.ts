@@ -1,0 +1,113 @@
+import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
+
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)
+  },
+  {
+    path: 'auth',
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+  {
+    path: 'app',
+    loadComponent: () => import('./shared/components/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'farm-dashboard',
+        loadComponent: () => import('./features/farm-dashboard/farm-dashboard.component').then(m => m.FarmDashboardComponent)
+      },
+      {
+        path: 'marketplace',
+        loadChildren: () => import('./features/marketplace/marketplace.routes').then(m => m.MARKETPLACE_ROUTES)
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
+      },
+      {
+        path: 'community',
+        loadComponent: () => import('./features/community/community.component').then(m => m.CommunityComponent)
+      },
+      {
+        path: 'market-analysis',
+        loadComponent: () => import('./features/market-analysis/market-analysis.component').then(m => m.MarketAnalysisComponent)
+      },
+      {
+        path: 'weather',
+        loadComponent: () => import('./features/weather/weather.component').then(m => m.WeatherComponent)
+      },
+      {
+        path: 'news',
+        loadComponent: () => import('./features/news/news.component').then(m => m.NewsComponent)
+      },
+      {
+        path: 'resources',
+        loadComponent: () => import('./features/resources/resources.component').then(m => m.ResourcesComponent)
+      },
+      {
+        path: 'govt-schemes',
+        loadComponent: () => import('./features/govt-schemes/govt-schemes.component').then(m => m.GovtSchemesComponent)
+      },
+      {
+        path: 'insurance',
+        loadComponent: () => import('./features/insurance/insurance.component').then(m => m.InsuranceComponent)
+      },
+      {
+        path: 'crop-recommendation',
+        loadComponent: () => import('./features/crop-recommendation/crop-recommendation.component').then(m => m.CropRecommendationComponent)
+      },
+      {
+        path: 'crop-calendar',
+        loadComponent: () => import('./features/crop-calendar/crop-calendar.component').then(m => m.CropCalendarComponent)
+      },
+      {
+        path: 'disease-detection',
+        loadComponent: () => import('./features/disease-detection/disease-detection.component').then(m => m.DiseaseDetectionComponent)
+      },
+      {
+        path: 'mandi-finder',
+        loadComponent: () => import('./features/mandi-finder/mandi-finder.component').then(m => m.MandiFinderComponent)
+      },
+      {
+        path: 'financial',
+        loadComponent: () => import('./features/financial/financial.component').then(m => m.FinancialComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/profile/settings.component').then(m => m.SettingsComponent)
+      }
+    ]
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/admin/admin-layout.component').then(m => m.AdminLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+      }
+    ]
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./shared/components/not-found/not-found.component').then(m => m.NotFoundComponent)
+  }
+];
