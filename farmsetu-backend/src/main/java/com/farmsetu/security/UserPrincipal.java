@@ -19,6 +19,7 @@ public class UserPrincipal implements UserDetails {
     private final String password;
     private final UserRole role;
     private final boolean active;
+    private final String identifier;
 
     public UserPrincipal(User user) {
         this.id = user.getId();
@@ -27,6 +28,7 @@ public class UserPrincipal implements UserDetails {
         this.password = user.getPasswordHash();
         this.role = user.getRole();
         this.active = user.isActive();
+        this.identifier = user.getEmail() != null ? user.getEmail() : user.getPhone();
     }
 
     @Override
@@ -36,7 +38,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email != null ? email : phone;
+        return identifier;
     }
 
     @Override

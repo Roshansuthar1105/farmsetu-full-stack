@@ -103,7 +103,32 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./features/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent)
+      },
+      {
+        path: 'crops',
+        loadComponent: () => import('./features/admin/crops/admin-crops.component').then(m => m.AdminCropsComponent)
       }
+      // ,
+      // {
+      //   path: 'marketplace',
+      //   loadComponent: () => import('./features/admin/marketplace/admin-marketplace.component').then(m => m.AdminMarketplaceComponent)
+      // },
+      // {
+      //   path: 'marketplace',
+      //   loadComponent: () => import('./features/admin/marketplace/admin-marketplace.component').then(m => m.AdminMarketplaceComponent)
+      // },
+      // {
+      //   path: 'services',
+      //   loadComponent: () => import('./features/admin/services/admin-services.component').then(m => m.AdminServicesComponent)
+      // },
+      // {
+      //   path: 'insurance',
+      //   loadComponent: () => import('./features/admin/insurance/admin-insurance.component').then(m => m.AdminInsuranceComponent)
+      // },
     ]
   },
   {

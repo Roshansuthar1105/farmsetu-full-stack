@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -48,7 +49,9 @@ public class UserResponse {
                 .village(user.getVillage())
                 .verified(user.isVerified())
                 .reputationScore(user.getReputationScore())
-                .currentCrops(user.getCurrentCrops())
+                .currentCrops(user.getCurrentCrops() != null
+                        ? new ArrayList<>(user.getCurrentCrops())
+                        : new ArrayList<>())
                 .build();
     }
 }

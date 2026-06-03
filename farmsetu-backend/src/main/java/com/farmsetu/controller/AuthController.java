@@ -44,8 +44,10 @@ public class AuthController {
 
     @PostMapping("/refresh-token")
     public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        UserPrincipal principal = SecurityUtils.currentUser();
-        return ApiResponse.ok(authService.refreshToken(request.getRefreshToken(), principal));
+//        UserPrincipal principal = SecurityUtils.currentUser();
+//        return ApiResponse.ok(authService.refreshToken(request.getRefreshToken(), principal));
+        // ✅ FIXED: removed SecurityUtils.currentUser() - token validates itself
+    return ApiResponse.ok(authService.refreshToken(request.getRefreshToken()));
     }
 
     @PostMapping("/verify-otp")

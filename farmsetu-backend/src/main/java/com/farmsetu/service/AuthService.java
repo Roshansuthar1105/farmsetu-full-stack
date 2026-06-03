@@ -14,7 +14,9 @@ import com.farmsetu.security.JwtService;
 import com.farmsetu.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,22 +62,60 @@ public class AuthService {
         return buildAuthResponse(user);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword()));
+//        authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword()));
+//
+//        User user = userRepository.findByEmailOrPhone(request.getIdentifier(), request.getIdentifier())
+//                .orElseThrow(() -> new BadRequestException("User not found"));
+//        return buildAuthResponse(user);
+        try {
+            // ✅ FIXED: authentication is restored and works with email OR phone
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getIdentifier(),
+                            request.getPassword()
+                    )
+            );
 
-        User user = userRepository.findByEmailOrPhone(request.getIdentifier(), request.getIdentifier())
-                .orElseThrow(() -> new BadRequestException("User not found"));
+            // ✅ FIXED: get UserPrincipal directly from authentication - no extra DB call
+            UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 
-        return buildAuthResponse(user);
+            User user = userRepository.findById(principal.getId())
+                    .orElseThrow(() -> new BadRequestException("User not found"));
+
+            return buildAuthResponse(user);
+
+        } catch (BadCredentialsException e) {
+            throw new BadRequestException("Invalid credentials"); // ✅ returns 400, not 403
+        }
     }
 
-    public AuthResponse refreshToken(String refreshToken, UserPrincipal principal) {
-        User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new BadRequestException("User not found"));
-        return buildAuthResponse(user);
+    @Transactional
+    public AuthResponse refreshToken(String refreshToken) {
+//        User user = userRepository.findById(principal.getId())
+//                .orElseThrow(() -> new BadRequestException("User not found"));
+//        return buildAuthResponse(user);
+        // ✅ FIXED: validate refresh token directly, no SecurityUtils needed
+        try {
+            String username = jwtService.extractUsername(refreshToken);
+            User user = userRepository.findByIdentifier(username)
+                    .orElseThrow(() -> new BadRequestException("User not found"));
+
+            UserPrincipal principal = new UserPrincipal(user);
+
+            if (!jwtService.isTokenValid(refreshToken, principal)) {
+                throw new BadRequestException("Invalid or expired refresh token");
+            }
+
+            return buildAuthResponse(user);
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid refresh token");
+        }
     }
 
+    @Transactional
     public UserResponse me(UserPrincipal principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new BadRequestException("User not found"));
