@@ -31,45 +31,51 @@ export interface RegistrationData {
     FarmDetailsStepComponent
   ],
   template: `
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div class="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-300 pb-12">
 
       <!-- Compact header for registration -->
-      <fs-auth-header tagline="Join the farming revolution" height="25vh" />
+      <fs-auth-header tagline="Join the agricultural revolution" height="28vh" />
 
-      <!-- Main Card -->
-      <div class="flex-1 -mt-6 relative z-10">
-        <div class="bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl min-h-full px-6 pt-6 pb-6">
+      <!-- Main Card Wrap -->
+      <div class="flex-1 -mt-8 relative z-10 px-4">
+        <div class="glass-card max-w-md mx-auto p-8 shadow-2xl relative overflow-hidden">
+          
+          <!-- Top Accent Line -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 to-secondary-500"></div>
 
-          <!-- Progress Bar -->
-          <div class="max-w-md mx-auto mb-6">
+          <!-- Progress Bar & Stepper -->
+          <div class="mb-8">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-semibold text-green-600 dark:text-green-400">
+              <span class="text-xs font-semibold text-primary-650 dark:text-primary-400 uppercase tracking-wider">
                 Step {{ currentStep() }} of 3
               </span>
-              <span class="text-xs text-gray-400">
+              <span class="text-xs text-slate-450 dark:text-slate-400 font-medium">
                 {{ stepLabels[currentStep() - 1] }}
               </span>
             </div>
-            <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full
+            
+            <!-- Sleek Progress Track -->
+            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full
                           transition-all duration-500 ease-out"
                    [style.width.%]="(currentStep() / 3) * 100">
               </div>
             </div>
 
-            <!-- Step indicators -->
-            <div class="flex justify-between mt-3">
+            <!-- Custom Stepper Dots -->
+            <div class="flex justify-between mt-5 relative">
+              <!-- Background connector line -->
+              <div class="absolute top-3.5 left-0 right-0 h-[2px] bg-slate-100 dark:bg-slate-800 -z-10"></div>
+              
               @for (step of [1, 2, 3]; track step) {
-                <div class="flex flex-col items-center gap-1">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                              transition-all duration-300"
+                <div class="flex flex-col items-center gap-1.5">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                              transition-all duration-300 z-10"
                        [class]="step <= currentStep()
-                         ? 'bg-green-600 text-white shadow-lg shadow-green-500/30'
-                         : 'bg-gray-200 dark:bg-gray-700 text-gray-400'">
+                         ? 'bg-primary-600 text-white shadow-md shadow-primary-600/20'
+                         : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'">
                     @if (step < currentStep()) {
-                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                      </svg>
+                      <span class="material-icons text-sm">done</span>
                     } @else {
                       {{ step }}
                     }
@@ -79,8 +85,8 @@ export interface RegistrationData {
             </div>
           </div>
 
-          <!-- Step Content -->
-          <div class="max-w-md mx-auto">
+          <!-- Step Content Container -->
+          <div class="mt-4 animate-fade-in-up">
             @switch (currentStep()) {
               @case (1) {
                 <fs-personal-info-step
