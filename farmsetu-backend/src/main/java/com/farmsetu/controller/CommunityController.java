@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.Comment;
 import com.farmsetu.model.entity.Post;
 import com.farmsetu.model.entity.Story;
@@ -22,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/community")
 @RequiredArgsConstructor
 public class CommunityController {
 
     private final CommunityService communityService;
 
     @GetMapping("/posts")
-    public ApiResponse<PageResponse<Post>> list(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(communityService.listPosts(page, size));
@@ -67,7 +66,7 @@ public class CommunityController {
         return ApiResponse.ok(communityService.likePost(id));
     }
 
-    @PostMapping("/posts/{id}/comment")
+    @PostMapping({"/posts/{id}/comment", "/posts/{id}/comments"})
     public ApiResponse<Comment> comment(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         Long parentId = body.get("parentCommentId") != null
                 ? Long.valueOf(body.get("parentCommentId").toString()) : null;
@@ -75,7 +74,7 @@ public class CommunityController {
     }
 
     @GetMapping("/posts/{id}/comments")
-    public ApiResponse<PageResponse<Comment>> comments(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> comments(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

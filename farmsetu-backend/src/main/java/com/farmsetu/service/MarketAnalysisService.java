@@ -3,7 +3,6 @@ package com.farmsetu.service;
 import com.farmsetu.model.entity.MarketPrice;
 import com.farmsetu.repository.MarketPriceRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,12 +15,12 @@ public class MarketAnalysisService {
 
     private final MarketPriceRepository marketPriceRepository;
 
-    public List<MarketPrice> getPrices(int page, int size) {
-        return marketPriceRepository.findAll(PageRequest.of(page, size)).getContent();
+    public List<Map<String, Object>> getPrices(int page, int size) {
+        return marketPriceRepository.findAllNative(size, page * size);
     }
 
-    public List<MarketPrice> getPricesByCrop(Long cropId, int page, int size) {
-        return marketPriceRepository.findByCropId(cropId, PageRequest.of(page, size)).getContent();
+    public List<Map<String, Object>> getPricesByCrop(Long cropId, int page, int size) {
+        return marketPriceRepository.findByCropIdNative(cropId, size, page * size);
     }
 
     public List<MarketPrice> getTrends(Long cropId) {

@@ -5,7 +5,8 @@ import com.farmsetu.model.dto.crop.CropResponse;
 import com.farmsetu.model.entity.*;
 import com.farmsetu.service.AdminService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import java.util.List;
+import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ public class AdminController {
 
     // Users
     @GetMapping("/users")
-    public ApiResponse<Page<User>> users(
+    public ApiResponse<List<Map<String, Object>>> users(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listUsers(page, size));
@@ -71,7 +72,7 @@ public class AdminController {
 
     // Products
     @GetMapping("/products")
-    public ApiResponse<Page<Product>> listProducts(
+    public ApiResponse<List<Map<String, Object>>> listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listProducts(page, size));
@@ -100,7 +101,7 @@ public class AdminController {
 
     // Orders
     @GetMapping("/orders")
-    public ApiResponse<Page<Order>> listOrders(
+    public ApiResponse<List<Map<String, Object>>> listOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listOrders(page, size));
@@ -124,7 +125,7 @@ public class AdminController {
 
     // Crops
     @GetMapping("/crops")
-    public ApiResponse<Page<CropResponse>> listCrops(
+    public ApiResponse<List<Map<String, Object>>> listCrops(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listCrops(page, size));
@@ -153,7 +154,7 @@ public class AdminController {
 
     // Govt Schemes
     @GetMapping("/schemes")
-    public ApiResponse<Page<GovtScheme>> listSchemes(
+    public ApiResponse<List<Map<String, Object>>> listSchemes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listSchemes(page, size));
@@ -182,7 +183,7 @@ public class AdminController {
 
     // Insurance
     @GetMapping("/insurance")
-    public ApiResponse<Page<InsuranceScheme>> listInsurance(
+    public ApiResponse<List<Map<String, Object>>> listInsurance(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listInsurance(page, size));
@@ -211,7 +212,7 @@ public class AdminController {
 
     // Mandis
     @GetMapping("/mandis")
-    public ApiResponse<Page<Mandi>> listMandis(
+    public ApiResponse<List<Map<String, Object>>> listMandis(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listMandis(page, size));
@@ -240,7 +241,7 @@ public class AdminController {
 
     // News
     @GetMapping("/news")
-    public ApiResponse<Page<News>> listNews(
+    public ApiResponse<List<Map<String, Object>>> listNews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listNews(page, size));
@@ -269,7 +270,7 @@ public class AdminController {
 
     // Resources
     @GetMapping("/resources")
-    public ApiResponse<Page<Resource>> listResources(
+    public ApiResponse<List<Map<String, Object>>> listResources(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listResources(page, size));
@@ -296,3 +297,4 @@ public class AdminController {
         return ApiResponse.ok(null);
     }
 }
+

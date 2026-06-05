@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.ChatMessage;
 import com.farmsetu.model.enums.MessageType;
 import com.farmsetu.service.ChatService;
@@ -25,7 +24,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping("/chats/{userId}")
-    public ApiResponse<PageResponse<ChatMessage>> conversation(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> conversation(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -33,7 +32,7 @@ public class ChatController {
     }
 
     @GetMapping("/chats/history/{userId}")
-    public ApiResponse<PageResponse<ChatMessage>> history(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> history(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

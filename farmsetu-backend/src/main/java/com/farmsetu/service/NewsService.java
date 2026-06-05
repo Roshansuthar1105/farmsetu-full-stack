@@ -1,17 +1,16 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.News;
 import com.farmsetu.repository.NewsRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +19,8 @@ public class NewsService {
     private final NewsRepository newsRepository;
     private final List<Long> savedByUser = new ArrayList<>();
 
-    public PageResponse<News> list(int page, int size) {
-        return PageResponse.from(newsRepository.findAll(PageRequest.of(page, size)));
+    public List<Map<String, Object>> list(int page, int size) {
+        return newsRepository.findAllNative(size, page * size);
     }
 
     public News getById(Long id) {

@@ -1,7 +1,6 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.Comment;
 import com.farmsetu.model.entity.Post;
 import com.farmsetu.model.entity.Story;
@@ -13,8 +12,6 @@ import com.farmsetu.repository.StoryRepository;
 import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +29,8 @@ public class CommunityService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
 
-    public PageResponse<Post> listPosts(int page, int size) {
-        Page<Post> posts = postRepository.findAll(PageRequest.of(page, size));
-        return PageResponse.from(posts);
+    public List<Map<String, Object>> listPosts(int page, int size) {
+        return postRepository.findAllNative(size, page * size);
     }
 
     public Post getPost(Long id) {
@@ -91,8 +87,8 @@ public class CommunityService {
         return comment;
     }
 
-    public PageResponse<Comment> getComments(Long postId, int page, int size) {
-        return PageResponse.from(commentRepository.findByPostId(postId, PageRequest.of(page, size)));
+    public List<Map<String, Object>> getComments(Long postId, int page, int size) {
+        return commentRepository.findByPostIdNative(postId, size, page * size);
     }
 
     @Transactional
@@ -126,3 +122,4 @@ public class CommunityService {
         return Map.of("message", "Leaderboard aggregation placeholder");
     }
 }
+

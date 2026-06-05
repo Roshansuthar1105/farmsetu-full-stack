@@ -8,3 +8,5 @@ import java.util.List;
 public interface CropCalendarRepository extends JpaRepository<CropCalendar, Long> {
     List<CropCalendar> findByFarmerId(Long farmerId);
 }
+
+

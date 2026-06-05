@@ -9,3 +9,5 @@ public interface FarmExpenseRepository extends JpaRepository<FarmExpense, Long> 
     List<FarmExpense> findByFarmerId(Long farmerId);
     List<FarmExpense> findByFarmerIdAndSeasonAndYear(Long farmerId, String season, Integer year);
 }
+
+

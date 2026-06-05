@@ -18,6 +18,10 @@ public class MandiService {
     private final MandiRepository mandiRepository;
     private final MarketPriceRepository marketPriceRepository;
 
+    public List<Mandi> getAll() {
+        return mandiRepository.findAll();
+    }
+
     public List<Mandi> nearby(double lat, double lng, double radiusKm) {
         return mandiRepository.findNearby(lat, lng, radiusKm);
     }

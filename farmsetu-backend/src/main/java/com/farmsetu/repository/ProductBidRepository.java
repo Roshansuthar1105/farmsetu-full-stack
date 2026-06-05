@@ -8,3 +8,5 @@ import java.util.List;
 public interface ProductBidRepository extends JpaRepository<ProductBid, Long> {
     List<ProductBid> findByProductIdOrderByAmountDesc(Long productId);
 }
+
+

@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.Resource;
 import com.farmsetu.service.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,7 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @GetMapping
-    public ApiResponse<PageResponse<Resource>> list(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(resourceService.list(page, size));

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.farmsetu.security.SecurityUtils;
+
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,21 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMe() {
+        return ApiResponse.ok(userService.getById(SecurityUtils.currentUserId()));
+    }
+
+    @PutMapping("/me")
+    public ApiResponse<UserResponse> updateMe(@Valid @RequestBody UpdateUserRequest request) {
+        return ApiResponse.ok(userService.update(SecurityUtils.currentUserId(), request));
+    }
+
+    @GetMapping("/me/badges")
+    public ApiResponse<List<UserBadge>> getMeBadges() {
+        return ApiResponse.ok(userService.getBadges(SecurityUtils.currentUserId()));
+    }
 
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUser(@PathVariable Long id) {

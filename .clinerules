@@ -1,0 +1,11 @@
+# Farmsetu Frontend Developer Rules & Guidelines
+
+Please adhere strictly to the rules defined in developer_rules.md:
+[developer_rules.md](file:///d:/new%20project%20f/farmsetu-frontend/developer_rules.md)
+
+Summary of core rules:
+1. **Mobile-First & Responsive**: Always use mobile-first styling. Preview must be stable on mobile.
+2. **Dark/Light Mode**: Every component must support both `light` and `dark` modes using Tailwind `dark:` modifiers.
+3. **Tailwind + SCSS**: Tailwind for basic styling and layout; SCSS for advanced styling, animations, and custom CSS effects.
+4. **i18n (English & Hindi)**: All text must be internationalized. Every new key must be added to both English (`src/assets/i18n/en.json`) and Hindi (`src/assets/i18n/hn.json`).
+5. **Toast Notifications**: Use `ToastrService` for user actions feedback (success/error/warning).

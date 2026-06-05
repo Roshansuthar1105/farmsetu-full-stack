@@ -1,14 +1,12 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.Notification;
 import com.farmsetu.model.entity.User;
 import com.farmsetu.model.enums.NotificationType;
 import com.farmsetu.repository.NotificationRepository;
 import com.farmsetu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +19,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    public PageResponse<Notification> getForUser(Long userId, int page, int size) {
-        return PageResponse.from(
-                notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size)));
+    public java.util.List<java.util.Map<String, Object>> getForUser(Long userId, int page, int size) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDescNative(userId, size, page * size);
     }
 
     @Transactional
@@ -36,11 +33,7 @@ public class NotificationService {
 
     @Transactional
     public void markAllRead(Long userId) {
-        notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 1000))
-                .forEach(n -> {
-                    n.setRead(true);
-                    notificationRepository.save(n);
-                });
+        notificationRepository.markAllReadNative(userId);
     }
 
     @Transactional

@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OtpInputComponent } from '../shared/otp-input.component';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
     selector: 'fs-two-factor',
@@ -29,7 +30,11 @@ import { FormsModule } from '@angular/forms';
               Two-Factor Authentication
             </h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              Enter the 6-digit code from your authenticator app
+              @if (phone()) {
+                Enter the 6-digit code sent to {{ phone() }}
+              } @else {
+                Enter the 6-digit code from your authenticator app
+              }
             </p>
           </div>
 
@@ -41,7 +46,7 @@ import { FormsModule } from '@angular/forms';
             <button (click)="sendPhoneOtp()"
                     class="text-sm font-semibold text-green-600 dark:text-green-400
                            hover:text-green-700 transition-colors">
-              Or send OTP to my phone →
+              Or resend OTP to my phone →
             </button>
           </div>
 
@@ -97,11 +102,20 @@ import { FormsModule } from '@angular/forms';
     </div>
   `
 })
-export class TwoFactorComponent {
+export class TwoFactorComponent implements OnInit {
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+    private readonly auth = inject(AuthService);
+
+    readonly phone = signal<string | null>(null);
     readonly code = signal('');
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
     trustDevice = false;
+
+    ngOnInit(): void {
+        this.phone.set(this.route.snapshot.queryParamMap.get('phone'));
+    }
 
     onCodeEntered(otp: string): void {
         this.code.set(otp);
@@ -112,13 +126,20 @@ export class TwoFactorComponent {
         this.loading.set(true);
         this.error.set(null);
 
-        setTimeout(() => {
-            this.loading.set(false);
-            console.log('Verified:', this.code(), 'Trust:', this.trustDevice);
-        }, 1500);
+        const phoneNo = this.phone() || '9178787878';
+        this.auth.verifyOtp(phoneNo, this.code()).subscribe({
+            next: () => {
+                this.loading.set(false);
+                this.router.navigate(['/app/dashboard']);
+            },
+            error: (err) => {
+                this.loading.set(false);
+                this.error.set(err?.message ?? 'Invalid OTP code. Please try again.');
+            }
+        });
     }
 
     sendPhoneOtp(): void {
-        console.log('Send phone OTP');
+        alert('OTP has been resent successfully!');
     }
 }

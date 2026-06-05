@@ -1,0 +1,170 @@
+<div class="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary/30">
+
+  <!-- Sticky Header -->
+  <header class="fixed top-0 w-full z-50 transition-all duration-300"
+          [ngClass]="{'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-4': isScrolled(), 'bg-transparent py-6': !isScrolled()}">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <a routerLink="/" class="flex items-center gap-2 text-2xl font-bold text-primary group">
+        <svg lucideLeaf class="text-primary group-hover:rotate-12 transition-transform"></svg>
+        {{ i18n.t('app.name') }}
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-8 font-medium">
+        <a href="#features" class="hover:text-primary transition-colors">Features</a>
+        <a href="#about" class="hover:text-primary transition-colors">About Us</a>
+        <a href="#impact" class="hover:text-primary transition-colors">Impact</a>
+      </nav>
+
+      <!-- Auth Actions -->
+      <div class="flex items-center gap-3">
+        <a routerLink="/auth/login" class="px-5 py-2 font-semibold hover:text-primary transition-colors">
+          {{ i18n.t('auth.login') }}
+        </a>
+        <a routerLink="/auth/register" class="fs-btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all hover:-translate-y-0.5">
+          {{ i18n.t('auth.register') }}
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-3xl"></div>
+
+    <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-8 animate-fade-in-up">
+        <svg lucideSprout size="18"></svg>
+        Empowering the Modern Farmer
+      </div>
+      <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6 animate-fade-in-up animation-delay-100">
+        The Future of <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Agriculture</span> is Here
+      </h1>
+      <p class="text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-200">
+        {{ i18n.t('landing.tagline') }} Join thousands of farmers leveraging AI, marketplace insights, and community support to maximize yield.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up animation-delay-300">
+        <a routerLink="/auth/register" class="flex items-center gap-2 fs-btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all">
+          Get Started For Free
+          <svg lucideArrowRight size="20"></svg>
+        </a>
+        <a href="#features" class="fs-btn-secondary bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 text-lg px-8 py-4 w-full sm:w-auto transition-all border border-gray-200 dark:border-gray-700 hover:border-gray-300">
+          Explore Features
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact / Stats Banner -->
+  <section id="impact" class="py-16 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        @for (stat of stats; track stat.label) {
+          <div class="p-4">
+            <div class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">{{ stat.value }}</div>
+            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">{{ stat.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-24 relative">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Everything You Need to Succeed</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400">Farmsetu brings the entire agricultural ecosystem into your pocket. From sowing to selling, we've got you covered.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (f of features; track f.title) {
+          <div class="fs-feature-card group bg-white/50 dark:bg-gray-800/50 backdrop-blur border border-gray-100 dark:border-gray-700 p-8 rounded-2xl hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1">
+            <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+              <svg [lucideIcon]="f.icon" class="text-primary group-hover:text-white"></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-3">{{ f.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ f.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="py-24 bg-gray-50 dark:bg-gray-900/50">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="relative">
+          <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-amber-500/20 rounded-3xl transform -rotate-3 scale-105"></div>
+          <div class="relative bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
+            <!-- Simulated Image / Graphic -->
+            <div class="aspect-video bg-gray-100 dark:bg-gray-700 rounded-xl mb-6 flex items-center justify-center overflow-hidden">
+               <svg lucideShieldCheck size="64" class="text-gray-300 dark:text-gray-600"></svg>
+            </div>
+            <h3 class="text-2xl font-bold mb-4">Built for Trust and Transparency</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">Every transaction on Farmsetu is secured, and every expert is verified. We ensure that farmers get the best prices and buyers get the highest quality produce.</p>
+            <ul class="space-y-3">
+              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
+                <svg lucideShieldCheck class="text-primary" size="20"></svg> Verified Buyers & Sellers
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
+                <svg lucideShieldCheck class="text-primary" size="20"></svg> Secure Digital Payments
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
+                <svg lucideShieldCheck class="text-primary" size="20"></svg> Transparent Bidding System
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">Our Mission</h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            At Farmsetu, we believe that technology is the great equalizer. Our mission is to bridge the gap between traditional farming practices and modern digital solutions.
+          </p>
+          <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+            By providing access to real-time market data, AI-driven diagnostics, and a nationwide community, we empower farmers to make informed decisions, increase their yields, and improve their livelihoods.
+          </p>
+          <a routerLink="/auth/register" class="inline-flex font-semibold text-primary items-center gap-2 hover:gap-3 transition-all">
+            Join our mission today <svg lucideArrowRight size="18"></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="py-20 relative overflow-hidden bg-primary">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-30"></div>
+    <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+      <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Ready to Transform Your Farm?</h2>
+      <p class="text-green-100 text-lg mb-10">Join Farmsetu today and unlock the full potential of your agricultural business.</p>
+      <a routerLink="/auth/register" class="inline-block bg-white text-primary font-bold text-lg px-10 py-4 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
+        Create Your Free Account
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-gray-950 py-12 border-t border-gray-200 dark:border-gray-800">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+        <svg lucideLeaf class="text-primary"></svg> Farmsetu
+      </div>
+      <div class="text-gray-500 text-sm">
+        &copy; {{ currentYear || '2024' }} Farmsetu. All rights reserved.
+      </div>
+      <div class="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+        <a href="#" class="hover:text-primary transition-colors">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</div>

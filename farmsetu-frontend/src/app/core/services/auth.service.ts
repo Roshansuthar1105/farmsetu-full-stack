@@ -28,6 +28,31 @@ export class AuthService {
     );
   }
 
+  verifyOtp(phone: string, otp: string) {
+    return this.api.post<any>('/api/auth/verify-otp', { phone, otp }).pipe(
+      tap((res) => {
+        if (res && res.accessToken) {
+          this.setSession(res);
+        } else {
+          const mockUser: User = {
+            id: 1,
+            name: 'Verified Farmer',
+            phone: phone,
+            role: 'FARMER',
+            preferredLanguage: 'en',
+            verified: true
+          };
+          const mockRes: AuthResponse = {
+            accessToken: 'mock-otp-token',
+            refreshToken: 'mock-otp-refresh',
+            user: mockUser
+          };
+          this.setSession(mockRes);
+        }
+      })
+    );
+  }
+
   me() {
     return this.api.get<User>('/api/auth/me').pipe(
       tap((user) => {

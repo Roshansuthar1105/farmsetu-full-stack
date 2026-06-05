@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.dto.marketplace.ProductRequest;
 import com.farmsetu.model.dto.marketplace.ProductResponse;
 import com.farmsetu.model.entity.Order;
@@ -11,7 +10,6 @@ import com.farmsetu.model.enums.DeliveryStatus;
 import com.farmsetu.service.MarketplaceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,14 +24,14 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/marketplace")
 @RequiredArgsConstructor
 public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
 
     @GetMapping("/products")
-    public ApiResponse<PageResponse<ProductResponse>> list(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(marketplaceService.listProducts(page, size));
@@ -61,14 +59,14 @@ public class MarketplaceController {
     }
 
     @GetMapping("/products/category/{category}")
-    public ApiResponse<PageResponse<ProductResponse>> byCategory(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> byCategory(
             @PathVariable String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(marketplaceService.listByCategory(category, page, size));
     }
 
-    @PostMapping("/products/{id}/bid")
+    @PostMapping("/products/{id}/bids")
     public ApiResponse<ProductBid> bid(@PathVariable Long id, @RequestBody Map<String, BigDecimal> body) {
         return ApiResponse.ok(marketplaceService.placeBid(id, body.get("amount")));
     }
@@ -103,7 +101,7 @@ public class MarketplaceController {
     }
 
     @GetMapping("/products/{id}/reviews")
-    public ApiResponse<Page<Review>> reviews(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> reviews(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -111,7 +109,7 @@ public class MarketplaceController {
     }
 
     @GetMapping("/seller/{id}/products")
-    public ApiResponse<PageResponse<ProductResponse>> sellerProducts(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> sellerProducts(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

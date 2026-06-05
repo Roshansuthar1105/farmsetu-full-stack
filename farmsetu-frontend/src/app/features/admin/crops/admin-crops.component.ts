@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 
 @Component({
@@ -12,13 +13,12 @@ import { ApiService } from '../../../core/services/api.service';
 })
 export class AdminCropsComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly toastr = inject(ToastrService);
 
   crops = signal<any[]>([]);
   selectedCrop = signal<any>(null);
   showEditModal = signal(false);
   isEditMode = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
 
   // Form soil types comma list
   soilTypesRaw = '';
@@ -135,12 +135,10 @@ export class AdminCropsComponent implements OnInit {
   }
 
   private showSuccess(msg: string): void {
-    this.successMessage.set(msg);
-    setTimeout(() => this.successMessage.set(null), 3000);
+    this.toastr.success(msg, 'Success');
   }
 
   private showError(msg: string): void {
-    this.errorMessage.set(msg);
-    setTimeout(() => this.errorMessage.set(null), 3000);
+    this.toastr.error(msg, 'Error');
   }
 }

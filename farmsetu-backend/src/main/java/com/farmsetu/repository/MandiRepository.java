@@ -18,4 +18,9 @@ public interface MandiRepository extends JpaRepository<Mandi, Long> {
     List<Mandi> findNearby(@Param("lat") double lat,
                            @Param("lng") double lng,
                            @Param("radiusKm") double radiusKm);
+
+    @Query(value = "SELECT * FROM mandis LIMIT :limit OFFSET :offset", nativeQuery = true)
+    java.util.List<java.util.Map<String, Object>> findAllNative(@Param("limit") int limit, @Param("offset") int offset);
 }
+
+

@@ -1,7 +1,6 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.DiseaseDetection;
 import com.farmsetu.model.entity.User;
 import com.farmsetu.model.enums.DiseaseSeverity;
@@ -9,7 +8,6 @@ import com.farmsetu.repository.DiseaseDetectionRepository;
 import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,9 +39,8 @@ public class DiseaseDetectionService {
         return diseaseDetectionRepository.save(detection);
     }
 
-    public PageResponse<DiseaseDetection> history(Long farmerId, int page, int size) {
-        return PageResponse.from(
-                diseaseDetectionRepository.findByFarmerId(farmerId, PageRequest.of(page, size)));
+    public java.util.List<java.util.Map<String, Object>> history(Long farmerId, int page, int size) {
+        return diseaseDetectionRepository.findByFarmerIdNative(farmerId, size, page * size);
     }
 
     public DiseaseDetection getById(Long id) {

@@ -21,6 +21,11 @@ public class MandiController {
 
     private final MandiService mandiService;
 
+    @GetMapping("/mandis")
+    public ApiResponse<List<Mandi>> list() {
+        return ApiResponse.ok(mandiService.getAll());
+    }
+
     @GetMapping("/mandis/nearby")
     public ApiResponse<List<Mandi>> nearby(
             @RequestParam double lat,

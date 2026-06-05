@@ -23,14 +23,14 @@ public class MarketAnalysisController {
     private final MarketAnalysisService marketAnalysisService;
 
     @GetMapping("/prices")
-    public ApiResponse<List<MarketPrice>> prices(
+    public ApiResponse<List<Map<String, Object>>> prices(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(marketAnalysisService.getPrices(page, size));
     }
 
     @GetMapping("/prices/{cropId}")
-    public ApiResponse<List<MarketPrice>> pricesByCrop(
+    public ApiResponse<List<Map<String, Object>>> pricesByCrop(
             @PathVariable Long cropId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

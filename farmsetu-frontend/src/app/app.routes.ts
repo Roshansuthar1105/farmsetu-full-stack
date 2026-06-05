@@ -111,6 +111,10 @@ export const routes: Routes = [
       {
         path: 'crops',
         loadComponent: () => import('./features/admin/crops/admin-crops.component').then(m => m.AdminCropsComponent)
+      },
+      {
+        path: 'email',
+        loadComponent: () => import('./features/admin/email/admin-email.component').then(m => m.AdminEmailComponent)
       }
       // ,
       // {

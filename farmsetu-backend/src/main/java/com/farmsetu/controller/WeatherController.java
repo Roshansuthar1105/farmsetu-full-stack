@@ -18,6 +18,18 @@ public class WeatherController {
 
     private final WeatherService weatherService;
 
+    @GetMapping("")
+    public ApiResponse<Map<String, Object>> weather(
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon) {
+        Double targetLat = lat != null ? lat : 28.6139;
+        Double targetLon = lon != null ? lon : 77.209;
+        return ApiResponse.ok(Map.of(
+            "current", weatherService.current(targetLat, targetLon, null),
+            "forecast", weatherService.forecast(targetLat, targetLon, 7)
+        ));
+    }
+
     @GetMapping("/current")
     public ApiResponse<Map<String, Object>> current(
             @RequestParam(required = false) Double lat,

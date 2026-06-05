@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 import { User } from '../../../core/models/user.model';
 
@@ -13,12 +14,11 @@ import { User } from '../../../core/models/user.model';
 })
 export class AdminUsersComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly toastr = inject(ToastrService);
 
   users = signal<User[]>([]);
   selectedUser = signal<any>(null);
   showEditModal = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
 
   // Pagination
   page = 0;
@@ -122,12 +122,10 @@ export class AdminUsersComponent implements OnInit {
   }
 
   private showSuccess(msg: string): void {
-    this.successMessage.set(msg);
-    setTimeout(() => this.successMessage.set(null), 3000);
+    this.toastr.success(msg, 'Success');
   }
 
   private showError(msg: string): void {
-    this.errorMessage.set(msg);
-    setTimeout(() => this.errorMessage.set(null), 3000);
+    this.toastr.error(msg, 'Error');
   }
 }

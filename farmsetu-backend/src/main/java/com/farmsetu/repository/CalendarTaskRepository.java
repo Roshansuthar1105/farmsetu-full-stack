@@ -8,3 +8,5 @@ import java.util.List;
 public interface CalendarTaskRepository extends JpaRepository<CalendarTask, Long> {
     List<CalendarTask> findByCalendarId(Long calendarId);
 }
+
+

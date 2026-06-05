@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../../store/auth/auth.actions';
 import { AuthHeaderComponent } from '../shared/auth-header.component';
@@ -166,6 +166,7 @@ import { SocialLoginComponent } from '../shared/social-login.component';
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);
     private readonly store = inject(Store);
+    private readonly router = inject(Router);
 
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
@@ -182,22 +183,21 @@ export class LoginComponent {
         this.error.set(null);
         const { identifier, password } = this.form.getRawValue();
         this.store.dispatch(AuthActions.login({ identifier, password }));
-        // Loading will be reset by store effect on success/failure
     }
 
     onGoogleLogin(): void {
-        // this.store.dispatch(AuthActions.googleLogin());
     }
 
     onFacebookLogin(): void {
-        // Facebook login
     }
 
     onOtpLogin(): void {
-        // Navigate to OTP login flow
+        const phone = prompt('Enter your phone number for OTP verification:');
+        if (phone) {
+            this.router.navigate(['/auth/2fa'], { queryParams: { phone } });
+        }
     }
 
     toggleLanguage(): void {
-        // Language switch logic
     }
 }

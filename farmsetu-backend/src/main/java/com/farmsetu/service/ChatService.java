@@ -1,6 +1,5 @@
 package com.farmsetu.service;
 
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.ChatMessage;
 import com.farmsetu.model.entity.User;
 import com.farmsetu.model.enums.MessageType;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -22,11 +22,9 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
 
-    public PageResponse<ChatMessage> getConversation(Long peerId, int page, int size) {
+    public List<Map<String, Object>> getConversation(Long otherUserId, int page, int size) {
         Long userId = SecurityUtils.currentUserId();
-        Page<ChatMessage> messages = chatMessageRepository.findConversation(
-                userId, peerId, PageRequest.of(page, size));
-        return PageResponse.from(messages);
+        return chatMessageRepository.findConversationNative(userId, otherUserId, size, page * size);
     }
 
     @Transactional
@@ -59,3 +57,4 @@ public class ChatService {
         );
     }
 }
+

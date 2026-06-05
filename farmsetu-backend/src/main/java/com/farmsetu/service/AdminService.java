@@ -6,8 +6,8 @@ import com.farmsetu.model.entity.*;
 import com.farmsetu.model.enums.*;
 import com.farmsetu.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +38,7 @@ public class AdminService {
         );
     }
 
-    public Page<User> listUsers(int page, int size) {
-        return userRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listUsers(int page, int size) { return userRepository.findAllNative(size, page * size); }
 
     public User getUser(Long id) {
         return userRepository.findById(id)
@@ -136,9 +134,7 @@ public class AdminService {
     }
 
     // Products CRUD
-    public Page<Product> listProducts(int page, int size) {
-        return productRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listProducts(int page, int size) { return productRepository.findAllNative(size, page * size); }
 
     public Product getProduct(Long id) {
         return productRepository.findById(id)
@@ -190,9 +186,7 @@ public class AdminService {
     }
 
     // Orders CRUD
-    public Page<Order> listOrders(int page, int size) {
-        return orderRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listOrders(int page, int size) { return orderRepository.findAllNative(size, page * size); }
 
     public Order getOrder(Long id) {
         return orderRepository.findById(id)
@@ -218,9 +212,8 @@ public class AdminService {
 
     // Crops CRUD
     @Transactional(readOnly = true)
-    public Page<CropResponse> listCrops(int page, int size) {
-        return cropRepository.findAll(PageRequest.of(page, size))
-                .map(CropResponse::from);// ✅ converts inside open session
+    public List<Map<String, Object>> listCrops(int page, int size) {
+        return cropRepository.findAllNative(size, page * size);
     }
 
     public Crop getCrop(Long id) {
@@ -256,9 +249,7 @@ public class AdminService {
     }
 
     // Govt Schemes CRUD
-    public Page<GovtScheme> listSchemes(int page, int size) {
-        return govtSchemeRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listSchemes(int page, int size) { return govtSchemeRepository.findAllNative(size, page * size); }
 
     public GovtScheme getScheme(Long id) {
         return govtSchemeRepository.findById(id)
@@ -292,9 +283,7 @@ public class AdminService {
     }
 
     // Insurance CRUD
-    public Page<InsuranceScheme> listInsurance(int page, int size) {
-        return insuranceSchemeRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listInsurance(int page, int size) { return insuranceSchemeRepository.findAllNative(size, page * size); }
 
     public InsuranceScheme getInsurance(Long id) {
         return insuranceSchemeRepository.findById(id)
@@ -326,9 +315,7 @@ public class AdminService {
     }
 
     // Mandi CRUD
-    public Page<Mandi> listMandis(int page, int size) {
-        return mandiRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listMandis(int page, int size) { return mandiRepository.findAllNative(size, page * size); }
 
     public Mandi getMandi(Long id) {
         return mandiRepository.findById(id)
@@ -360,9 +347,7 @@ public class AdminService {
     }
 
     // News CRUD
-    public Page<News> listNews(int page, int size) {
-        return newsRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listNews(int page, int size) { return newsRepository.findAllNative(size, page * size); }
 
     public News getNews(Long id) {
         return newsRepository.findById(id)
@@ -395,9 +380,7 @@ public class AdminService {
     }
 
     // Resources CRUD
-    public Page<Resource> listResources(int page, int size) {
-        return resourceRepository.findAll(PageRequest.of(page, size));
-    }
+    public List<Map<String, Object>> listResources(int page, int size) { return resourceRepository.findAllNative(size, page * size); }
 
     public Resource getResource(Long id) {
         return resourceRepository.findById(id)
@@ -429,3 +412,5 @@ public class AdminService {
         resourceRepository.deleteById(id);
     }
 }
+
+

@@ -9,7 +9,6 @@ import com.farmsetu.repository.FarmerProfileRepository;
 import com.farmsetu.repository.FarmExpenseRepository;
 import com.farmsetu.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +30,7 @@ public class FarmDashboardService {
         Map<String, Object> dashboard = new HashMap<>();
         dashboard.put("activeCalendars", cropCalendarRepository.findByFarmerId(farmerId));
         dashboard.put("recentNotifications",
-                notificationRepository.findByUserIdOrderByCreatedAtDesc(farmerId, PageRequest.of(0, 5)));
+                notificationRepository.findByUserIdOrderByCreatedAtDescNative(farmerId, 5, 0));
         farmerProfileRepository.findByUserId(farmerId).ifPresent(p -> dashboard.put("farmProfile", p));
         return dashboard;
     }

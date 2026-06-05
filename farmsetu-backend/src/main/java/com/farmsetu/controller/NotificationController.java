@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.Notification;
 import com.farmsetu.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/{userId}")
-    public ApiResponse<PageResponse<Notification>> list(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

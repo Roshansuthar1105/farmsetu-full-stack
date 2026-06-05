@@ -1,7 +1,6 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.entity.DiseaseDetection;
 import com.farmsetu.service.DiseaseDetectionService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class DiseaseDetectionController {
     }
 
     @GetMapping("/history/{farmerId}")
-    public ApiResponse<PageResponse<DiseaseDetection>> history(
+    public ApiResponse<java.util.List<java.util.Map<String, Object>>> history(
             @PathVariable Long farmerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

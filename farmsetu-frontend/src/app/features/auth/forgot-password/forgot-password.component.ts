@@ -138,10 +138,11 @@ export class ForgotPasswordComponent {
 
   readonly form = this.fb.nonNullable.group({
     phone: [''],
-    email: [''],
-    newPassword: ['', Validators.required],
-    confirmNewPassword: ['', Validators.required]
+    email: ['']
   });
+
+  newPassword = '';
+  confirmNewPassword = '';
 
   sendReset(): void {
     this.step.set('otp');

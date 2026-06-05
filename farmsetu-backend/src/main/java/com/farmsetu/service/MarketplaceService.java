@@ -1,7 +1,6 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
-import com.farmsetu.model.dto.common.PageResponse;
 import com.farmsetu.model.dto.marketplace.ProductRequest;
 import com.farmsetu.model.dto.marketplace.ProductResponse;
 import com.farmsetu.model.entity.Order;
@@ -18,8 +17,6 @@ import com.farmsetu.repository.ReviewRepository;
 import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,18 +33,17 @@ public class MarketplaceService {
     private final ProductBidRepository productBidRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public PageResponse<ProductResponse> listProducts(int page, int size) {
-        Page<Product> products = productRepository.findByStatus(ProductStatus.ACTIVE, PageRequest.of(page, size));
-        return PageResponse.from(products.map(ProductResponse::from));
+    public List<Map<String, Object>> listProducts(int page, int size) {
+        return productRepository.findByStatusNative(ProductStatus.ACTIVE, size, page * size);
     }
 
-    public PageResponse<ProductResponse> listByCategory(String category, int page, int size) {
-        Page<Product> products = productRepository.findByCategoryAndStatus(
+    public List<Map<String, Object>> listByCategory(String category, int page, int size) {
+        return productRepository.findByCategoryAndStatusNative(
                 com.farmsetu.model.enums.ProductCategory.valueOf(category),
                 ProductStatus.ACTIVE,
-                PageRequest.of(page, size));
-        return PageResponse.from(products.map(ProductResponse::from));
+                size, page * size);
     }
 
     public ProductResponse getProduct(Long id) {
@@ -107,6 +103,22 @@ public class MarketplaceService {
         User bidder = userRepository.findById(SecurityUtils.currentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        List<ProductBid> existingBids = productBidRepository.findByProductIdOrderByAmountDesc(productId);
+        if (!existingBids.isEmpty()) {
+            ProductBid highestBid = existingBids.get(0);
+            User prevBidder = highestBid.getBidder();
+            if (prevBidder != null && prevBidder.getEmail() != null && !prevBidder.getEmail().isBlank() 
+                    && !prevBidder.getId().equals(bidder.getId())) {
+                emailService.sendSimpleEmail(prevBidder.getEmail(), 
+                    "You've been outbid on " + product.getTitle() + "! 📣",
+                    "Hello " + prevBidder.getName() + ",\n\n" +
+                    "Someone placed a higher bid of ₹" + amount + " on '" + product.getTitle() + "'.\n" +
+                    "Your bid of ₹" + highestBid.getAmount() + " is no longer the highest.\n\n" +
+                    "Go to the marketplace to place a new bid if you don't want to miss out!\n\n" +
+                    "Best regards,\nThe Farmsetu Team");
+            }
+        }
+
         ProductBid bid = ProductBid.builder()
                 .product(product)
                 .bidder(bidder)
@@ -137,7 +149,36 @@ public class MarketplaceService {
                 .deliveryAddress(deliveryAddress)
                 .deliveryStatus(DeliveryStatus.PENDING)
                 .build();
-        return orderRepository.save(order);
+
+        Order savedOrder = orderRepository.save(order);
+
+        if (buyer.getEmail() != null && !buyer.getEmail().isBlank()) {
+            emailService.sendSimpleEmail(buyer.getEmail(), 
+                "Order Confirmed: " + product.getTitle() + "! 📦",
+                "Hello " + buyer.getName() + ",\n\n" +
+                "Your order has been placed successfully!\n" +
+                "Product: " + product.getTitle() + "\n" +
+                "Quantity: " + quantity + " " + (product.getUnit() != null ? product.getUnit() : "unit(s)") + "\n" +
+                "Total Price: ₹" + total + "\n" +
+                "Delivery Address: " + deliveryAddress + "\n\n" +
+                "Thank you for shopping on Farmsetu!\n\n" +
+                "Best regards,\nThe Farmsetu Team");
+        }
+
+        User seller = product.getSeller();
+        if (seller != null && seller.getEmail() != null && !seller.getEmail().isBlank()) {
+            emailService.sendSimpleEmail(seller.getEmail(), 
+                "New Order Received: " + product.getTitle() + "! 🔔",
+                "Hello " + seller.getName() + ",\n\n" +
+                "You have received a new order for '" + product.getTitle() + "'.\n" +
+                "Quantity: " + quantity + " " + (product.getUnit() != null ? product.getUnit() : "unit(s)") + "\n" +
+                "Total Earnings: ₹" + total + "\n" +
+                "Delivery Address: " + deliveryAddress + "\n\n" +
+                "Please prepare the items for delivery.\n\n" +
+                "Best regards,\nThe Farmsetu Team");
+        }
+
+        return savedOrder;
     }
 
     public Order getOrder(Long id) {
@@ -167,19 +208,17 @@ public class MarketplaceService {
                 .build());
     }
 
-    public Page<Review> getReviews(Long productId, int page, int size) {
-        return reviewRepository.findByProductId(productId, PageRequest.of(page, size));
+    public List<Map<String, Object>> getReviews(Long productId, int page, int size) {
+        return reviewRepository.findByProductIdNative(productId, size, page * size);
     }
 
-    public PageResponse<ProductResponse> sellerProducts(Long sellerId, int page, int size) {
-        Page<Product> products = productRepository.findBySellerIdAndStatus(
-                sellerId, ProductStatus.ACTIVE, PageRequest.of(page, size));
-        return PageResponse.from(products.map(ProductResponse::from));
+    public List<Map<String, Object>> sellerProducts(Long sellerId, int page, int size) {
+        return productRepository.findBySellerIdAndStatusNative(
+                sellerId, ProductStatus.ACTIVE, size, page * size);
     }
 
     public Map<String, Object> sellerAnalytics(Long sellerId) {
-        long activeProducts = productRepository.findBySellerIdAndStatus(
-                sellerId, ProductStatus.ACTIVE, PageRequest.of(0, 1)).getTotalElements();
+        long activeProducts = productRepository.countBySellerIdAndStatus(sellerId, ProductStatus.ACTIVE);
         return Map.of("activeProducts", activeProducts);
     }
 

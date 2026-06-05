@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'ngx-toastr/toastr';
+
 :root {
   --fs-primary: #16a34a;
   --fs-secondary: #f59e0b;

@@ -30,6 +30,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -57,6 +58,12 @@ public class AuthService {
 
         if (role == UserRole.FARMER) {
             farmerProfileRepository.save(FarmerProfile.builder().user(user).build());
+        }
+
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
+            emailService.sendSimpleEmail(user.getEmail(), "Welcome to Farmsetu! 🌾",
+                "Hello " + user.getName() + ",\n\nWelcome to Farmsetu - Kheti ki nayi duniya!\n" +
+                "We are thrilled to have you join our community. You can now list products in the marketplace, read crop alerts, and interact with other farmers.\n\nBest regards,\nThe Farmsetu Team");
         }
 
         return buildAuthResponse(user);
