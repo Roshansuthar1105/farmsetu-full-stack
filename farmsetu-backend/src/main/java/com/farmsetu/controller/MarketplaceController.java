@@ -11,6 +11,7 @@ import com.farmsetu.model.entity.Review;
 import com.farmsetu.model.entity.CartItem;
 import com.farmsetu.model.enums.DeliveryStatus;
 import com.farmsetu.service.MarketplaceService;
+import com.farmsetu.service.CloudinaryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +34,7 @@ import java.util.Map;
 public class MarketplaceController {
 
     private final MarketplaceService marketplaceService;
+    private final CloudinaryService cloudinaryService;
 
     @GetMapping("/products")
     public ApiResponse<java.util.List<ProductResponse>> list(
@@ -194,9 +196,6 @@ public class MarketplaceController {
     public ApiResponse<java.util.List<String>> uploadImages(@RequestParam("files") MultipartFile[] files) {
         java.util.List<String> urls = new java.util.ArrayList<>();
         try {
-            java.nio.file.Path uploadPath = java.nio.file.Paths.get("uploads").toAbsolutePath().normalize();
-            java.nio.file.Files.createDirectories(uploadPath);
-            
             for (MultipartFile file : files) {
                 if (file.isEmpty()) {
                     continue;
@@ -209,17 +208,8 @@ public class MarketplaceController {
                     throw new com.farmsetu.exception.BadRequestException("Only image files are allowed.");
                 }
                 
-                String originalFilename = file.getOriginalFilename();
-                String ext = "";
-                if (originalFilename != null && originalFilename.contains(".")) {
-                    ext = originalFilename.substring(originalFilename.lastIndexOf("."));
-                }
-                
-                String newFilename = java.util.UUID.randomUUID().toString() + ext;
-                java.nio.file.Path targetFile = uploadPath.resolve(newFilename);
-                java.nio.file.Files.copy(file.getInputStream(), targetFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                
-                urls.add("D:/new project f/farmsetu-backend/uploads" + newFilename);
+                String url = cloudinaryService.uploadFile(file);
+                urls.add(url);
             }
         } catch (java.io.IOException e) {
             throw new com.farmsetu.exception.BadRequestException("Failed to upload files: " + e.getMessage());

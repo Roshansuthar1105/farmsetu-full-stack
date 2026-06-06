@@ -1,32 +1,27 @@
 package com.farmsetu.config;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class CloudinaryConfig {
 
     @Value("${cloudinary.cloud-name:}")
     private String cloudName;
 
-    @Value("${cloudinary.api-key:}")
-    private String apiKey;
+    @Value("${cloudinary.upload-preset:}")
+    private String uploadPreset;
 
-    @Value("${cloudinary.api-secret:}")
-    private String apiSecret;
-
-    @Bean
-    public Cloudinary cloudinary() {
+    @PostConstruct
+    public void init() {
         if (cloudName == null || cloudName.isBlank()) {
-            return null;
+            log.warn("Cloudinary cloud name is EMPTY. Cloudinary uploads will not work.");
+        } else {
+            log.info("Cloudinary REST uploader initialized: Cloud Name: [{}], Preset: [{}]", 
+                     cloudName, uploadPreset);
         }
-        return new Cloudinary(ObjectUtils.asMap(
-                "cloud_name", cloudName,
-                "api_key", apiKey,
-                "api_secret", apiSecret
-        ));
     }
 }
