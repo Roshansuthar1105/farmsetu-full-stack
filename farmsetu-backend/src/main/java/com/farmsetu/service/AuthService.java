@@ -57,7 +57,12 @@ public class AuthService {
         user = userRepository.save(user);
 
         if (role == UserRole.FARMER) {
-            farmerProfileRepository.save(FarmerProfile.builder().user(user).build());
+            farmerProfileRepository.save(FarmerProfile.builder()
+                    .user(user)
+                    .farmArea(request.getFarmArea())
+                    .soilType(request.getSoilType())
+                    .farmingExperience(request.getFarmingExperience())
+                    .build());
         }
 
         if (user.getEmail() != null && !user.getEmail().isBlank()) {

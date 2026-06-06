@@ -3,6 +3,7 @@ package com.farmsetu.controller;
 import com.farmsetu.model.dto.common.ApiResponse;
 import com.farmsetu.model.entity.ChatMessage;
 import com.farmsetu.model.enums.MessageType;
+import com.farmsetu.util.EnumUtils;
 import com.farmsetu.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,8 +44,7 @@ public class ChatController {
     public ApiResponse<ChatMessage> send(@RequestBody Map<String, Object> body) {
         Long receiverId = Long.valueOf(body.get("receiverId").toString());
         String text = (String) body.get("message");
-        MessageType type = body.get("messageType") != null
-                ? MessageType.valueOf(body.get("messageType").toString()) : MessageType.TEXT;
+        MessageType type = EnumUtils.parseEnum(MessageType.class, body.get("messageType"), MessageType.TEXT);
         String mediaUrl = (String) body.get("mediaUrl");
         return ApiResponse.ok(chatService.sendMessage(receiverId, text, type, mediaUrl));
     }

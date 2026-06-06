@@ -33,7 +33,7 @@ public class AdminController {
 
     // Users
     @GetMapping("/users")
-    public ApiResponse<List<Map<String, Object>>> users(
+    public ApiResponse<Map<String, Object>> users(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listUsers(page, size));
@@ -72,7 +72,7 @@ public class AdminController {
 
     // Products
     @GetMapping("/products")
-    public ApiResponse<List<Map<String, Object>>> listProducts(
+    public ApiResponse<Map<String, Object>> listProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listProducts(page, size));
@@ -101,7 +101,7 @@ public class AdminController {
 
     // Orders
     @GetMapping("/orders")
-    public ApiResponse<List<Map<String, Object>>> listOrders(
+    public ApiResponse<Map<String, Object>> listOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listOrders(page, size));
@@ -125,7 +125,7 @@ public class AdminController {
 
     // Crops
     @GetMapping("/crops")
-    public ApiResponse<List<Map<String, Object>>> listCrops(
+    public ApiResponse<Map<String, Object>> listCrops(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listCrops(page, size));
@@ -154,7 +154,7 @@ public class AdminController {
 
     // Govt Schemes
     @GetMapping("/schemes")
-    public ApiResponse<List<Map<String, Object>>> listSchemes(
+    public ApiResponse<Map<String, Object>> listSchemes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listSchemes(page, size));
@@ -183,7 +183,7 @@ public class AdminController {
 
     // Insurance
     @GetMapping("/insurance")
-    public ApiResponse<List<Map<String, Object>>> listInsurance(
+    public ApiResponse<Map<String, Object>> listInsurance(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listInsurance(page, size));
@@ -212,7 +212,7 @@ public class AdminController {
 
     // Mandis
     @GetMapping("/mandis")
-    public ApiResponse<List<Map<String, Object>>> listMandis(
+    public ApiResponse<Map<String, Object>> listMandis(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listMandis(page, size));
@@ -241,7 +241,7 @@ public class AdminController {
 
     // News
     @GetMapping("/news")
-    public ApiResponse<List<Map<String, Object>>> listNews(
+    public ApiResponse<Map<String, Object>> listNews(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listNews(page, size));
@@ -270,7 +270,7 @@ public class AdminController {
 
     // Resources
     @GetMapping("/resources")
-    public ApiResponse<List<Map<String, Object>>> listResources(
+    public ApiResponse<Map<String, Object>> listResources(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(adminService.listResources(page, size));

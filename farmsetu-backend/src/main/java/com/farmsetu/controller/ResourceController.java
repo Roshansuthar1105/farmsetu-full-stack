@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/resources")
@@ -23,7 +24,7 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @GetMapping
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
+    public ApiResponse<Map<String, Object>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(resourceService.list(page, size));

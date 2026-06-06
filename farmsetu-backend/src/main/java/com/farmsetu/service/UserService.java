@@ -20,6 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserBadgeRepository userBadgeRepository;
 
+    @Transactional(readOnly = true)
     public UserResponse getById(Long id) {
         return UserResponse.from(findUser(id));
     }

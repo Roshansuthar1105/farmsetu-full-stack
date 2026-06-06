@@ -30,7 +30,7 @@ public class FarmDashboardService {
         Map<String, Object> dashboard = new HashMap<>();
         dashboard.put("activeCalendars", cropCalendarRepository.findByFarmerId(farmerId));
         dashboard.put("recentNotifications",
-                notificationRepository.findByUserIdOrderByCreatedAtDescNative(farmerId, 5, 0));
+                notificationRepository.findByUserIdOrderByCreatedAtDesc(farmerId, org.springframework.data.domain.PageRequest.of(0, 5)));
         farmerProfileRepository.findByUserId(farmerId).ifPresent(p -> dashboard.put("farmProfile", p));
         return dashboard;
     }

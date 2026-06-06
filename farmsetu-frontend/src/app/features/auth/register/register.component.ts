@@ -1,8 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { PersonalInfoStepComponent } from './steps/personal-info-step.component';
 import { OtpVerificationStepComponent } from './steps/otp-verification-step.component';
 import { FarmDetailsStepComponent } from './steps/farm-details-step.component';
 import { AuthHeaderComponent } from '../shared/auth-header.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface RegistrationData {
   name: string;
@@ -108,6 +110,9 @@ export interface RegistrationData {
   `
 })
 export class RegisterComponent {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly currentStep = signal(1);
   readonly stepLabels = ['Personal Info', 'Verification', 'Farm Details'];
 
@@ -125,7 +130,14 @@ export class RegisterComponent {
 
   onRegistrationComplete(data: Partial<RegistrationData>): void {
     this.registrationData.update(prev => ({ ...prev, ...data }));
-    // Final registration API call
-    console.log('Complete registration:', this.registrationData());
+    const payload = this.registrationData();
+    this.authService.register(payload).subscribe({
+      next: () => {
+        this.router.navigate(['/app/dashboard']);
+      },
+      error: (err) => {
+        console.error('Registration failed:', err);
+      }
+    });
   }
 }

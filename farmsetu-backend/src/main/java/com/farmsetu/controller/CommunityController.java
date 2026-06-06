@@ -5,6 +5,7 @@ import com.farmsetu.model.entity.Comment;
 import com.farmsetu.model.entity.Post;
 import com.farmsetu.model.entity.Story;
 import com.farmsetu.model.enums.PostType;
+import com.farmsetu.util.EnumUtils;
 import com.farmsetu.service.CommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +29,7 @@ public class CommunityController {
     private final CommunityService communityService;
 
     @GetMapping("/posts")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
+    public ApiResponse<List<Map<String, Object>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(communityService.listPosts(page, size));
@@ -36,9 +37,10 @@ public class CommunityController {
 
     @PostMapping("/posts")
     public ApiResponse<Post> create(@RequestBody Map<String, Object> body) {
+        PostType postType = EnumUtils.parseEnum(PostType.class, body.get("postType"), PostType.TEXT);
         return ApiResponse.ok(communityService.createPost(
                 (String) body.get("content"),
-                body.get("postType") != null ? PostType.valueOf(body.get("postType").toString()) : null,
+                postType,
                 (List<String>) body.get("mediaUrls"),
                 (String) body.get("category"),
                 (List<String>) body.get("tags"),
@@ -70,11 +72,12 @@ public class CommunityController {
     public ApiResponse<Comment> comment(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         Long parentId = body.get("parentCommentId") != null
                 ? Long.valueOf(body.get("parentCommentId").toString()) : null;
-        return ApiResponse.ok(communityService.addComment(id, (String) body.get("content"), parentId));
+        String content = body.get("content") != null ? (String) body.get("content") : (String) body.get("text");
+        return ApiResponse.ok(communityService.addComment(id, content, parentId));
     }
 
     @GetMapping("/posts/{id}/comments")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> comments(
+    public ApiResponse<List<Map<String, Object>>> comments(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

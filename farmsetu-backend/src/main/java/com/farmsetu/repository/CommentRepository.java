@@ -1,13 +1,15 @@
 package com.farmsetu.repository;
 
 import com.farmsetu.model.entity.Comment;
-
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    @org.springframework.data.jpa.repository.Query(value = "SELECT * FROM comments WHERE post_id = :postId LIMIT :limit OFFSET :offset", nativeQuery = true)
-    java.util.List<java.util.Map<String, Object>> findByPostIdNative(@org.springframework.data.repository.query.Param("postId") Long postId, @org.springframework.data.repository.query.Param("limit") int limit, @org.springframework.data.repository.query.Param("offset") int offset);
+    @Query("SELECT c FROM Comment c JOIN FETCH c.author WHERE c.post.id = :postId")
+    List<Comment> findByPostId(@Param("postId") Long postId, Pageable pageable);
 }
 
 

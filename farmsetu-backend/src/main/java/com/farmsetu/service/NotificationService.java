@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -19,8 +20,31 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    public java.util.List<java.util.Map<String, Object>> getForUser(Long userId, int page, int size) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDescNative(userId, size, page * size);
+    public Map<String, Object> getForUser(Long userId, int page, int size) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, org.springframework.data.domain.PageRequest.of(page, size));
+        long totalElements = notificationRepository.countByUserId(userId);
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        List<Map<String, Object>> mappedContent = notifications.stream().map(n -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", n.getId());
+            map.put("title", n.getTitle());
+            map.put("message", n.getMessage());
+            map.put("notificationType", n.getNotificationType() != null ? n.getNotificationType().name() : "INFO");
+            map.put("read", n.isRead());
+            map.put("actionUrl", n.getActionUrl());
+            map.put("createdAt", n.getCreatedAt() != null ? n.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", totalElements,
+            "totalPages", totalPages,
+            "last", (page + 1) * size >= totalElements
+        );
     }
 
     @Transactional

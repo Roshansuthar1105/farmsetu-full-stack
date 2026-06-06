@@ -19,8 +19,33 @@ public class NewsService {
     private final NewsRepository newsRepository;
     private final List<Long> savedByUser = new ArrayList<>();
 
-    public List<Map<String, Object>> list(int page, int size) {
-        return newsRepository.findAllNative(size, page * size);
+    public Map<String, Object> list(int page, int size) {
+        org.springframework.data.domain.Page<News> pageResult = newsRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));
+        
+        List<Map<String, Object>> mappedContent = pageResult.getContent().stream().map(n -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", n.getId());
+            map.put("title", n.getTitle());
+            map.put("content", n.getContent());
+            map.put("category", n.getCategory());
+            map.put("author", n.getAuthor());
+            map.put("source", n.getSource());
+            map.put("imageUrl", n.getImageUrl());
+            map.put("verified", n.isVerified());
+            map.put("state", n.getState());
+            map.put("publishedAt", n.getPublishedAt() != null ? n.getPublishedAt().toString() : "");
+            map.put("viewsCount", n.getViewsCount());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
     }
 
     public News getById(Long id) {

@@ -24,7 +24,20 @@ public class ChatService {
 
     public List<Map<String, Object>> getConversation(Long otherUserId, int page, int size) {
         Long userId = SecurityUtils.currentUserId();
-        return chatMessageRepository.findConversationNative(userId, otherUserId, size, page * size);
+        List<com.farmsetu.model.entity.ChatMessage> messages = chatMessageRepository.findConversation(userId, otherUserId, org.springframework.data.domain.PageRequest.of(page, size));
+        return messages.stream().map(msg -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", msg.getId());
+            map.put("senderId", msg.getSender().getId());
+            map.put("receiverId", msg.getReceiver().getId());
+            map.put("messageText", msg.getMessageText() != null ? msg.getMessageText() : "");
+            map.put("messageType", msg.getMessageType() != null ? msg.getMessageType().name() : "TEXT");
+            map.put("mediaUrl", msg.getMediaUrl() != null ? msg.getMediaUrl() : "");
+            map.put("read", msg.isRead());
+            map.put("pinned", msg.isPinned());
+            map.put("createdAt", msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional

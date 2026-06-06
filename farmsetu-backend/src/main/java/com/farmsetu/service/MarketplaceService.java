@@ -1,6 +1,7 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
+import com.farmsetu.util.EnumUtils;
 import com.farmsetu.model.dto.marketplace.ProductRequest;
 import com.farmsetu.model.dto.marketplace.ProductResponse;
 import com.farmsetu.model.entity.Order;
@@ -35,17 +36,44 @@ public class MarketplaceService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
-    public List<Map<String, Object>> listProducts(int page, int size) {
-        return productRepository.findByStatusNative(ProductStatus.ACTIVE, size, page * size);
+    @Transactional(readOnly = true)
+    public List<ProductResponse> listProducts(String category, String search, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        List<Product> products;
+        
+        com.farmsetu.model.enums.ProductCategory parsedCategory = null;
+        if (category != null && !category.isBlank() && !category.equalsIgnoreCase("ALL")) {
+            parsedCategory = EnumUtils.parseEnum(com.farmsetu.model.enums.ProductCategory.class, category);
+        }
+
+        boolean hasSearch = search != null && !search.isBlank();
+
+        if (parsedCategory != null) {
+            if (hasSearch) {
+                products = productRepository.findByCategoryAndStatusAndSearch(parsedCategory, ProductStatus.ACTIVE, search, pageable);
+            } else {
+                products = productRepository.findByCategoryAndStatus(parsedCategory, ProductStatus.ACTIVE, pageable);
+            }
+        } else {
+            if (hasSearch) {
+                products = productRepository.findByStatusAndSearch(ProductStatus.ACTIVE, search, pageable);
+            } else {
+                products = productRepository.findByStatus(ProductStatus.ACTIVE, pageable);
+            }
+        }
+        return products.stream().map(ProductResponse::from).collect(java.util.stream.Collectors.toList());
     }
 
-    public List<Map<String, Object>> listByCategory(String category, int page, int size) {
-        return productRepository.findByCategoryAndStatusNative(
-                com.farmsetu.model.enums.ProductCategory.valueOf(category),
+    @Transactional(readOnly = true)
+    public List<ProductResponse> listByCategory(String category, int page, int size) {
+        List<Product> products = productRepository.findByCategoryAndStatus(
+                EnumUtils.parseEnum(com.farmsetu.model.enums.ProductCategory.class, category),
                 ProductStatus.ACTIVE,
-                size, page * size);
+                org.springframework.data.domain.PageRequest.of(page, size));
+        return products.stream().map(ProductResponse::from).collect(java.util.stream.Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getProduct(Long id) {
         return ProductResponse.from(findProduct(id));
     }
@@ -129,6 +157,7 @@ public class MarketplaceService {
         return productBidRepository.save(bid);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductBid> getBids(Long productId) {
         return productBidRepository.findByProductIdOrderByAmountDesc(productId);
     }
@@ -181,6 +210,7 @@ public class MarketplaceService {
         return savedOrder;
     }
 
+    @Transactional(readOnly = true)
     public Order getOrder(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -212,9 +242,11 @@ public class MarketplaceService {
         return reviewRepository.findByProductIdNative(productId, size, page * size);
     }
 
-    public List<Map<String, Object>> sellerProducts(Long sellerId, int page, int size) {
-        return productRepository.findBySellerIdAndStatusNative(
-                sellerId, ProductStatus.ACTIVE, size, page * size);
+    @Transactional(readOnly = true)
+    public List<ProductResponse> sellerProducts(Long sellerId, int page, int size) {
+        List<Product> products = productRepository.findBySellerIdAndStatus(
+                sellerId, ProductStatus.ACTIVE, org.springframework.data.domain.PageRequest.of(page, size));
+        return products.stream().map(ProductResponse::from).collect(java.util.stream.Collectors.toList());
     }
 
     public Map<String, Object> sellerAnalytics(Long sellerId) {

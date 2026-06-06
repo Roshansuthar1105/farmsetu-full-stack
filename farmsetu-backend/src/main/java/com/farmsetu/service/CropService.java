@@ -1,6 +1,7 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
+import com.farmsetu.util.EnumUtils;
 import com.farmsetu.model.entity.Crop;
 import com.farmsetu.model.enums.CropSeason;
 import com.farmsetu.repository.CropRepository;
@@ -26,7 +27,7 @@ public class CropService {
     }
 
     public List<Crop> getBySeason(String season) {
-        return cropRepository.findBySeason(CropSeason.valueOf(season.toUpperCase()));
+        return cropRepository.findBySeason(EnumUtils.parseEnum(CropSeason.class, season));
     }
 
     public List<Map<String, Object>> recommend(Map<String, Object> input) {

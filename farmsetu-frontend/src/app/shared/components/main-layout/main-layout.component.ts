@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -13,7 +14,7 @@ interface NavItem {
 @Component({
   selector: 'fs-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
 })
@@ -22,12 +23,27 @@ export class MainLayoutComponent {
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
 
-  readonly navItems: NavItem[] = [
+  readonly showMobileDrawer = signal(false);
+  readonly showSidebar = signal(true);
+
+  toggleSidebar(): void {
+    if (window.innerWidth >= 1024) {
+      this.showSidebar.update(v => !v);
+    } else {
+      this.showMobileDrawer.set(true);
+    }
+  }
+
+  readonly primaryNavItems: NavItem[] = [
     { path: '/app/dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
-    { path: '/app/farm-dashboard', labelKey: 'nav.dashboard', icon: 'agriculture' },
     { path: '/app/marketplace', labelKey: 'nav.marketplace', icon: 'store' },
     { path: '/app/chat', labelKey: 'nav.chat', icon: 'chat' },
     { path: '/app/community', labelKey: 'nav.community', icon: 'groups' },
+    { path: '/app/profile', labelKey: 'nav.profile', icon: 'person' }
+  ];
+
+  readonly secondaryNavItems: NavItem[] = [
+    { path: '/app/farm-dashboard', labelKey: 'nav.dashboard', icon: 'agriculture' },
     { path: '/app/market-analysis', labelKey: 'nav.market', icon: 'trending_up' },
     { path: '/app/weather', labelKey: 'nav.weather', icon: 'cloud' },
     { path: '/app/news', labelKey: 'nav.news', icon: 'article' },
@@ -39,8 +55,7 @@ export class MainLayoutComponent {
     { path: '/app/disease-detection', labelKey: 'nav.disease', icon: 'biotech' },
     { path: '/app/mandi-finder', labelKey: 'nav.mandi', icon: 'map' },
     { path: '/app/financial', labelKey: 'nav.finance', icon: 'payments' },
-    { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' },
-    { path: '/app/profile', labelKey: 'nav.profile', icon: 'person' }
+    { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' }
   ];
 
   t(key: string): string {

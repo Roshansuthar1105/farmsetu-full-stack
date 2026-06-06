@@ -18,8 +18,34 @@ public class ResourceService {
     private final ResourceRepository resourceRepository;
     private final List<Long> completedIds = new ArrayList<>();
 
-    public List<Map<String, Object>> list(int page, int size) {
-        return resourceRepository.findAllNative(size, page * size);
+    public Map<String, Object> list(int page, int size) {
+        org.springframework.data.domain.Page<Resource> pageResult = resourceRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));
+        
+        List<Map<String, Object>> mappedContent = pageResult.getContent().stream().map(r -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", r.getId());
+            map.put("title", r.getTitle());
+            map.put("description", r.getDescription());
+            map.put("contentType", r.getContentType() != null ? r.getContentType().name() : "VIDEO");
+            map.put("contentUrl", r.getContentUrl());
+            map.put("cropType", r.getCropType());
+            map.put("topic", r.getTopic());
+            map.put("difficultyLevel", r.getDifficultyLevel() != null ? r.getDifficultyLevel().name() : "BEGINNER");
+            map.put("language", r.getLanguage());
+            map.put("thumbnailUrl", r.getThumbnailUrl());
+            map.put("viewsCount", r.getViewsCount());
+            map.put("completionCount", r.getCompletionCount());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
     }
 
     public Resource getById(Long id) {

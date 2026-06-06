@@ -31,10 +31,12 @@ public class MarketplaceController {
     private final MarketplaceService marketplaceService;
 
     @GetMapping("/products")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
+    public ApiResponse<java.util.List<ProductResponse>> list(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.ok(marketplaceService.listProducts(page, size));
+        return ApiResponse.ok(marketplaceService.listProducts(category, search, page, size));
     }
 
     @PostMapping("/products")
@@ -59,7 +61,7 @@ public class MarketplaceController {
     }
 
     @GetMapping("/products/category/{category}")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> byCategory(
+    public ApiResponse<java.util.List<ProductResponse>> byCategory(
             @PathVariable String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -109,7 +111,7 @@ public class MarketplaceController {
     }
 
     @GetMapping("/seller/{id}/products")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> sellerProducts(
+    public ApiResponse<java.util.List<ProductResponse>> sellerProducts(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

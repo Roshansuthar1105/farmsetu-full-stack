@@ -23,9 +23,9 @@ import { Component, Input } from '@angular/core';
       <!-- Content -->
       <div class="relative z-10 flex flex-col items-center justify-center h-full text-white px-4">
         <!-- Logo -->
-        <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4
-                    shadow-lg border border-white/30">
-          <span class="text-4xl">🌾</span>
+        <div class="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-4
+                    shadow-lg border border-white/30 p-3">
+          <img src="assets/favicon.png" alt="FarmSetu Logo" class="w-full h-full object-contain">
         </div>
         <h1 class="text-3xl font-bold tracking-wide">FarmSetu</h1>
         <p class="text-green-100 mt-2 text-sm tracking-widest uppercase">{{ tagline }}</p>

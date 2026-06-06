@@ -44,7 +44,7 @@ public class ProductResponse {
                 .quantity(product.getQuantity())
                 .unit(product.getUnit())
                 .condition(product.getCondition())
-                .images(product.getImages())
+                .images(product.getImages() != null ? new java.util.ArrayList<>(product.getImages()) : new java.util.ArrayList<>())
                 .location(product.getLocation())
                 .auction(product.isAuction())
                 .auctionEndTime(product.getAuctionEndTime())

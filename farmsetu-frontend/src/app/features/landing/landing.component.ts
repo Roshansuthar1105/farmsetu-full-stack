@@ -15,6 +15,7 @@ import {
   LucideDynamicIcon
 } from '@lucide/angular';
 import { I18nService } from '../../core/services/i18n.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'fs-landing',
@@ -39,6 +40,7 @@ import { I18nService } from '../../core/services/i18n.service';
 })
 export class LandingComponent {
   readonly i18n = inject(I18nService);
+  readonly theme = inject(ThemeService);
   isScrolled = signal(false);
   readonly currentYear = new Date().getFullYear();
 

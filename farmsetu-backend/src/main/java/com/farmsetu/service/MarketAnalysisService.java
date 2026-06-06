@@ -16,11 +16,39 @@ public class MarketAnalysisService {
     private final MarketPriceRepository marketPriceRepository;
 
     public List<Map<String, Object>> getPrices(int page, int size) {
-        return marketPriceRepository.findAllNative(size, page * size);
+        org.springframework.data.domain.Page<MarketPrice> pageResult = marketPriceRepository.findAll(org.springframework.data.domain.PageRequest.of(page, size));
+        return pageResult.getContent().stream().map(mp -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", mp.getId());
+            map.put("mandiName", mp.getMandiName());
+            map.put("state", mp.getState());
+            map.put("district", mp.getDistrict());
+            map.put("pricePerQuintal", mp.getPricePerQuintal());
+            map.put("minPrice", mp.getMinPrice());
+            map.put("maxPrice", mp.getMaxPrice());
+            map.put("modalPrice", mp.getModalPrice());
+            map.put("tradeVolume", mp.getTradeVolume());
+            map.put("recordedDate", mp.getRecordedDate() != null ? mp.getRecordedDate().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     public List<Map<String, Object>> getPricesByCrop(Long cropId, int page, int size) {
-        return marketPriceRepository.findByCropIdNative(cropId, size, page * size);
+        List<MarketPrice> prices = marketPriceRepository.findByCropId(cropId, org.springframework.data.domain.PageRequest.of(page, size));
+        return prices.stream().map(mp -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", mp.getId());
+            map.put("mandiName", mp.getMandiName());
+            map.put("state", mp.getState());
+            map.put("district", mp.getDistrict());
+            map.put("pricePerQuintal", mp.getPricePerQuintal());
+            map.put("minPrice", mp.getMinPrice());
+            map.put("maxPrice", mp.getMaxPrice());
+            map.put("modalPrice", mp.getModalPrice());
+            map.put("tradeVolume", mp.getTradeVolume());
+            map.put("recordedDate", mp.getRecordedDate() != null ? mp.getRecordedDate().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     public List<MarketPrice> getTrends(Long cropId) {

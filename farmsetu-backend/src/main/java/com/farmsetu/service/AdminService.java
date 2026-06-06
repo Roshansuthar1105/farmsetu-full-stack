@@ -1,18 +1,23 @@
 package com.farmsetu.service;
 
 import com.farmsetu.exception.ResourceNotFoundException;
+import com.farmsetu.util.EnumUtils;
 import com.farmsetu.model.dto.crop.CropResponse;
 import com.farmsetu.model.entity.*;
 import com.farmsetu.model.enums.*;
 import com.farmsetu.repository.*;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +43,55 @@ public class AdminService {
         );
     }
 
-    public List<Map<String, Object>> listUsers(int page, int size) { return userRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listUsers(int page, int size) {
+        List<User> content = userRepository.findAllWithProfile(PageRequest.of(page, size));
+        long totalElements = userRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        
+        List<Map<String, Object>> mappedContent = content.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("name", u.getName());
+            map.put("email", u.getEmail());
+            map.put("phone", u.getPhone());
+            map.put("role", u.getRole() != null ? u.getRole().name() : "FARMER");
+            map.put("profilePhoto", u.getProfilePhoto());
+            map.put("bio", u.getBio());
+            map.put("preferredLanguage", u.getPreferredLanguage());
+            map.put("latitude", u.getLatitude());
+            map.put("longitude", u.getLongitude());
+            map.put("state", u.getState());
+            map.put("district", u.getDistrict());
+            map.put("village", u.getVillage());
+            map.put("verified", u.isVerified());
+            map.put("active", u.isActive());
+
+            if (u.getFarmerProfile() != null) {
+                FarmerProfile fp = u.getFarmerProfile();
+                Map<String, Object> fpMap = new HashMap<>();
+                fpMap.put("id", fp.getId());
+                fpMap.put("farmArea", fp.getFarmArea());
+                fpMap.put("soilType", fp.getSoilType());
+                fpMap.put("soilPh", fp.getSoilPh());
+                fpMap.put("waterSource", fp.getWaterSource());
+                fpMap.put("farmingExperience", fp.getFarmingExperience());
+                fpMap.put("farmingType", fp.getFarmingType() != null ? fp.getFarmingType().name() : "CONVENTIONAL");
+                map.put("farmerProfile", fpMap);
+            } else {
+                map.put("farmerProfile", null);
+            }
+            return map;
+        }).collect(Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", totalElements,
+            "totalPages", totalPages,
+            "last", (page + 1) * size >= totalElements
+        );
+    }
 
     public User getUser(Long id) {
         return userRepository.findById(id)
@@ -53,7 +106,7 @@ public class AdminService {
             user.setActive(Boolean.parseBoolean(updates.get("active").toString()));
         }
         if (updates.containsKey("role")) {
-            user.setRole(UserRole.valueOf(updates.get("role").toString()));
+            user.setRole(EnumUtils.parseEnum(UserRole.class, updates.get("role")));
         }
         if (updates.containsKey("verified")) {
             user.setVerified(Boolean.parseBoolean(updates.get("verified").toString()));
@@ -81,7 +134,7 @@ public class AdminService {
         }
         if (body.containsKey("active")) user.setActive(Boolean.parseBoolean(body.get("active").toString()));
         if (body.containsKey("verified")) user.setVerified(Boolean.parseBoolean(body.get("verified").toString()));
-        if (body.containsKey("role")) user.setRole(UserRole.valueOf(body.get("role").toString()));
+        if (body.containsKey("role")) user.setRole(EnumUtils.parseEnum(UserRole.class, body.get("role")));
 
         if (body.containsKey("farmArea") || body.containsKey("soilType") || body.containsKey("farmingType")) {
             FarmerProfile profile = user.getFarmerProfile();
@@ -105,7 +158,7 @@ public class AdminService {
                 profile.setFarmingExperience(Integer.parseInt(body.get("farmingExperience").toString()));
             }
             if (body.containsKey("farmingType") && body.get("farmingType") != null) {
-                profile.setFarmingType(FarmingType.valueOf(body.get("farmingType").toString()));
+                profile.setFarmingType(EnumUtils.parseEnum(FarmingType.class, body.get("farmingType")));
             }
             farmerProfileRepository.save(profile);
         }
@@ -134,7 +187,52 @@ public class AdminService {
     }
 
     // Products CRUD
-    public List<Map<String, Object>> listProducts(int page, int size) { return productRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listProducts(int page, int size) {
+        List<Product> products = productRepository.findAllWithSeller(PageRequest.of(page, size));
+        long totalElements = productRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        List<Map<String, Object>> mappedContent = products.stream().map(p -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", p.getId());
+            map.put("title", p.getTitle());
+            map.put("description", p.getDescription());
+            map.put("category", p.getCategory() != null ? p.getCategory().name() : "SEEDS");
+            map.put("price", p.getPrice());
+            map.put("quantity", p.getQuantity());
+            map.put("unit", p.getUnit());
+            map.put("condition", p.getCondition() != null ? p.getCondition().name() : "NEW");
+            map.put("location", p.getLocation());
+            map.put("status", p.getStatus() != null ? p.getStatus().name() : "ACTIVE");
+            map.put("images", p.getImages());
+            map.put("auction", p.isAuction());
+            map.put("auctionEndTime", p.getAuctionEndTime() != null ? p.getAuctionEndTime().toString() : null);
+            map.put("currentBid", p.getCurrentBid());
+            map.put("startingBid", p.getStartingBid());
+            
+            if (p.getSeller() != null) {
+                Map<String, Object> sellerMap = new HashMap<>();
+                sellerMap.put("id", p.getSeller().getId());
+                sellerMap.put("name", p.getSeller().getName());
+                sellerMap.put("email", p.getSeller().getEmail());
+                sellerMap.put("phone", p.getSeller().getPhone());
+                sellerMap.put("role", p.getSeller().getRole() != null ? p.getSeller().getRole().name() : "SELLER");
+                map.put("seller", sellerMap);
+            } else {
+                map.put("seller", null);
+            }
+            return map;
+        }).collect(Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", totalElements,
+            "totalPages", totalPages,
+            "last", (page + 1) * size >= totalElements
+        );
+    }
 
     public Product getProduct(Long id) {
         return productRepository.findById(id)
@@ -151,13 +249,13 @@ public class AdminService {
                 .seller(seller)
                 .title((String) body.get("title"))
                 .description((String) body.get("description"))
-                .category(ProductCategory.valueOf((String) body.get("category")))
+                .category(EnumUtils.parseEnum(ProductCategory.class, body.get("category")))
                 .price(new BigDecimal(body.get("price").toString()))
                 .quantity(body.containsKey("quantity") && body.get("quantity") != null ? Integer.parseInt(body.get("quantity").toString()) : 1)
                 .unit((String) body.get("unit"))
-                .condition(ProductCondition.valueOf(body.getOrDefault("condition", "NEW").toString()))
+                .condition(EnumUtils.parseEnum(ProductCondition.class, body.get("condition"), ProductCondition.NEW))
                 .location((String) body.get("location"))
-                .status(ProductStatus.valueOf(body.getOrDefault("status", "ACTIVE").toString()))
+                .status(EnumUtils.parseEnum(ProductStatus.class, body.get("status"), ProductStatus.ACTIVE))
                 .build();
 
         return productRepository.save(product);
@@ -168,13 +266,13 @@ public class AdminService {
         Product product = getProduct(id);
         if (body.containsKey("title")) product.setTitle((String) body.get("title"));
         if (body.containsKey("description")) product.setDescription((String) body.get("description"));
-        if (body.containsKey("category")) product.setCategory(ProductCategory.valueOf((String) body.get("category")));
+        if (body.containsKey("category")) product.setCategory(EnumUtils.parseEnum(ProductCategory.class, body.get("category")));
         if (body.containsKey("price")) product.setPrice(new BigDecimal(body.get("price").toString()));
         if (body.containsKey("quantity") && body.get("quantity") != null) product.setQuantity(Integer.parseInt(body.get("quantity").toString()));
         if (body.containsKey("unit")) product.setUnit((String) body.get("unit"));
-        if (body.containsKey("condition")) product.setCondition(ProductCondition.valueOf((String) body.get("condition")));
+        if (body.containsKey("condition")) product.setCondition(EnumUtils.parseEnum(ProductCondition.class, body.get("condition")));
         if (body.containsKey("location")) product.setLocation((String) body.get("location"));
-        if (body.containsKey("status")) product.setStatus(ProductStatus.valueOf((String) body.get("status")));
+        if (body.containsKey("status")) product.setStatus(EnumUtils.parseEnum(ProductStatus.class, body.get("status")));
         return productRepository.save(product);
     }
 
@@ -186,7 +284,61 @@ public class AdminService {
     }
 
     // Orders CRUD
-    public List<Map<String, Object>> listOrders(int page, int size) { return orderRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listOrders(int page, int size) {
+        List<Order> orders = orderRepository.findAllWithRelations(PageRequest.of(page, size));
+        long totalElements = orderRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        List<Map<String, Object>> mappedContent = orders.stream().map(o -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", o.getId());
+            map.put("quantity", o.getQuantity());
+            map.put("totalAmount", o.getTotalAmount());
+            map.put("paymentStatus", o.getPaymentStatus() != null ? o.getPaymentStatus().name() : "PENDING");
+            map.put("paymentId", o.getPaymentId());
+            map.put("deliveryStatus", o.getDeliveryStatus() != null ? o.getDeliveryStatus().name() : "PENDING");
+            map.put("deliveryAddress", o.getDeliveryAddress());
+            map.put("createdAt", o.getCreatedAt() != null ? o.getCreatedAt().toString() : "");
+
+            if (o.getBuyer() != null) {
+                Map<String, Object> buyerMap = new HashMap<>();
+                buyerMap.put("id", o.getBuyer().getId());
+                buyerMap.put("name", o.getBuyer().getName());
+                map.put("buyer", buyerMap);
+            } else {
+                map.put("buyer", null);
+            }
+
+            if (o.getSeller() != null) {
+                Map<String, Object> sellerMap = new HashMap<>();
+                sellerMap.put("id", o.getSeller().getId());
+                sellerMap.put("name", o.getSeller().getName());
+                map.put("seller", sellerMap);
+            } else {
+                map.put("seller", null);
+            }
+
+            if (o.getProduct() != null) {
+                Map<String, Object> productMap = new HashMap<>();
+                productMap.put("id", o.getProduct().getId());
+                productMap.put("title", o.getProduct().getTitle());
+                map.put("product", productMap);
+            } else {
+                map.put("product", null);
+            }
+
+            return map;
+        }).collect(Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", totalElements,
+            "totalPages", totalPages,
+            "last", (page + 1) * size >= totalElements
+        );
+    }
 
     public Order getOrder(Long id) {
         return orderRepository.findById(id)
@@ -198,9 +350,9 @@ public class AdminService {
         Order order = getOrder(id);
         if (body.containsKey("quantity") && body.get("quantity") != null) order.setQuantity(Integer.parseInt(body.get("quantity").toString()));
         if (body.containsKey("totalAmount") && body.get("totalAmount") != null) order.setTotalAmount(new BigDecimal(body.get("totalAmount").toString()));
-        if (body.containsKey("paymentStatus")) order.setPaymentStatus(PaymentStatus.valueOf((String) body.get("paymentStatus")));
+        if (body.containsKey("paymentStatus")) order.setPaymentStatus(EnumUtils.parseEnum(PaymentStatus.class, body.get("paymentStatus")));
         if (body.containsKey("paymentId")) order.setPaymentId((String) body.get("paymentId"));
-        if (body.containsKey("deliveryStatus")) order.setDeliveryStatus(DeliveryStatus.valueOf((String) body.get("deliveryStatus")));
+        if (body.containsKey("deliveryStatus")) order.setDeliveryStatus(EnumUtils.parseEnum(DeliveryStatus.class, body.get("deliveryStatus")));
         if (body.containsKey("deliveryAddress")) order.setDeliveryAddress((String) body.get("deliveryAddress"));
         return orderRepository.save(order);
     }
@@ -212,8 +364,16 @@ public class AdminService {
 
     // Crops CRUD
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> listCrops(int page, int size) {
-        return cropRepository.findAllNative(size, page * size);
+    public Map<String, Object> listCrops(int page, int size) {
+        Page<Crop> pageResult = cropRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
     }
 
     public Crop getCrop(Long id) {
@@ -249,7 +409,17 @@ public class AdminService {
     }
 
     // Govt Schemes CRUD
-    public List<Map<String, Object>> listSchemes(int page, int size) { return govtSchemeRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listSchemes(int page, int size) {
+        Page<GovtScheme> pageResult = govtSchemeRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
+    }
 
     public GovtScheme getScheme(Long id) {
         return govtSchemeRepository.findById(id)
@@ -283,7 +453,17 @@ public class AdminService {
     }
 
     // Insurance CRUD
-    public List<Map<String, Object>> listInsurance(int page, int size) { return insuranceSchemeRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listInsurance(int page, int size) {
+        Page<InsuranceScheme> pageResult = insuranceSchemeRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
+    }
 
     public InsuranceScheme getInsurance(Long id) {
         return insuranceSchemeRepository.findById(id)
@@ -315,7 +495,17 @@ public class AdminService {
     }
 
     // Mandi CRUD
-    public List<Map<String, Object>> listMandis(int page, int size) { return mandiRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listMandis(int page, int size) {
+        Page<Mandi> pageResult = mandiRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
+    }
 
     public Mandi getMandi(Long id) {
         return mandiRepository.findById(id)
@@ -347,7 +537,17 @@ public class AdminService {
     }
 
     // News CRUD
-    public List<Map<String, Object>> listNews(int page, int size) { return newsRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listNews(int page, int size) {
+        Page<News> pageResult = newsRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
+    }
 
     public News getNews(Long id) {
         return newsRepository.findById(id)
@@ -380,7 +580,17 @@ public class AdminService {
     }
 
     // Resources CRUD
-    public List<Map<String, Object>> listResources(int page, int size) { return resourceRepository.findAllNative(size, page * size); }
+    public Map<String, Object> listResources(int page, int size) {
+        Page<Resource> pageResult = resourceRepository.findAll(PageRequest.of(page, size));
+        return Map.of(
+            "content", pageResult.getContent(),
+            "page", page,
+            "size", size,
+            "totalElements", pageResult.getTotalElements(),
+            "totalPages", pageResult.getTotalPages(),
+            "last", pageResult.isLast()
+        );
+    }
 
     public Resource getResource(Long id) {
         return resourceRepository.findById(id)

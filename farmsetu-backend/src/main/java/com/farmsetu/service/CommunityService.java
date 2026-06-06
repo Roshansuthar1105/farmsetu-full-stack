@@ -30,7 +30,25 @@ public class CommunityService {
     private final UserRepository userRepository;
 
     public List<Map<String, Object>> listPosts(int page, int size) {
-        return postRepository.findAllNative(size, page * size);
+        List<Post> posts = postRepository.findAllWithAuthor(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending()));
+        return posts.stream().map(p -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", p.getId());
+            map.put("title", "");
+            map.put("content", p.getContent() != null ? p.getContent() : "");
+            map.put("category", p.getCategory() != null ? p.getCategory() : "");
+            map.put("location", p.getLocation() != null ? p.getLocation() : "");
+            map.put("postType", p.getPostType() != null ? p.getPostType().name() : "TEXT");
+            map.put("likesCount", p.getLikesCount() != null ? p.getLikesCount() : 0);
+            map.put("commentsCount", p.getCommentsCount() != null ? p.getCommentsCount() : 0);
+            map.put("sharesCount", p.getSharesCount() != null ? p.getSharesCount() : 0);
+            map.put("authorId", p.getAuthor().getId());
+            map.put("authorName", p.getAuthor().getName());
+            map.put("mediaUrls", p.getMediaUrls());
+            map.put("tags", p.getTags());
+            map.put("createdAt", p.getCreatedAt() != null ? p.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     public Post getPost(Long id) {
@@ -41,7 +59,8 @@ public class CommunityService {
     @Transactional
     public Post createPost(String content, PostType type, List<String> mediaUrls,
                            String category, List<String> tags, String location) {
-        User author = userRepository.getReferenceById(SecurityUtils.currentUserId());
+        User author = userRepository.findById(SecurityUtils.currentUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + SecurityUtils.currentUserId()));
         Post post = Post.builder()
                 .author(author)
                 .content(content)
@@ -76,7 +95,8 @@ public class CommunityService {
     @Transactional
     public Comment addComment(Long postId, String content, Long parentId) {
         Post post = getPost(postId);
-        User author = userRepository.getReferenceById(SecurityUtils.currentUserId());
+        User author = userRepository.findById(SecurityUtils.currentUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + SecurityUtils.currentUserId()));
         Comment.CommentBuilder builder = Comment.builder().post(post).author(author).content(content);
         if (parentId != null) {
             builder.parentComment(commentRepository.getReferenceById(parentId));
@@ -88,7 +108,18 @@ public class CommunityService {
     }
 
     public List<Map<String, Object>> getComments(Long postId, int page, int size) {
-        return commentRepository.findByPostIdNative(postId, size, page * size);
+        List<Comment> comments = commentRepository.findByPostId(postId, org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").ascending()));
+        return comments.stream().map(c -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", c.getId());
+            map.put("content", c.getContent());
+            map.put("likesCount", c.getLikesCount() != null ? c.getLikesCount() : 0);
+            map.put("authorId", c.getAuthor().getId());
+            map.put("authorName", c.getAuthor().getName());
+            map.put("parentCommentId", c.getParentComment() != null ? c.getParentComment().getId() : null);
+            map.put("createdAt", c.getCreatedAt() != null ? c.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional
@@ -98,7 +129,8 @@ public class CommunityService {
 
     @Transactional
     public Story createStory(String mediaUrl, String mediaType, String caption) {
-        User author = userRepository.getReferenceById(SecurityUtils.currentUserId());
+        User author = userRepository.findById(SecurityUtils.currentUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + SecurityUtils.currentUserId()));
         Story story = Story.builder()
                 .author(author)
                 .mediaUrl(mediaUrl)

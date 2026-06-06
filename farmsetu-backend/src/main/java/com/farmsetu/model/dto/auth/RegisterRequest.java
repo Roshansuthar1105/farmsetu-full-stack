@@ -25,4 +25,7 @@ public class RegisterRequest {
     private String state;
     private String district;
     private String village;
+    private Double farmArea;
+    private String soilType;
+    private Integer farmingExperience;
 }

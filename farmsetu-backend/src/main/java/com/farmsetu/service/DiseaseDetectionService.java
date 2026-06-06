@@ -40,7 +40,19 @@ public class DiseaseDetectionService {
     }
 
     public java.util.List<java.util.Map<String, Object>> history(Long farmerId, int page, int size) {
-        return diseaseDetectionRepository.findByFarmerIdNative(farmerId, size, page * size);
+        java.util.List<DiseaseDetection> detections = diseaseDetectionRepository.findByFarmerIdOrderByCreatedAtDesc(farmerId, org.springframework.data.domain.PageRequest.of(page, size));
+        return detections.stream().map(d -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", d.getId());
+            map.put("cropName", d.getCropName());
+            map.put("imageUrl", d.getImageUrl());
+            map.put("detectedDisease", d.getDetectedDisease());
+            map.put("severity", d.getSeverity() != null ? d.getSeverity().name() : "MODERATE");
+            map.put("confidenceScore", d.getConfidenceScore());
+            map.put("treatmentSuggestions", d.getTreatmentSuggestions());
+            map.put("createdAt", d.getCreatedAt() != null ? d.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     public DiseaseDetection getById(Long id) {

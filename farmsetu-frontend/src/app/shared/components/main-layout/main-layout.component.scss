@@ -1,3 +1,42 @@
 :host {
   display: block;
 }
+
+/* Custom scrollbars for clean lists */
+.scrollbar-thin {
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.2);
+    border-radius: 99px;
+    &:hover {
+      background: rgba(156, 163, 175, 0.4);
+    }
+  }
+}
+
+/* Slide-in slide-over drawer animation for mobile */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.fixed {
+  .absolute.max-w-xs {
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+/* Fine-tune interactive micro-animations */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+}

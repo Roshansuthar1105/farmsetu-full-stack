@@ -24,7 +24,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/{userId}")
-    public ApiResponse<java.util.List<java.util.Map<String, Object>>> list(
+    public ApiResponse<Map<String, Object>> list(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

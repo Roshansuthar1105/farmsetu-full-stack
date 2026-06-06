@@ -9,8 +9,15 @@ import { Observable } from 'rxjs';
 export class MarketplaceService {
   private readonly api = inject(ApiService);
 
-  list(page = 0, size = 20): Observable<PageResponse<Product>> {
-    return this.api.get<Product[]>('/api/marketplace/products').pipe(
+  list(page = 0, size = 20, category = '', search = ''): Observable<PageResponse<Product>> {
+    let url = `/api/marketplace/products?page=${page}&size=${size}`;
+    if (category) {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    return this.api.get<Product[]>(url).pipe(
       map((products) => ({
         content: products,
         page: page,

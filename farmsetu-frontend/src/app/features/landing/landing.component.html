@@ -4,9 +4,8 @@
   <header class="fixed top-0 w-full z-50 transition-all duration-300"
           [ngClass]="{'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-4': isScrolled(), 'bg-transparent py-6': !isScrolled()}">
     <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-      <a routerLink="/" class="flex items-center gap-2 text-2xl font-bold text-primary group">
-        <svg lucideLeaf class="text-primary group-hover:rotate-12 transition-transform"></svg>
-        {{ i18n.t('app.name') }}
+      <a routerLink="/" class="flex items-center group">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu" class="h-10 w-auto object-contain transition-transform group-hover:scale-105">
       </a>
 
       <!-- Desktop Nav -->
@@ -153,8 +152,8 @@
   <!-- Footer -->
   <footer class="bg-white dark:bg-gray-950 py-12 border-t border-gray-200 dark:border-gray-800">
     <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-        <svg lucideLeaf class="text-primary"></svg> Farmsetu
+      <div class="flex items-center">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu" class="h-8 w-auto object-contain">
       </div>
       <div class="text-gray-500 text-sm">
         &copy; {{ currentYear || '2024' }} Farmsetu. All rights reserved.

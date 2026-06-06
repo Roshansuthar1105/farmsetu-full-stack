@@ -12,6 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";  -- optional, for future UUID keys
 -- 2. Drop existing objects (development reset)
 -- -----------------------------------------------------------------------------
 DROP TABLE IF EXISTS product_bids CASCADE;
+DROP TABLE IF EXISTS admin_logs CASCADE;
 DROP TABLE IF EXISTS calendar_tasks CASCADE;
 DROP TABLE IF EXISTS crop_calendar CASCADE;
 DROP TABLE IF EXISTS user_badges CASCADE;
@@ -470,6 +471,17 @@ CREATE TABLE farm_expenses (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE admin_logs (
+    id              BIGSERIAL PRIMARY KEY,
+    entity_name     VARCHAR(255),
+    entity_id       BIGINT,
+    action          VARCHAR(255),
+    performed_by    VARCHAR(255),
+    details         TEXT,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- -----------------------------------------------------------------------------
 -- 4. Indexes
 -- -----------------------------------------------------------------------------
@@ -515,6 +527,9 @@ CREATE INDEX idx_farm_expenses_farmer ON farm_expenses(farmer_id);
 
 CREATE INDEX idx_stories_expires ON stories(expires_at);
 
+CREATE INDEX idx_admin_logs_entity ON admin_logs(entity_name, entity_id);
+
+
 -- -----------------------------------------------------------------------------
 -- 5. updated_at trigger (optional)
 -- -----------------------------------------------------------------------------
@@ -535,7 +550,7 @@ BEGIN
         'chats', 'posts', 'comments', 'stories', 'market_prices', 'mandis',
         'govt_schemes', 'insurance_schemes', 'crop_calendar', 'calendar_tasks',
         'disease_detections', 'notifications', 'reviews', 'news', 'resources',
-        'badges', 'user_badges', 'farm_expenses'
+        'badges', 'user_badges', 'farm_expenses', 'admin_logs'
     ])
     LOOP
         EXECUTE format('
