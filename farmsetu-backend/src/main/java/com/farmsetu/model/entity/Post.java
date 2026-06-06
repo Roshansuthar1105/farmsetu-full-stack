@@ -20,6 +20,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "posts")
 @Getter
@@ -27,6 +29,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "mediaUrls", "tags", "author"})
 public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

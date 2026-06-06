@@ -29,6 +29,7 @@ public class CommunityService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> listPosts(int page, int size) {
         List<Post> posts = postRepository.findAllWithAuthor(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending()));
         return posts.stream().map(p -> {
@@ -44,13 +45,14 @@ public class CommunityService {
             map.put("sharesCount", p.getSharesCount() != null ? p.getSharesCount() : 0);
             map.put("authorId", p.getAuthor().getId());
             map.put("authorName", p.getAuthor().getName());
-            map.put("mediaUrls", p.getMediaUrls());
-            map.put("tags", p.getTags());
+            map.put("mediaUrls", p.getMediaUrls() != null ? new java.util.ArrayList<>(p.getMediaUrls()) : new java.util.ArrayList<>());
+            map.put("tags", p.getTags() != null ? new java.util.ArrayList<>(p.getTags()) : new java.util.ArrayList<>());
             map.put("createdAt", p.getCreatedAt() != null ? p.getCreatedAt().toString() : "");
             return map;
         }).collect(java.util.stream.Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Post getPost(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
@@ -107,6 +109,7 @@ public class CommunityService {
         return comment;
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getComments(Long postId, int page, int size) {
         List<Comment> comments = commentRepository.findByPostId(postId, org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").ascending()));
         return comments.stream().map(c -> {
