@@ -17,6 +17,7 @@ import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
           <a routerLink="/admin/users" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Manage Users</a>
           <a routerLink="/admin/crops" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Manage Crops</a>
           <a routerLink="/admin/email" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Email Broadcaster</a>
+          <a routerLink="/admin/orders" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Manage Orders</a>
           <a routerLink="/app/dashboard" class="block py-2 text-gray-400 hover:text-white">← App Dashboard</a>
         </nav>
       </aside>

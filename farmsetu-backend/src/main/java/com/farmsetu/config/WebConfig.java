@@ -17,6 +17,14 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addConverterFactory(new CaseInsensitiveEnumConverterFactory());
     }
 
+    @Override
+    public void addResourceHandlers(
+            org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+        String uploadPath = java.nio.file.Paths.get("uploads").toAbsolutePath().toUri().toString();
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(uploadPath);
+    }
+
     private static class CaseInsensitiveEnumConverterFactory implements ConverterFactory<String, Enum> {
         @Override
         public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
@@ -47,8 +55,9 @@ public class WebConfig implements WebMvcConfigurer {
                 String allowed = Arrays.stream(enumType.getEnumConstants())
                         .map(Enum::name)
                         .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(String.format("Invalid value '%s' for type %s. Allowed values are: %s",
-                        source.trim(), enumType.getSimpleName(), allowed));
+                throw new IllegalArgumentException(
+                        String.format("Invalid value '%s' for type %s. Allowed values are: %s",
+                                source.trim(), enumType.getSimpleName(), allowed));
             }
         }
     }

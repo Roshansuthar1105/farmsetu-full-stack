@@ -9,9 +9,11 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    List<Order> findByBuyerId(Long buyerId, Pageable pageable);
+    @Query("SELECT o FROM Order o JOIN FETCH o.buyer JOIN FETCH o.seller JOIN FETCH o.product p JOIN FETCH p.seller WHERE o.buyer.id = :buyerId")
+    List<Order> findByBuyerIdWithRelations(@Param("buyerId") Long buyerId, Pageable pageable);
 
-    List<Order> findBySellerId(Long sellerId, Pageable pageable);
+    @Query("SELECT o FROM Order o JOIN FETCH o.buyer JOIN FETCH o.seller JOIN FETCH o.product p JOIN FETCH p.seller WHERE o.seller.id = :sellerId")
+    List<Order> findBySellerIdWithRelations(@Param("sellerId") Long sellerId, Pageable pageable);
 
     @Query("SELECT o FROM Order o JOIN FETCH o.buyer JOIN FETCH o.seller JOIN FETCH o.product p JOIN FETCH p.seller")
     List<Order> findAllWithRelations(Pageable pageable);

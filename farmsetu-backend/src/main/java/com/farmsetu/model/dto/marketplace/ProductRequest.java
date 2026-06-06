@@ -19,7 +19,9 @@ public class ProductRequest {
     private ProductCategory category;
     @NotNull
     private BigDecimal price;
-    private Integer quantity;
+    private Integer quantity; // Keep quantity for backward compatibility
+    private Integer stock;
+    private Integer lowStockThreshold;
     private String unit;
     private ProductCondition condition;
     private List<String> images;

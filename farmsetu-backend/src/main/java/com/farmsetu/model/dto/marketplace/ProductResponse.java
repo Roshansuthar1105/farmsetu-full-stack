@@ -22,6 +22,9 @@ public class ProductResponse {
     private ProductCategory category;
     private BigDecimal price;
     private Integer quantity;
+    private Integer stock;
+    private String stockStatus;
+    private Integer lowStockThreshold;
     private String unit;
     private ProductCondition condition;
     private List<String> images;
@@ -31,8 +34,15 @@ public class ProductResponse {
     private BigDecimal currentBid;
     private BigDecimal startingBid;
     private ProductStatus status;
+    private Double averageRating;
+    private Integer totalReviews;
+    private java.util.Map<Integer, Integer> starDistribution;
 
     public static ProductResponse from(Product product) {
+        return from(product, null, null, null);
+    }
+
+    public static ProductResponse from(Product product, Double averageRating, Integer totalReviews, java.util.Map<Integer, Integer> starDistribution) {
         return ProductResponse.builder()
                 .id(product.getId())
                 .sellerId(product.getSeller().getId())
@@ -42,6 +52,9 @@ public class ProductResponse {
                 .category(product.getCategory())
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
+                .stock(product.getStock())
+                .stockStatus(product.getStockStatus() != null ? product.getStockStatus().name() : null)
+                .lowStockThreshold(product.getLowStockThreshold())
                 .unit(product.getUnit())
                 .condition(product.getCondition())
                 .images(product.getImages() != null ? new java.util.ArrayList<>(product.getImages()) : new java.util.ArrayList<>())
@@ -51,6 +64,9 @@ public class ProductResponse {
                 .currentBid(product.getCurrentBid())
                 .startingBid(product.getStartingBid())
                 .status(product.getStatus())
+                .averageRating(averageRating)
+                .totalReviews(totalReviews)
+                .starDistribution(starDistribution)
                 .build();
     }
 }

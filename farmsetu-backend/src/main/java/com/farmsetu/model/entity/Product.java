@@ -85,4 +85,18 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private ProductStatus status = ProductStatus.ACTIVE;
+
+    @Column(name = "stock")
+    @Builder.Default
+    private Integer stock = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stock_status")
+    @Builder.Default
+    private com.farmsetu.model.enums.StockStatus stockStatus = com.farmsetu.model.enums.StockStatus.IN_STOCK;
+
+    @Column(name = "low_stock_threshold")
+    @Builder.Default
+    private Integer lowStockThreshold = 10;
 }
+

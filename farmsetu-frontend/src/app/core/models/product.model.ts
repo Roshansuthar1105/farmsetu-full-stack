@@ -19,4 +19,10 @@ export interface Product {
   currentBid?: number;
   startingBid?: number;
   status: 'ACTIVE' | 'SOLD' | 'CANCELLED';
+  stock: number;
+  stockStatus: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
+  lowStockThreshold: number;
+  averageRating?: number;
+  totalReviews?: number;
+  starDistribution?: Record<number, number>;
 }
