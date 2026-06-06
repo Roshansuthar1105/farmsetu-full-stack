@@ -2,6 +2,7 @@
   "app.name": "FarmSetu",
   "nav.dashboard": "Dashboard",
   "nav.marketplace": "Marketplace",
+  "nav.orders": "My Orders",
   "nav.chat": "Chat",
   "nav.community": "Community",
   "nav.market": "Market Prices",

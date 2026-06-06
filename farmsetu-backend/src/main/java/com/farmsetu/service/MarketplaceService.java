@@ -343,7 +343,7 @@ public class MarketplaceService {
 
     @Transactional(readOnly = true)
     public Order getOrder(Long id) {
-        return orderRepository.findById(id)
+        return orderRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
     }
 

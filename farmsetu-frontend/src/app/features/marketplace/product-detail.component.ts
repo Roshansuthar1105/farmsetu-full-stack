@@ -353,8 +353,30 @@ import { ToastrService } from 'ngx-toastr';
                 </div>
               </div>
 
+              <!-- ORDER INFO PANEL -->
+              @if (associatedOrders().length > 0) {
+                <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-md space-y-3.5 animate-in fade-in slide-in-from-bottom-3 duration-300">
+                  <div class="flex items-center gap-2 text-green-650 dark:text-green-400">
+                    <span class="material-icons text-xl">local_shipping</span>
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider">Order Track Info</h3>
+                  </div>
+                  
+                  <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                    {{ isSeller() 
+                        ? 'You have received ' + associatedOrders().length + ' order(s) for this listing.' 
+                        : 'You have ordered this product ' + (associatedOrders().length === 1 ? 'once' : associatedOrders().length + ' times') + '.' }}
+                  </p>
+
+                  <button (click)="openOrdersModal()"
+                          class="w-full py-3 bg-green-50 hover:bg-green-100 dark:bg-green-950/20 dark:hover:bg-green-950/40 text-green-700 dark:text-green-400 font-extrabold text-xs rounded-xl active:scale-[0.98] transition border border-green-150/40 dark:border-green-800/30 flex items-center justify-center gap-1.5 shadow-sm">
+                    <span class="material-icons text-sm">receipt_long</span>
+                    {{ isSeller() ? 'View Received Orders' : 'View Order Details' }}
+                  </button>
+                </div>
+              }
+
               <!-- Seller Profile Panel -->
-              <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-md space-y-4">
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-md space-y-4 font-outfit">
                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Information</h3>
                 
                 <div class="flex items-center gap-3">
@@ -385,6 +407,156 @@ import { ToastrService } from 'ngx-toastr';
             </div>
             
           </div>
+
+          <!-- ORDER DETAILS MODAL -->
+          @if (showOrdersModal()) {
+            <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+              <!-- Backdrop -->
+              <div (click)="closeOrdersModal()" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+
+              <!-- Content Container -->
+              <div class="relative bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full shadow-2xl p-6 border border-gray-150 dark:border-gray-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-thin">
+                
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
+                  <div class="space-y-0.5">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Marketplace Orders</span>
+                    <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                      <span class="material-icons text-green-600">receipt_long</span> 
+                      {{ isSeller() ? 'Orders Received for Listing' : 'Your Order Purchase Info' }}
+                    </h3>
+                  </div>
+                  <button (click)="closeOrdersModal()" class="w-8 h-8 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-650 dark:hover:text-white flex items-center justify-center transition active:scale-95">✕</button>
+                </div>
+
+                <!-- Modal Body -->
+                @if (associatedOrders().length > 1 && !selectedAssociatedOrder()) {
+                  <!-- Order List View -->
+                  <div class="space-y-3">
+                    <p class="text-xs text-gray-450 mb-2 font-medium">Select an order below to view full details:</p>
+                    <div class="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden bg-gray-50/20 dark:bg-gray-950/10">
+                      @for (order of associatedOrders(); track order.id) {
+                        <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:bg-gray-50/50 dark:hover:bg-gray-850/50 transition">
+                          <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                              <span class="text-xs font-bold text-gray-900 dark:text-white">Order #{{ order.id }}</span>
+                              <span class="text-[10px] text-gray-400 font-semibold">{{ order.createdAt | date:'mediumDate' }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                              Qty: <strong class="text-gray-700 dark:text-gray-300">{{ order.quantity }}</strong> • 
+                              Total: <strong class="text-green-600 dark:text-green-400 font-extrabold">₹{{ order.totalAmount }}</strong> •
+                              {{ isSeller() ? 'Buyer: ' + (order.buyer?.name || 'Unknown') : 'Seller: ' + (order.seller?.name || 'Unknown') }}
+                            </div>
+                          </div>
+                          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                            <span [class]="getStatusClass(order.deliveryStatus)" class="text-[9px]">
+                              {{ order.deliveryStatus }}
+                            </span>
+                            <button (click)="selectAssociatedOrder(order)" 
+                                    class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold rounded-lg transition active:scale-95">
+                              View Receipt
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  @if (selectedAssociatedOrder(); as detail) {
+                  <!-- Detailed View -->
+                  <div class="space-y-4">
+                    @if (associatedOrders().length > 1) {
+                      <button (click)="clearSelectedAssociatedOrder()" 
+                              class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-green-600 transition font-bold mb-2">
+                        <span class="material-icons text-sm">arrow_back</span> Back to Orders List
+                      </button>
+                    }
+
+                    <div class="grid sm:grid-cols-2 gap-6 text-xs sm:text-sm">
+                      
+                      <!-- Left side: Order details -->
+                      <div class="space-y-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 p-4 rounded-2xl">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Transaction Summary</h4>
+                        
+                        <div class="space-y-2.5 text-xs">
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Order ID:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-250">#{{ detail.id }}</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Order Date:</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-255">{{ detail.createdAt | date:'medium' }}</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Buyer:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-250">{{ detail.buyer?.name || 'Unknown' }}</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Seller:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-250">{{ detail.seller?.name || 'Unknown' }}</span>
+                          </div>
+                          
+                          <div class="h-px bg-gray-150 dark:bg-gray-805 my-1"></div>
+
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Quantity:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-255">{{ detail.quantity }} units</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Price Per Unit:</span>
+                            <span class="font-bold text-gray-850 dark:text-gray-255">₹{{ p.price }}</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Total Paid:</span>
+                            <span class="font-extrabold text-green-650 dark:text-green-400 text-sm">₹{{ detail.totalAmount }}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Right side: Shipping & status -->
+                      <div class="space-y-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 p-4 rounded-2xl flex flex-col justify-between">
+                        <div class="space-y-2.5">
+                          <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Shipping & Logistics</h4>
+                          
+                          <div class="space-y-1">
+                            <span class="text-[9px] font-bold text-gray-450 uppercase block">Delivery Address</span>
+                            <p class="text-xs text-gray-650 dark:text-gray-300 leading-relaxed font-medium">
+                              {{ detail.deliveryAddress || 'No shipping address provided.' }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div class="flex gap-4 pt-2 flex-wrap border-t border-gray-150/40 dark:border-gray-800/40 mt-2">
+                          <div class="flex flex-col gap-0.5">
+                            <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Logistics Status</span>
+                            <span [class]="getStatusClass(detail.deliveryStatus)" class="text-[9px] w-max">
+                              {{ detail.deliveryStatus }}
+                            </span>
+                          </div>
+                          <div class="flex flex-col gap-0.5">
+                            <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Payment</span>
+                            <span class="px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full border border-green-500/30 text-green-500 bg-green-500/10 w-max">
+                              PAID
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                }
+              }
+
+                <!-- Close Action Footer -->
+                <div class="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800 mt-5">
+                  <button (click)="closeOrdersModal()" 
+                          class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-bold rounded-xl text-xs active:scale-95 transition">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
         }
       }
     </div>
@@ -404,6 +576,11 @@ export class ProductDetailComponent implements OnInit {
 
   readonly product = signal<Product | null>(null);
   readonly loading = signal(true);
+
+  // Associated Orders State
+  readonly associatedOrders = signal<any[]>([]);
+  readonly selectedAssociatedOrder = signal<any | null>(null);
+  readonly showOrdersModal = signal(false);
 
   // Carousel State
   readonly activeImageIndex = signal(0);
@@ -436,10 +613,80 @@ export class ProductDetailComponent implements OnInit {
         this.product.set(p);
         this.totalReviewsCount.set(p.totalReviews || 0);
         this.loadReviews(id);
+        this.loadAssociatedOrders(p);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
+  }
+
+  loadAssociatedOrders(p: Product): void {
+    const currentUserId = this.authService.currentUser()?.id;
+    if (!currentUserId) return;
+
+    const isSeller = Number(p.sellerId) === Number(currentUserId);
+    const orderFetch = isSeller 
+      ? this.marketplace.getSellerOrders() 
+      : this.marketplace.getBuyerOrders();
+
+    orderFetch.subscribe({
+      next: (response: any) => {
+        const allOrders = response.data || response || [];
+        const filtered = allOrders.filter((o: any) => Number(o.product?.id || o.productId) === Number(p.id));
+        this.associatedOrders.set(filtered);
+        if (filtered.length === 1) {
+          this.selectedAssociatedOrder.set(filtered[0]);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load associated orders', err);
+      }
+    });
+  }
+
+  isSeller(): boolean {
+    const p = this.product();
+    const currentId = this.authService.currentUser()?.id;
+    return !!p && !!currentId && Number(p.sellerId) === Number(currentId);
+  }
+
+  openOrdersModal(): void {
+    this.showOrdersModal.set(true);
+    if (this.associatedOrders().length > 0 && !this.selectedAssociatedOrder()) {
+      this.selectedAssociatedOrder.set(this.associatedOrders()[0]);
+    }
+  }
+
+  closeOrdersModal(): void {
+    this.showOrdersModal.set(false);
+  }
+
+  selectAssociatedOrder(order: any): void {
+    this.selectedAssociatedOrder.set(order);
+  }
+
+  clearSelectedAssociatedOrder(): void {
+    this.selectedAssociatedOrder.set(null);
+  }
+
+  getStatusClass(status: string): string {
+    const base = 'px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ';
+    switch (status) {
+      case 'PENDING':
+        return base + 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+      case 'CONFIRMED':
+        return base + 'text-blue-500 bg-blue-500/10 border-blue-500/30';
+      case 'SHIPPED':
+        return base + 'text-indigo-500 bg-indigo-500/10 border-indigo-500/30';
+      case 'DELIVERED':
+        return base + 'text-green-500 bg-green-500/10 border-green-500/30';
+      case 'CANCELLED':
+        return base + 'text-red-500 bg-red-500/10 border-red-500/30';
+      case 'RETURNED':
+        return base + 'text-purple-500 bg-purple-500/10 border-purple-500/30';
+      default:
+        return base + 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+    }
   }
 
   loadReviews(productId: number): void {

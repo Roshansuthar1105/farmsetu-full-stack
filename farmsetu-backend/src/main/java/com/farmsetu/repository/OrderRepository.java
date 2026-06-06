@@ -17,4 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o JOIN FETCH o.buyer JOIN FETCH o.seller JOIN FETCH o.product p JOIN FETCH p.seller")
     List<Order> findAllWithRelations(Pageable pageable);
+
+    @Query("SELECT o FROM Order o JOIN FETCH o.buyer JOIN FETCH o.seller JOIN FETCH o.product p JOIN FETCH p.seller WHERE o.id = :id")
+    java.util.Optional<Order> findByIdWithRelations(@Param("id") Long id);
 }
