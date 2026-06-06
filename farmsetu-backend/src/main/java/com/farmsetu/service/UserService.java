@@ -59,6 +59,14 @@ public class UserService {
         return userBadgeRepository.findByUserId(userId);
     }
 
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .filter(User::isActive)
+                .map(UserResponse::from)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     private User findUser(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));

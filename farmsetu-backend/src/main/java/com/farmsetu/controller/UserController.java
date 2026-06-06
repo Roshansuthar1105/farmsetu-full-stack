@@ -28,6 +28,11 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("")
+    public ApiResponse<List<UserResponse>> getAll() {
+        return ApiResponse.ok(userService.getAllUsers());
+    }
+
     @GetMapping("/me")
     public ApiResponse<UserResponse> getMe() {
         return ApiResponse.ok(userService.getById(SecurityUtils.currentUserId()));

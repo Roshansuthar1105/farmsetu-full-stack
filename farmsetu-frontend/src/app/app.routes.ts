@@ -38,6 +38,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
       },
       {
+        path: 'farm-chat',
+        loadComponent: () => import('./features/chat/farm-chat.component').then(m => m.FarmChatComponent)
+      },
+      {
         path: 'community',
         loadComponent: () => import('./features/community/community.component').then(m => m.CommunityComponent)
       },

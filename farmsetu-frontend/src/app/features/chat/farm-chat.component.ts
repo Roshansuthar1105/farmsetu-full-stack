@@ -20,30 +20,14 @@ interface ChatMessage {
   createdAt: string;
 }
 
-interface Expert {
-  id: number;
-  name: string;
-  role: string;
-  profilePhoto?: string;
-  bio?: string;
-  specialties: string[];
-  rating: number;
-  phone?: string;
-  preferredLanguage?: string;
-  state?: string;
-  district?: string;
-  village?: string;
-  unreadCount?: number;
-}
-
 @Component({
-  selector: 'fs-chat',
+  selector: 'fs-farm-chat',
   standalone: true,
   imports: [CommonModule, FormsModule, PageHeaderComponent],
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss']
+  templateUrl: './farm-chat.component.html',
+  styleUrls: ['./farm-chat.component.scss']
 })
-export class ChatComponent implements OnInit, OnDestroy {
+export class FarmChatComponent implements OnInit, OnDestroy {
   private readonly api = inject(ApiService);
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
@@ -59,16 +43,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.windowWidth = window.innerWidth;
   }
 
-  readonly experts = signal<Expert[]>([]);
+  readonly contacts = signal<any[]>([]);
   readonly onlineUserIds = signal<Set<number>>(new Set());
-  readonly selectedExpert = signal<Expert | null>(null);
-  readonly messages = signal<any[]>([]);
-  readonly isAiLoading = signal(false);
+  readonly selectedContact = signal<any | null>(null);
+  readonly messages = signal<ChatMessage[]>([]);
 
-  // Search filter
   readonly searchQuery = signal('');
+  readonly chatSearchQuery = signal('');
+  readonly showChatSearch = signal(false);
+  readonly showInfoDrawer = signal(false);
 
-  // Input control
+  // Message input
   messageText = '';
 
   // Recording voice notes
@@ -78,7 +63,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private audioChunks: Blob[] = [];
   private recordingInterval: any = null;
 
-  // Websocket subscriptions
+  // Connection
   private unsubscribeMessages: (() => void) | null = null;
   private unsubscribeStatus: (() => void) | null = null;
 
@@ -99,7 +84,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     const user = this.currentUser;
     if (user) {
       this.ws.connect(user.id);
-      
+
       // Subscribe to personal queue for messages and read events
       this.unsubscribeMessages = this.ws.subscribe(`/topic/messages/${user.id}`, (payload) => {
         this.handleIncomingSocketPayload(payload);
@@ -110,8 +95,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.handleStatusUpdate(statusPayload);
       });
 
-      // Load experts & online status
-      this.loadExperts();
+      // Load contacts & online status
+      this.loadContacts();
       this.loadOnlineUsers();
     }
   }
@@ -122,50 +107,29 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.stopRecordingTimer();
   }
 
-  loadExperts(): void {
-    // Add permanent AI bot entry
-    const aiBot: Expert = {
-      id: -1,
-      name: 'FarmSetu AI Assistant',
-      role: 'EXPERT',
-      profilePhoto: 'assets/ai-avatar.png',
-      bio: 'Your automated agricultural expert assistant. Ask me anything about crop diseases, fertilizers, weather advisory or marketplace pricing!',
-      specialties: ['AI Botany', 'Instant Support', 'Diseases & Soils'],
-      rating: 5.0,
-      unreadCount: 0
-    };
-
+  loadContacts(): void {
     this.api.get<any[]>('/api/users').subscribe({
       next: (users) => {
-        const expertsOnly = users.filter(u => u.role === 'EXPERT' && u.id !== this.currentUser?.id);
-        const mapped = expertsOnly.map(u => {
-          let specialties = ['General Agronomy'];
-          let rating = 4.8;
-          
-          if (u.name.toLowerCase().includes('ramesh') || u.id % 3 === 0) {
-            specialties = ['Soil Science', 'Fertility'];
-            rating = 4.9;
-          } else if (u.name.toLowerCase().includes('sunita') || u.id % 3 === 1) {
-            specialties = ['Pest Pathology', 'Crop Safety'];
-            rating = 4.8;
-          } else {
-            specialties = ['Irrigation Systems', 'Horticulture'];
-            rating = 4.7;
-          }
-          return {
-            ...u,
-            specialties,
-            rating,
-            unreadCount: 0
-          };
-        });
+        const filtered = users.filter(u => u.id !== this.currentUser?.id);
+        // Map mock last messages
+        const contactsWithMsg = filtered.map(u => ({
+          ...u,
+          lastMessage: '',
+          lastMessageTime: '',
+          unreadCount: 0,
+          pinned: false
+        }));
+        this.contacts.set(contactsWithMsg);
 
-        this.experts.set([aiBot, ...mapped]);
-
-        // Load last message mock metadata if needed
-        mapped.forEach(c => {
+        // Load initial conversation lists to fetch last messages/unread counts if needed
+        contactsWithMsg.forEach(c => {
           this.api.get<ChatMessage[]>(`/api/chats/${c.id}?page=0&size=1`).subscribe(msgs => {
             if (msgs && msgs.length > 0) {
+              const last = msgs[0];
+              c.lastMessage = last.messageText || (last.messageType === 'IMAGE' ? '📷 Photo' : last.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
+              c.lastMessageTime = last.createdAt;
+
+              // Count unread
               c.unreadCount = msgs.filter(m => m.senderId === c.id && !m.read).length;
             }
           });
@@ -182,102 +146,50 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  selectExpert(expert: Expert): void {
-    this.selectedExpert.set(expert);
+  selectContact(contact: any): void {
+    this.selectedContact.set(contact);
     this.messages.set([]);
+    this.showChatSearch.set(false);
+    this.chatSearchQuery.set('');
 
-    if (expert.id === -1) {
-      // Load AI Welcome
-      this.messages.set([
-        {
-          id: 0,
-          senderId: -1,
-          receiverId: this.currentUser?.id || 0,
-          messageText: 'Hello! I am your FarmSetu AI Agricultural Assistant. Ask me any question related to seeds, fertilizers, mandis, weather or pest controls!',
-          messageType: 'TEXT',
-          read: true,
-          pinned: false,
-          createdAt: new Date().toISOString()
-        }
-      ]);
-      return;
-    }
-
-    // Load expert chat history
-    this.api.get<ChatMessage[]>(`/api/chats/${expert.id}?size=50`).subscribe({
+    // Fetch conversation history
+    this.api.get<ChatMessage[]>(`/api/chats/${contact.id}?size=50`).subscribe({
       next: (msgs) => {
+        // Backend returns DESC order, reverse for chronological view
         const ordered = [...msgs].reverse();
         this.messages.set(ordered);
-        
-        // Mark read
-        this.api.put(`/api/chats/read-all/${expert.id}`, {}).subscribe(() => {
-          expert.unreadCount = 0;
+
+        // Mark conversation as read
+        this.api.put(`/api/chats/read-all/${contact.id}`, {}).subscribe(() => {
+          contact.unreadCount = 0;
         });
       }
     });
   }
 
   sendMessage(): void {
-    if (!this.messageText.trim() || !this.selectedExpert() || !this.currentUser) return;
-
-    const text = this.messageText;
-    this.messageText = '';
-
-    if (this.selectedExpert()?.id === -1) {
-      // Send to AI
-      const userMsg = {
-        id: Date.now(),
-        senderId: this.currentUser.id,
-        receiverId: -1,
-        messageText: text,
-        messageType: 'TEXT' as const,
-        read: true,
-        pinned: false,
-        createdAt: new Date().toISOString()
-      };
-      
-      this.messages.update(list => [...list, userMsg]);
-      this.isAiLoading.set(true);
-
-      this.api.post<any>('/api/ai/chat', { message: text }).subscribe({
-        next: (res) => {
-          this.isAiLoading.set(false);
-          const aiMsg = {
-            id: Date.now() + 1,
-            senderId: -1,
-            receiverId: this.currentUser?.id || 0,
-            messageText: res.reply || JSON.stringify(res),
-            messageType: 'TEXT' as const,
-            read: true,
-            pinned: false,
-            createdAt: new Date().toISOString()
-          };
-          this.messages.update(list => [...list, aiMsg]);
-        },
-        error: () => {
-          this.isAiLoading.set(false);
-        }
-      });
-      return;
-    }
+    if (!this.messageText.trim() || !this.selectedContact() || !this.currentUser) return;
 
     const payload = {
       senderId: this.currentUser.id,
-      receiverId: this.selectedExpert()?.id || 0,
-      messageText: text,
+      receiverId: this.selectedContact().id,
+      messageText: this.messageText,
       messageType: 'TEXT',
       mediaUrl: ''
     };
 
     this.ws.send('/app/chat.send', payload);
+    this.messageText = '';
   }
 
   handleIncomingSocketPayload(payload: any): void {
+    // Check if payload is message
     if (payload.id) {
       const msg = payload as ChatMessage;
-      const activeExpert = this.selectedExpert();
+      const activeContact = this.selectedContact();
 
-      if (activeExpert && (msg.senderId === activeExpert.id || msg.senderId === this.currentUser?.id)) {
+      if (activeContact && (msg.senderId === activeContact.id || msg.senderId === this.currentUser?.id)) {
+        // Append to active message list
         this.messages.update(list => {
           if (!list.some(m => m.id === msg.id)) {
             return [...list, msg];
@@ -285,22 +197,30 @@ export class ChatComponent implements OnInit, OnDestroy {
           return list;
         });
 
-        if (msg.senderId === activeExpert.id) {
+        // Mark as read if received from partner and chat is open
+        if (msg.senderId === activeContact.id) {
           this.api.put(`/api/chats/${msg.id}/read`, {}).subscribe();
         }
       }
 
-      this.experts.update(list => {
+      // Update contact list last message
+      this.contacts.update(list => {
         return list.map(c => {
-          if (c.id === msg.senderId && (!activeExpert || activeExpert.id !== c.id)) {
-            if (c.unreadCount !== undefined) c.unreadCount++;
+          if (c.id === msg.senderId || c.id === msg.receiverId) {
+            c.lastMessage = msg.messageText || (msg.messageType === 'IMAGE' ? '📷 Photo' : msg.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
+            c.lastMessageTime = msg.createdAt;
+            if (msg.senderId === c.id && (!activeContact || activeContact.id !== c.id)) {
+              c.unreadCount++;
+            }
           }
           return c;
         });
       });
-    } else if (payload.readAll) {
+    }
+    // Check if payload is read-all update
+    else if (payload.readAll) {
       const partnerId = payload.senderId;
-      if (this.selectedExpert()?.id === partnerId) {
+      if (this.selectedContact()?.id === partnerId) {
         this.messages.update(list => {
           return list.map(m => {
             if (m.receiverId === partnerId) {
@@ -310,7 +230,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           });
         });
       }
-    } else if (payload.messageId && payload.read) {
+    }
+    // Check if payload is single message read receipt
+    else if (payload.messageId && payload.read) {
       this.messages.update(list => {
         return list.map(m => {
           if (m.id === payload.messageId) {
@@ -336,30 +258,45 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
+  togglePinMessage(msg: ChatMessage): void {
+    this.api.put(`/api/chats/${msg.id}/pin`, {}).subscribe({
+      next: () => {
+        this.messages.update(list => {
+          return list.map(m => {
+            if (m.id === msg.id) {
+              m.pinned = !m.pinned;
+            }
+            return m;
+          });
+        });
+      }
+    });
+  }
+
   isOnline(userId: number): boolean {
-    if (userId === -1) return true; // AI is always online
     return this.onlineUserIds().has(userId);
   }
 
-  get filteredExperts() {
+  get filteredContacts() {
     const q = this.searchQuery().toLowerCase();
-    return this.experts().filter(e => e.name.toLowerCase().includes(q));
+    return this.contacts().filter(c => c.name.toLowerCase().includes(q));
   }
 
-  // File uploading
+  get filteredMessages() {
+    const q = this.chatSearchQuery().toLowerCase();
+    const list = this.messages();
+    if (!q) return list;
+    return list; // highlights handled in UI template
+  }
+
+  // File sharing
   triggerFileUpload(): void {
     this.fileInput.nativeElement.click();
   }
 
   onFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (!file || !this.selectedExpert() || !this.currentUser) return;
-
-    // AI doesn't support attachments in mock
-    if (this.selectedExpert()?.id === -1) {
-      alert('AI Assistant currently only supports text queries.');
-      return;
-    }
+    if (!file || !this.selectedContact() || !this.currentUser) return;
 
     const formData = new FormData();
     formData.append('file', file);
@@ -369,10 +306,10 @@ export class ChatComponent implements OnInit, OnDestroy {
       next: (res) => {
         const fileUrl = res.data;
         const type = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
-        
+
         const payload = {
           senderId: this.currentUser?.id,
-          receiverId: this.selectedExpert()?.id || 0,
+          receiverId: this.selectedContact().id,
           messageText: file.name,
           messageType: type,
           mediaUrl: fileUrl
@@ -386,15 +323,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   startRecording(): void {
     if (this.isRecording()) return;
 
-    if (this.selectedExpert()?.id === -1) {
-      alert('AI Assistant currently only supports text queries.');
-      return;
-    }
-
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       this.audioChunks = [];
       this.mediaRecorder = new MediaRecorder(stream);
-      
+
       this.mediaRecorder.ondataavailable = (e) => {
         this.audioChunks.push(e.data);
       };
@@ -408,7 +340,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.mediaRecorder.start();
       this.isRecording.set(true);
       this.recordingDuration.set(0);
-      
+
       this.recordingInterval = setInterval(() => {
         this.recordingDuration.update(d => d + 1);
       }, 1000);
@@ -427,6 +359,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (send) {
       this.mediaRecorder.stop();
     } else {
+      // Cancel recording
       this.mediaRecorder.onstop = null;
       this.mediaRecorder.stop();
       this.mediaRecorder = null;
@@ -441,7 +374,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private uploadVoiceNote(blob: Blob): void {
-    if (!this.selectedExpert() || !this.currentUser) return;
+    if (!this.selectedContact() || !this.currentUser) return;
 
     const file = new File([blob], 'voice-note.webm', { type: 'audio/webm' });
     const formData = new FormData();
@@ -453,7 +386,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         const fileUrl = res.data;
         const payload = {
           senderId: this.currentUser?.id,
-          receiverId: this.selectedExpert()?.id || 0,
+          receiverId: this.selectedContact().id,
           messageText: 'Voice message',
           messageType: 'VOICE',
           mediaUrl: fileUrl
@@ -461,12 +394,6 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.ws.send('/app/chat.send', payload);
       }
     });
-  }
-
-  bookVideoCall(): void {
-    const expert = this.selectedExpert();
-    if (!expert) return;
-    alert(`Success: Video Consultation booking request with ${expert.name} initiated! You will receive notification confirmation via SMS shortly.`);
   }
 
   formatDuration(seconds: number): string {
@@ -482,6 +409,28 @@ export class ChatComponent implements OnInit, OnDestroy {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch {
       return '';
+    }
+  }
+
+  formatDateHeader(isoString: string): string {
+    if (!isoString) return '';
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    } catch {
+      return '';
+    }
+  }
+
+  shouldShowDateHeader(msg: ChatMessage, index: number): boolean {
+    if (index === 0) return true;
+    const prev = this.messages()[index - 1];
+    try {
+      const prevDate = new Date(prev.createdAt).toDateString();
+      const currDate = new Date(msg.createdAt).toDateString();
+      return prevDate !== currDate;
+    } catch {
+      return false;
     }
   }
 

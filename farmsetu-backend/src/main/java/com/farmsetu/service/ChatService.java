@@ -42,7 +42,12 @@ public class ChatService {
 
     @Transactional
     public ChatMessage sendMessage(Long receiverId, String text, MessageType type, String mediaUrl) {
-        User sender = userRepository.getReferenceById(SecurityUtils.currentUserId());
+        return sendMessage(SecurityUtils.currentUserId(), receiverId, text, type, mediaUrl);
+    }
+
+    @Transactional
+    public ChatMessage sendMessage(Long senderId, Long receiverId, String text, MessageType type, String mediaUrl) {
+        User sender = userRepository.getReferenceById(senderId);
         User receiver = userRepository.getReferenceById(receiverId);
 
         ChatMessage message = ChatMessage.builder()
@@ -59,6 +64,24 @@ public class ChatService {
     public void markAsRead(Long messageId) {
         chatMessageRepository.findById(messageId).ifPresent(m -> {
             m.setRead(true);
+            chatMessageRepository.save(m);
+        });
+    }
+
+    @Transactional
+    public void markConversationAsRead(Long otherUserId) {
+        Long currentUserId = SecurityUtils.currentUserId();
+        List<ChatMessage> unread = chatMessageRepository.findUnreadMessages(otherUserId, currentUserId);
+        for (ChatMessage m : unread) {
+            m.setRead(true);
+        }
+        chatMessageRepository.saveAll(unread);
+    }
+
+    @Transactional
+    public void togglePin(Long messageId) {
+        chatMessageRepository.findById(messageId).ifPresent(m -> {
+            m.setPinned(!m.isPinned());
             chatMessageRepository.save(m);
         });
     }

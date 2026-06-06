@@ -13,4 +13,9 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     List<ChatMessage> findConversation(@Param("userId") Long userId,
                                        @Param("otherUserId") Long otherUserId,
                                        Pageable pageable);
+
+    @Query("SELECT cm FROM ChatMessage cm WHERE cm.sender.id = :senderId AND cm.receiver.id = :receiverId AND cm.read = false")
+    List<ChatMessage> findUnreadMessages(@Param("senderId") Long senderId,
+                                         @Param("receiverId") Long receiverId);
 }
+

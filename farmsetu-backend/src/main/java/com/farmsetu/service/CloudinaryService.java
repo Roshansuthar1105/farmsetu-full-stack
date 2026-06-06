@@ -27,11 +27,20 @@ public class CloudinaryService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String uploadFile(MultipartFile file) throws IOException {
-        if (cloudName == null || cloudName.isBlank()) {
-            throw new IllegalStateException("Cloudinary is not configured. Please set the CLOUDINARY_CLOUD_NAME environment variable.");
-        }
-        if (uploadPreset == null || uploadPreset.isBlank()) {
-            throw new IllegalStateException("Cloudinary upload preset is not configured. Please set the CLOUDINARY_UPLOAD_PRESET environment variable.");
+        if (cloudName == null || cloudName.isBlank() || uploadPreset == null || uploadPreset.isBlank()) {
+            java.io.File uploadDir = new java.io.File("uploads");
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String filename = java.util.UUID.randomUUID().toString() + extension;
+            java.io.File dest = new java.io.File(uploadDir, filename);
+            file.transferTo(dest);
+            return "/uploads/" + filename;
         }
 
         String url = "https://api.cloudinary.com/v1_1/" + cloudName + "/image/upload";
