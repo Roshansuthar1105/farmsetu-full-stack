@@ -47,6 +47,15 @@ public class Order extends BaseEntity {
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(name = "unit_price", precision = 12, scale = 2)
+    private BigDecimal unitPrice;
+
+    @Column(name = "product_title")
+    private String productTitle;
+
+    @Column(name = "product_image")
+    private String productImage;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
     @Builder.Default

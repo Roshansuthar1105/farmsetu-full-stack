@@ -235,6 +235,9 @@ public class MarketplaceService {
     @Transactional
     public ProductBid placeBid(Long productId, BigDecimal amount) {
         Product product = findProduct(productId);
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            throw new BadRequestException("This product listing is no longer active.");
+        }
         User bidder = userRepository.findById(SecurityUtils.currentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -272,6 +275,9 @@ public class MarketplaceService {
     @Transactional
     public Order createOrder(Long productId, int quantity, String deliveryAddress) {
         Product product = findProduct(productId);
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            throw new BadRequestException("This product listing is no longer active.");
+        }
         User buyer = userRepository.findById(SecurityUtils.currentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -300,6 +306,9 @@ public class MarketplaceService {
                 .totalAmount(total)
                 .deliveryAddress(deliveryAddress)
                 .deliveryStatus(DeliveryStatus.PENDING)
+                .unitPrice(product.getPrice())
+                .productTitle(product.getTitle())
+                .productImage((product.getImages() != null && !product.getImages().isEmpty()) ? product.getImages().get(0) : "")
                 .build();
 
         Order savedOrder = orderRepository.save(order);
@@ -530,6 +539,9 @@ public class MarketplaceService {
     public CartItem addToCart(Long productId, Integer quantity) {
         Long userId = SecurityUtils.currentUserId();
         Product p = findProduct(productId);
+        if (p.getStatus() != ProductStatus.ACTIVE) {
+            throw new BadRequestException("This product listing is no longer active.");
+        }
         
         if (p.getStock() == null || p.getStock() < quantity) {
             throw new BadRequestException("Requested quantity exceeds available stock.");
@@ -560,6 +572,9 @@ public class MarketplaceService {
     public CartItem updateCartQuantity(Long productId, Integer quantity) {
         Long userId = SecurityUtils.currentUserId();
         Product p = findProduct(productId);
+        if (p.getStatus() != ProductStatus.ACTIVE) {
+            throw new BadRequestException("This product listing is no longer active.");
+        }
         
         if (p.getStock() == null || p.getStock() < quantity) {
             throw new BadRequestException("Requested quantity exceeds available stock.");
@@ -590,6 +605,9 @@ public class MarketplaceService {
         
         for (CartItem item : items) {
             Product p = item.getProduct();
+            if (p.getStatus() != ProductStatus.ACTIVE) {
+                throw new BadRequestException("Product is no longer active: " + p.getTitle());
+            }
             if (p.getStock() == null || p.getStock() < item.getQuantity()) {
                 throw new BadRequestException("Insufficient stock for product: " + p.getTitle());
             }
@@ -618,6 +636,9 @@ public class MarketplaceService {
                     .totalAmount(total)
                     .deliveryAddress(deliveryAddress)
                     .deliveryStatus(DeliveryStatus.PENDING)
+                    .unitPrice(p.getPrice())
+                    .productTitle(p.getTitle())
+                    .productImage((p.getImages() != null && !p.getImages().isEmpty()) ? p.getImages().get(0) : "")
                     .build();
             
             Order savedOrder = orderRepository.save(order);

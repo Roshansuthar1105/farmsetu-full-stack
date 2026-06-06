@@ -275,7 +275,7 @@ export class CartComponent implements OnInit {
       next: () => {
         this.toastr.success('Order placed successfully!');
         this.submitting.set(false);
-        this.router.navigate(['/app/marketplace/orders']);
+        this.router.navigate(['/app/orders']);
       },
       error: (err) => {
         console.error(err);

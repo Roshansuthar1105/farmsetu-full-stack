@@ -80,7 +80,9 @@ import { ToastrService } from 'ngx-toastr';
                   <!-- Product Image Thumbnail -->
                   <a [routerLink]="['/app/marketplace', order.product?.id]" 
                      class="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-150 dark:border-gray-700 shadow-inner cursor-pointer hover:opacity-90 transition">
-                    @if (order.product?.images && order.product.images.length) {
+                    @if (order.productImage) {
+                      <img [src]="order.productImage" class="w-full h-full object-cover" [alt]="order.productTitle || order.product?.title" />
+                    } @else if (order.product?.images && order.product.images.length) {
                       <img [src]="order.product.images[0]" class="w-full h-full object-cover" [alt]="order.product.title" />
                     } @else {
                       <span class="material-icons text-3xl text-gray-300 dark:text-gray-350">image</span>
@@ -95,7 +97,7 @@ import { ToastrService } from 'ngx-toastr';
                     </div>
                     <a [routerLink]="['/app/marketplace', order.product?.id]" 
                        class="font-extrabold text-gray-900 dark:text-white text-base hover:text-green-600 transition cursor-pointer">
-                      {{ order.product?.title || 'Unknown Product' }}
+                      {{ order.productTitle || order.product?.title || 'Unknown Product' }}
                     </a>
                     <div class="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                       <span>Quantity: <strong class="text-gray-800 dark:text-gray-350">{{ order.quantity }}</strong></span>
@@ -196,7 +198,9 @@ import { ToastrService } from 'ngx-toastr';
               <div class="space-y-4">
                 <!-- Thumbnail -->
                 <div class="h-44 bg-gray-50 dark:bg-gray-950 rounded-2xl overflow-hidden border border-gray-150 dark:border-gray-800 flex items-center justify-center relative shadow-inner">
-                  @if (detail.product?.images && detail.product.images.length) {
+                  @if (detail.productImage) {
+                    <img [src]="detail.productImage" class="w-full h-full object-cover" />
+                  } @else if (detail.product?.images && detail.product.images.length) {
                     <img [src]="detail.product.images[0]" class="w-full h-full object-cover" />
                   } @else {
                     <span class="material-icons text-4xl text-gray-300 dark:text-gray-700">image</span>
@@ -213,7 +217,7 @@ import { ToastrService } from 'ngx-toastr';
                     {{ detail.product?.category }}
                   </span>
                   <h4 class="font-extrabold text-gray-950 dark:text-white text-base pt-1">
-                    {{ detail.product?.title || 'Unknown Product' }}
+                    {{ detail.productTitle || detail.product?.title || 'Unknown Product' }}
                   </h4>
                   <p class="text-xs text-gray-500 leading-relaxed max-h-24 overflow-y-auto pr-1 scrollbar-thin">
                     {{ detail.product?.description || 'No description provided.' }}
@@ -247,7 +251,7 @@ import { ToastrService } from 'ngx-toastr';
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-gray-500">Price Per Unit:</span>
-                    <span class="font-bold text-gray-850 dark:text-gray-255">₹{{ detail.product?.price || 0 }}</span>
+                    <span class="font-bold text-gray-850 dark:text-gray-255">₹{{ detail.unitPrice || detail.product?.price || 0 }}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-gray-500">Total Charged:</span>
@@ -285,6 +289,61 @@ import { ToastrService } from 'ngx-toastr';
               </div>
 
             </div>
+
+            <!-- Visual Status Tracking Stepper -->
+            @if (detail.deliveryStatus !== 'CANCELLED' && detail.deliveryStatus !== 'RETURNED') {
+              <div class="mt-5 p-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 rounded-2xl animate-in fade-in duration-300">
+                <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-3">Order Tracking Status</span>
+                <div class="flex items-center justify-between relative">
+                  <!-- Stepper line connecting nodes -->
+                  <div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-gray-700 z-0">
+                    <div class="h-full bg-green-500 transition-all duration-500" 
+                         [style.width.%]="detail.deliveryStatus === 'PENDING' ? 0 : detail.deliveryStatus === 'CONFIRMED' ? 33 : detail.deliveryStatus === 'SHIPPED' ? 66 : 100">
+                    </div>
+                  </div>
+                  
+                  <!-- Step 1: Placed -->
+                  <div class="flex flex-col items-center z-10 relative">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'PENDING') }}">
+                      <span class="material-icons text-sm">assignment</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Placed</span>
+                  </div>
+                  
+                  <!-- Step 2: Confirmed -->
+                  <div class="flex flex-col items-center z-10 relative">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'CONFIRMED') }}">
+                      <span class="material-icons text-sm">thumb_up</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Confirmed</span>
+                  </div>
+                  
+                  <!-- Step 3: Shipped -->
+                  <div class="flex flex-col items-center z-10 relative">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'SHIPPED') }}">
+                      <span class="material-icons text-sm">local_shipping</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Shipped</span>
+                  </div>
+                  
+                  <!-- Step 4: Delivered -->
+                  <div class="flex flex-col items-center z-10 relative">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'DELIVERED') }}">
+                      <span class="material-icons text-sm">done_all</span>
+                    </div>
+                    <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Delivered</span>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="mt-5 p-4 bg-red-500/10 dark:bg-red-950/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
+                <span class="material-icons text-red-500 text-2xl">cancel</span>
+                <div>
+                  <h5 class="text-xs font-extrabold text-red-650 dark:text-red-400">Order {{ detail.deliveryStatus }}</h5>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-normal font-medium">This order has been {{ detail.deliveryStatus | lowercase }}. Tracking history is unavailable.</p>
+                </div>
+              </div>
+            }
 
             <!-- Close Action footer -->
             <div class="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-800 mt-5">
@@ -408,5 +467,25 @@ export class OrdersComponent implements OnInit {
       default:
         return base + 'text-gray-500 bg-gray-500/10 border-gray-500/30';
     }
+  }
+
+  getStepClass(currentStatus: string, step: string): string {
+    const activeClass = 'bg-green-600 text-white shadow-md shadow-green-500/20';
+    const inactiveClass = 'bg-gray-150 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-250 dark:border-gray-700';
+    
+    const statusWeight: Record<string, number> = {
+      'PENDING': 1,
+      'CONFIRMED': 2,
+      'SHIPPED': 3,
+      'DELIVERED': 4
+    };
+    
+    const currentWeight = statusWeight[currentStatus] || 0;
+    const stepWeight = statusWeight[step] || 0;
+    
+    if (currentWeight >= stepWeight) {
+      return activeClass;
+    }
+    return inactiveClass;
   }
 }

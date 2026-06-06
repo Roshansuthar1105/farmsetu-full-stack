@@ -61,7 +61,7 @@ public class Product extends BaseEntity {
     @Builder.Default
     private ProductCondition condition = ProductCondition.NEW;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     @Builder.Default

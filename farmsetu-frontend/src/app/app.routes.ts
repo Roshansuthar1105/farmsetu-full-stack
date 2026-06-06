@@ -30,6 +30,10 @@ export const routes: Routes = [
         loadChildren: () => import('./features/marketplace/marketplace.routes').then(m => m.MARKETPLACE_ROUTES)
       },
       {
+        path: 'orders',
+        loadComponent: () => import('./features/marketplace/orders.component').then(m => m.OrdersComponent)
+      },
+      {
         path: 'chat',
         loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
       },

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MarketplaceService } from '../../core/services/marketplace.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Product } from '../../core/models/product.model';
+import { Product, ProductCategory } from '../../core/models/product.model';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { ToastrService } from 'ngx-toastr';
 
@@ -39,9 +39,15 @@ import { ToastrService } from 'ngx-toastr';
 
           <!-- Quick Stock Indicator -->
           <div class="flex items-center gap-2 flex-shrink-0">
-            <span [class]="getStockBadgeClass(p.stockStatus)" class="px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider">
-              {{ getStockStatusText(p.stockStatus) }}
-            </span>
+            @if (p.status === 'CANCELLED') {
+              <span class="px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40 border border-red-200/50">
+                Cancelled
+              </span>
+            } @else {
+              <span [class]="getStockBadgeClass(p.stockStatus)" class="px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider">
+                {{ getStockStatusText(p.stockStatus) }}
+              </span>
+            }
           </div>
         </div>
       }
@@ -293,11 +299,34 @@ import { ToastrService } from 'ngx-toastr';
                 </div>
 
                 <div class="border-t border-gray-100 dark:border-gray-750/70 pt-4 space-y-4">
-                  @if (p.auction) {
+                  @if (p.status === 'CANCELLED') {
+                    <div class="p-4 bg-red-500/10 dark:bg-red-950/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
+                      <span class="material-icons text-red-500 text-2xl">cancel</span>
+                      <div>
+                        <h5 class="text-xs font-extrabold text-red-650 dark:text-red-400">Listing Cancelled</h5>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-normal font-medium">This product listing is no longer active and cannot be purchased or bid on.</p>
+                      </div>
+                    </div>
+                  } @else if (isSeller()) {
+                    <!-- Seller Actions -->
+                    <div class="flex flex-col gap-3 pt-2">
+                      <button (click)="openEditModal()" 
+                              class="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition text-xs flex items-center justify-center gap-1.5">
+                        <span class="material-icons text-base">edit</span>
+                        Edit Product Listing
+                      </button>
+
+                      <button (click)="deleteListing()" 
+                              class="w-full py-3.5 bg-red-650/10 hover:bg-red-605 text-red-600 hover:text-white border border-red-500/20 font-extrabold rounded-xl active:scale-[0.98] transition text-xs flex items-center justify-center gap-1.5 font-semibold">
+                        <span class="material-icons text-base">delete</span>
+                        Cancel Listing
+                      </button>
+                    </div>
+                  } @else if (p.auction) {
                     <!-- Bidding Form -->
                     <form (ngSubmit)="placeBid()" class="space-y-3">
                       <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Bid Amount (₹)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Bid Amount (₹)</label>
                         <input type="number" [(ngModel)]="bidAmount" name="bidAmount" placeholder="Enter bid amount in ₹" required class="w-full border border-gray-250 dark:border-gray-700 rounded-xl px-4 py-3 bg-gray-50 dark:bg-gray-900 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-gray-900 dark:text-white" />
                       </div>
                       <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition">
@@ -314,13 +343,13 @@ import { ToastrService } from 'ngx-toastr';
                         <div class="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900">
                           <button (click)="decreaseQty()" 
                                   [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty <= 1"
-                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-650 transition active:scale-95 disabled:opacity-30">
+                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-655 transition active:scale-95 disabled:opacity-30">
                             <span class="material-icons text-sm">remove</span>
                           </button>
-                          <span class="w-8 text-center text-xs font-bold text-gray-950 dark:text-white">{{ orderQty }}</span>
+                          <span class="w-8 text-center text-xs font-bold text-gray-955 dark:text-white">{{ orderQty }}</span>
                           <button (click)="increaseQty(p.stock)" 
                                   [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty >= p.stock"
-                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-650 transition active:scale-95 disabled:opacity-30">
+                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-655 transition active:scale-95 disabled:opacity-30">
                             <span class="material-icons text-sm">add</span>
                           </button>
                         </div>
@@ -474,75 +503,157 @@ import { ToastrService } from 'ngx-toastr';
 
                     <div class="grid sm:grid-cols-2 gap-6 text-xs sm:text-sm">
                       
-                      <!-- Left side: Order details -->
-                      <div class="space-y-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 p-4 rounded-2xl">
-                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Transaction Summary</h4>
-                        
-                        <div class="space-y-2.5 text-xs">
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Order ID:</span>
-                            <span class="font-bold text-gray-800 dark:text-gray-250">#{{ detail.id }}</span>
-                          </div>
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Order Date:</span>
-                            <span class="font-semibold text-gray-800 dark:text-gray-255">{{ detail.createdAt | date:'medium' }}</span>
-                          </div>
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Buyer:</span>
-                            <span class="font-bold text-gray-800 dark:text-gray-250">{{ detail.buyer?.name || 'Unknown' }}</span>
-                          </div>
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Seller:</span>
-                            <span class="font-bold text-gray-800 dark:text-gray-250">{{ detail.seller?.name || 'Unknown' }}</span>
-                          </div>
+                      <!-- Left Side: Product Info (Historical Snapshot) -->
+                      <div class="space-y-4">
+                        <!-- Thumbnail -->
+                        <div class="h-44 bg-gray-50 dark:bg-gray-950 rounded-2xl overflow-hidden border border-gray-150 dark:border-gray-800 flex items-center justify-center relative shadow-inner">
+                          @if (detail.productImage) {
+                            <img [src]="detail.productImage" class="w-full h-full object-cover" />
+                          } @else if (p.images && p.images.length) {
+                            <img [src]="p.images[0]" class="w-full h-full object-cover" />
+                          } @else {
+                            <span class="material-icons text-4xl text-gray-300 dark:text-gray-700">image</span>
+                          }
                           
-                          <div class="h-px bg-gray-150 dark:bg-gray-805 my-1"></div>
+                          <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ p.condition === 'NEW' ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20' : 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20' }}">
+                            {{ p.condition }}
+                          </span>
+                        </div>
 
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Quantity:</span>
-                            <span class="font-bold text-gray-800 dark:text-gray-255">{{ detail.quantity }} units</span>
-                          </div>
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Price Per Unit:</span>
-                            <span class="font-bold text-gray-850 dark:text-gray-255">₹{{ p.price }}</span>
-                          </div>
-                          <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Total Paid:</span>
-                            <span class="font-extrabold text-green-650 dark:text-green-400 text-sm">₹{{ detail.totalAmount }}</span>
-                          </div>
+                        <!-- Product Details -->
+                        <div class="space-y-1">
+                          <span class="px-2 py-0.5 text-[9px] font-bold text-green-700 dark:text-green-450 bg-green-50 dark:bg-green-950/30 rounded border border-green-100/50 w-max block uppercase">
+                            {{ p.category }}
+                          </span>
+                          <h4 class="font-extrabold text-gray-955 dark:text-white text-base pt-1">
+                            {{ detail.productTitle || p.title }}
+                          </h4>
+                          <p class="text-xs text-gray-500 leading-relaxed max-h-24 overflow-y-auto pr-1 scrollbar-thin">
+                            {{ p.description || 'No description provided.' }}
+                          </p>
                         </div>
                       </div>
 
-                      <!-- Right side: Shipping & status -->
-                      <div class="space-y-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 p-4 rounded-2xl flex flex-col justify-between">
-                        <div class="space-y-2.5">
-                          <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Shipping & Logistics</h4>
-                          
+                      <!-- Right Side: Order Transaction Details -->
+                      <div class="space-y-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 p-4 rounded-2xl">
+                        <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Order Summary</h4>
+                        
+                        <div class="space-y-2.5 text-xs">
+                          <!-- Buyer Details -->
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Buyer:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-255">{{ detail.buyer?.name || 'Unknown' }}</span>
+                          </div>
+
+                          <!-- Seller Details -->
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Seller:</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-255">{{ detail.seller?.name || p.sellerName || 'Unknown' }}</span>
+                          </div>
+
+                          <div class="h-px bg-gray-150 dark:bg-gray-805 my-1"></div>
+
+                          <!-- Qty and Total Price -->
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Quantity Ordered:</span>
+                            <span class="font-extrabold text-gray-800 dark:text-gray-255">{{ detail.quantity }} units</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Price Per Unit:</span>
+                            <span class="font-bold text-gray-850 dark:text-gray-255">₹{{ detail.unitPrice || p.price }}</span>
+                          </div>
+                          <div class="flex justify-between items-center">
+                            <span class="text-gray-500">Total Charged:</span>
+                            <span class="font-extrabold text-green-650 dark:text-green-400 text-sm">₹{{ detail.totalAmount }}</span>
+                          </div>
+
+                          <div class="h-px bg-gray-150 dark:bg-gray-805 my-1"></div>
+
+                          <!-- Shipping Address -->
                           <div class="space-y-1">
-                            <span class="text-[9px] font-bold text-gray-450 uppercase block">Delivery Address</span>
+                            <span class="text-[9px] font-bold uppercase text-gray-400 block tracking-wider">Shipping Address</span>
                             <p class="text-xs text-gray-650 dark:text-gray-300 leading-relaxed font-medium">
-                              {{ detail.deliveryAddress || 'No shipping address provided.' }}
+                              {{ detail.deliveryAddress }}
                             </p>
                           </div>
-                        </div>
 
-                        <div class="flex gap-4 pt-2 flex-wrap border-t border-gray-150/40 dark:border-gray-800/40 mt-2">
-                          <div class="flex flex-col gap-0.5">
-                            <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Logistics Status</span>
-                            <span [class]="getStatusClass(detail.deliveryStatus)" class="text-[9px] w-max">
-                              {{ detail.deliveryStatus }}
-                            </span>
-                          </div>
-                          <div class="flex flex-col gap-0.5">
-                            <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Payment</span>
-                            <span class="px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full border border-green-500/30 text-green-500 bg-green-500/10 w-max">
-                              PAID
-                            </span>
+                          <!-- Status Badges -->
+                          <div class="flex gap-2 pt-1.5 flex-wrap">
+                            <!-- Delivery Status Badge -->
+                            <div class="flex flex-col gap-0.5">
+                              <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Shipping Status</span>
+                              <span [class]="getStatusClass(detail.deliveryStatus)" class="text-[9px]">
+                                {{ detail.deliveryStatus }}
+                              </span>
+                            </div>
+                            <!-- Payment Status Badge -->
+                            <div class="flex flex-col gap-0.5">
+                              <span class="text-[8px] font-bold uppercase text-gray-450 tracking-wider">Payment Status</span>
+                              <span class="px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full border border-green-500/30 text-green-500 bg-green-500/10">
+                                PAID
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
 
                     </div>
+
+                    <!-- Visual Status Tracking Stepper -->
+                    @if (detail.deliveryStatus !== 'CANCELLED' && detail.deliveryStatus !== 'RETURNED') {
+                      <div class="mt-5 p-4 bg-gray-50/50 dark:bg-gray-950/20 border border-gray-150/40 dark:border-gray-800/80 rounded-2xl animate-in fade-in duration-300">
+                        <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-3">Order Tracking Status</span>
+                        <div class="flex items-center justify-between relative">
+                          <!-- Stepper line connecting nodes -->
+                          <div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-gray-250 dark:bg-gray-700 z-0">
+                            <div class="h-full bg-green-500 transition-all duration-500" 
+                                 [style.width.%]="detail.deliveryStatus === 'PENDING' ? 0 : detail.deliveryStatus === 'CONFIRMED' ? 33 : detail.deliveryStatus === 'SHIPPED' ? 66 : 100">
+                            </div>
+                          </div>
+                          
+                          <!-- Step 1: Placed -->
+                          <div class="flex flex-col items-center z-10 relative">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'PENDING') }}">
+                              <span class="material-icons text-sm">assignment</span>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Placed</span>
+                          </div>
+                          
+                          <!-- Step 2: Confirmed -->
+                          <div class="flex flex-col items-center z-10 relative">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'CONFIRMED') }}">
+                              <span class="material-icons text-sm">thumb_up</span>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Confirmed</span>
+                          </div>
+                          
+                          <!-- Step 3: Shipped -->
+                          <div class="flex flex-col items-center z-10 relative">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'SHIPPED') }}">
+                              <span class="material-icons text-sm">local_shipping</span>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Shipped</span>
+                          </div>
+                          
+                          <!-- Step 4: Delivered -->
+                          <div class="flex flex-col items-center z-10 relative">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'DELIVERED') }}">
+                              <span class="material-icons text-sm">done_all</span>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">Delivered</span>
+                          </div>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="mt-5 p-4 bg-red-500/10 dark:bg-red-950/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
+                        <span class="material-icons text-red-500 text-2xl">cancel</span>
+                        <div>
+                          <h5 class="text-xs font-extrabold text-red-650 dark:text-red-400">Order {{ detail.deliveryStatus }}</h5>
+                          <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-normal font-medium">This order has been {{ detail.deliveryStatus | lowercase }}. Tracking history is unavailable.</p>
+                        </div>
+                      </div>
+                    }
+
                   </div>
                 }
               }
@@ -557,8 +668,166 @@ import { ToastrService } from 'ngx-toastr';
               </div>
             </div>
           }
+
+          <!-- EDIT PRODUCT MODAL -->
+          @if (showEditModal()) {
+            <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+              <!-- Backdrop -->
+              <div (click)="closeEditModal()" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+
+              <!-- Content Container -->
+              <div class="relative bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full shadow-2xl p-6 border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-thin">
+                <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-4 mb-4">
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="material-icons text-green-600">edit</span> Edit Product Listing
+                  </h3>
+                  <button (click)="closeEditModal()" class="p-1 rounded-lg text-gray-400 hover:bg-gray-105 dark:hover:bg-gray-700 transition">✕</button>
+                </div>
+
+                <form (ngSubmit)="submitProductEdit()" class="space-y-4 text-xs sm:text-sm">
+                  <!-- Row: Title & Category -->
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Product Title</label>
+                      <input type="text" [(ngModel)]="editForm.title" name="title" required placeholder="e.g., Organic Wheat Seeds"
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Category</label>
+                      <select [(ngModel)]="editForm.category" name="category" required
+                              class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white">
+                        <option value="SEEDS">Seeds</option>
+                        <option value="FERTILIZERS">Fertilizers</option>
+                        <option value="TOOLS">Tools</option>
+                        <option value="EQUIPMENT">Equipment</option>
+                        <option value="PESTICIDES">Pesticides</option>
+                        <option value="ORGANIC_PRODUCTS">Organic Products</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Description -->
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Description</label>
+                    <textarea [(ngModel)]="editForm.description" name="description" rows="3" placeholder="Describe the item condition, quality, crop variety, etc."
+                              class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white"></textarea>
+                  </div>
+
+                  <!-- Row: Price / Stock / LowStockThreshold -->
+                  <div class="grid grid-cols-3 gap-3">
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Price (₹)</label>
+                      <input type="number" [(ngModel)]="editForm.price" name="price" required min="1"
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Current Stock</label>
+                      <input type="number" [(ngModel)]="editForm.stock" name="stock" min="0" required
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Low Limit Threshold</label>
+                      <input type="number" [(ngModel)]="editForm.lowStockThreshold" name="lowStockThreshold" min="1"
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                  </div>
+
+                  <!-- Row: Unit / Condition / Location -->
+                  <div class="grid sm:grid-cols-3 gap-4">
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Unit</label>
+                      <input type="text" [(ngModel)]="editForm.unit" name="unit" placeholder="Kg / Bags / Pcs"
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Condition</label>
+                      <div class="flex gap-4 py-2">
+                        <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
+                          <input type="radio" [(ngModel)]="editForm.condition" name="condition" value="NEW" class="text-green-600 focus:ring-green-500" /> New
+                        </label>
+                        <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
+                          <input type="radio" [(ngModel)]="editForm.condition" name="condition" value="USED" class="text-green-600 focus:ring-green-500" /> Used
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Location</label>
+                      <input type="text" [(ngModel)]="editForm.location" name="location" placeholder="e.g. Pune, Maharashtra"
+                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                    </div>
+                  </div>
+
+                  <!-- Option: Toggle Auction -->
+                  <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-3">
+                    <label class="flex items-center justify-between cursor-pointer font-bold text-xs uppercase text-gray-500">
+                      <span>Sell via Bidding / Live Auction</span>
+                      <input type="checkbox" [(ngModel)]="editForm.auction" name="auction" class="rounded text-green-600 focus:ring-green-500" />
+                    </label>
+
+                    @if (editForm.auction) {
+                      <div class="grid sm:grid-cols-2 gap-3 pt-2 animate-in slide-in-from-top-2 duration-200">
+                        <div>
+                          <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">Starting Bid (₹)</label>
+                          <input type="number" [(ngModel)]="editForm.startingBid" name="startingBid" min="1"
+                                 class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                        </div>
+                        <div>
+                          <label class="block text-[10px] font-bold uppercase text-gray-400 mb-1">End Time</label>
+                          <input type="datetime-local" [(ngModel)]="editAuctionEndDate" name="editAuctionEndDate"
+                                 class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white" />
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Multi-Image Upload Section -->
+                  <div class="space-y-2">
+                    <label class="block text-[10px] font-bold uppercase text-gray-400">Product Images</label>
+                    
+                    <div class="flex items-center justify-center w-full">
+                      <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/40 transition">
+                        <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                          <span class="material-icons text-gray-400 text-2xl mb-1">cloud_upload</span>
+                          <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold">
+                            {{ editImageUploading() ? 'Uploading images...' : 'Click to upload files (multi-select)' }}
+                          </p>
+                          <p class="text-[9px] text-gray-400">PNG, JPG, JPEG up to 5MB each</p>
+                        </div>
+                        <input type="file" multiple class="hidden" accept="image/*" (change)="onEditFileSelect($event)" [disabled]="editImageUploading()" />
+                      </label>
+                    </div>
+
+                    <!-- Uploaded Images Thumbnails Grid -->
+                    @if (editUploadedImages().length) {
+                      <div class="grid grid-cols-4 gap-2 pt-2">
+                        @for (url of editUploadedImages(); track url; let idx = $index) {
+                          <div class="relative w-full h-16 bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-150 dark:border-gray-700 group">
+                            <img [src]="url" class="w-full h-full object-cover" />
+                            <button type="button" (click)="removeEditUploadedImage(idx)" 
+                                    class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md active:scale-90 transition opacity-0 group-hover:opacity-100">
+                              <span class="material-icons text-[12px]">close</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Action buttons -->
+                  <div class="flex justify-end space-x-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button type="button" (click)="closeEditModal()"
+                            class="px-5 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition">Cancel</button>
+                    <button type="submit" [disabled]="editSubmitting() || editImageUploading()"
+                            class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50">
+                      {{ editSubmitting() ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          }
         }
-      }
+        }
     </div>
   `,
   styles: [`
@@ -581,6 +850,27 @@ export class ProductDetailComponent implements OnInit {
   readonly associatedOrders = signal<any[]>([]);
   readonly selectedAssociatedOrder = signal<any | null>(null);
   readonly showOrdersModal = signal(false);
+
+  // Edit Listing State
+  readonly showEditModal = signal(false);
+  readonly editSubmitting = signal(false);
+  readonly editImageUploading = signal(false);
+  readonly editUploadedImages = signal<string[]>([]);
+  editForm = {
+    title: '',
+    category: 'SEEDS' as ProductCategory,
+    description: '',
+    price: 0,
+    stock: 0,
+    lowStockThreshold: 5,
+    unit: 'Kg',
+    condition: 'NEW' as 'NEW' | 'USED',
+    location: '',
+    auction: false,
+    startingBid: 0,
+    auctionEndTime: undefined as string | undefined
+  };
+  editAuctionEndDate = '';
 
   // Carousel State
   readonly activeImageIndex = signal(0);
@@ -625,8 +915,8 @@ export class ProductDetailComponent implements OnInit {
     if (!currentUserId) return;
 
     const isSeller = Number(p.sellerId) === Number(currentUserId);
-    const orderFetch = isSeller 
-      ? this.marketplace.getSellerOrders() 
+    const orderFetch = isSeller
+      ? this.marketplace.getSellerOrders()
       : this.marketplace.getBuyerOrders();
 
     orderFetch.subscribe({
@@ -642,6 +932,119 @@ export class ProductDetailComponent implements OnInit {
         console.error('Failed to load associated orders', err);
       }
     });
+  }
+
+  openEditModal(): void {
+    const p = this.product();
+    if (!p) return;
+
+    this.editForm = {
+      title: p.title,
+      category: p.category,
+      description: p.description || '',
+      price: p.price,
+      stock: p.stock,
+      lowStockThreshold: p.lowStockThreshold,
+      unit: p.unit || 'Kg',
+      condition: p.condition,
+      location: p.location || '',
+      auction: p.auction,
+      startingBid: p.startingBid || 0,
+      auctionEndTime: p.auctionEndTime
+    };
+
+    if (p.auctionEndTime) {
+      const date = new Date(p.auctionEndTime);
+      const tzoffset = date.getTimezoneOffset() * 60000;
+      const localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+      this.editAuctionEndDate = localISOTime;
+    } else {
+      this.editAuctionEndDate = '';
+    }
+
+    this.editUploadedImages.set([...(p.images || [])]);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+  }
+
+  onEditFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const files: File[] = Array.from(input.files);
+    this.editImageUploading.set(true);
+
+    this.marketplace.uploadImages(files).subscribe({
+      next: (urls) => {
+        this.editUploadedImages.update(existing => [...existing, ...urls]);
+        this.editImageUploading.set(false);
+        this.toastr.success('Images uploaded successfully');
+      },
+      error: (err) => {
+        console.error(err);
+        const errorMsg = err.error?.message || 'Failed to upload images';
+        this.toastr.error(errorMsg);
+        this.editImageUploading.set(false);
+      }
+    });
+  }
+
+  removeEditUploadedImage(index: number): void {
+    this.editUploadedImages.update(existing => existing.filter((_, idx) => idx !== index));
+  }
+
+  submitProductEdit(): void {
+    const p = this.product();
+    if (!p) return;
+
+    this.editSubmitting.set(true);
+
+    let endTimeStr: string | undefined = undefined;
+    if (this.editForm.auction && this.editAuctionEndDate) {
+      endTimeStr = new Date(this.editAuctionEndDate).toISOString();
+    }
+
+    const payload = {
+      ...this.editForm,
+      images: this.editUploadedImages(),
+      auctionEndTime: endTimeStr
+    };
+
+    this.marketplace.update(p.id, payload).subscribe({
+      next: () => {
+        this.toastr.success('Listing updated successfully!', 'Success');
+        this.editSubmitting.set(false);
+        this.showEditModal.set(false);
+        this.loadProduct();
+      },
+      error: (err) => {
+        console.error(err);
+        const errorMsg = err.error?.message || 'Failed to update listing';
+        this.toastr.error(errorMsg);
+        this.editSubmitting.set(false);
+      }
+    });
+  }
+
+  deleteListing(): void {
+    const p = this.product();
+    if (!p) return;
+
+    if (confirm(`Are you sure you want to cancel the product listing for "${p.title}"?`)) {
+      this.marketplace.deleteProduct(p.id).subscribe({
+        next: () => {
+          this.toastr.success('Listing cancelled successfully.');
+          this.router.navigate(['/app/marketplace']);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Failed to cancel listing');
+        }
+      });
+    }
   }
 
   isSeller(): boolean {
@@ -687,6 +1090,26 @@ export class ProductDetailComponent implements OnInit {
       default:
         return base + 'text-gray-500 bg-gray-500/10 border-gray-500/30';
     }
+  }
+
+  getStepClass(currentStatus: string, step: string): string {
+    const activeClass = 'bg-green-600 text-white shadow-md shadow-green-500/20';
+    const inactiveClass = 'bg-gray-150 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-250 dark:border-gray-700';
+
+    const statusWeight: Record<string, number> = {
+      'PENDING': 1,
+      'CONFIRMED': 2,
+      'SHIPPED': 3,
+      'DELIVERED': 4
+    };
+
+    const currentWeight = statusWeight[currentStatus] || 0;
+    const stepWeight = statusWeight[step] || 0;
+
+    if (currentWeight >= stepWeight) {
+      return activeClass;
+    }
+    return inactiveClass;
   }
 
   loadReviews(productId: number): void {
@@ -765,7 +1188,7 @@ export class ProductDetailComponent implements OnInit {
         this.orderQty = 1;
         this.deliveryAddress = '';
         this.loadProduct();
-        this.router.navigate(['/app/marketplace/orders']);
+        this.router.navigate(['/app/orders']);
       },
       error: (err) => {
         console.error(err);

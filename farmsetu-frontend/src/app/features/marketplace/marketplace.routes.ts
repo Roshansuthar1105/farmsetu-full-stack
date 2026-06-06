@@ -11,7 +11,8 @@ export const MARKETPLACE_ROUTES: Routes = [
   },
   {
     path: 'orders',
-    loadComponent: () => import('./orders.component').then(m => m.OrdersComponent)
+    redirectTo: '/app/orders',
+    pathMatch: 'full'
   },
   {
     path: ':id',
