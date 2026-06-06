@@ -13,333 +13,387 @@ import { ToastrService } from 'ngx-toastr';
   standalone: true,
   imports: [RouterLink, CommonModule, FormsModule, LoadingSkeletonComponent],
   template: `
-    <div class="max-w-5xl mx-auto p-4 space-y-8 pb-16">
-      <a routerLink="/app/marketplace" class="inline-flex items-center gap-2 text-xs font-bold text-green-700 dark:text-green-450 bg-green-50 dark:bg-green-950/40 px-4 py-2.5 rounded-xl hover:bg-green-100 dark:hover:bg-green-950/60 transition active:scale-95 border border-green-100/30">
-        <span class="material-icons text-sm">arrow_back</span> Back to Marketplace
-      </a>
+    <div class="max-w-7xl mx-auto px-4 py-6 space-y-6 pb-16">
       
+      <!-- HEADER: Back navigation & Breadcrumbs -->
+      @if (!loading() && product(); as p) {
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+          <div class="flex items-center gap-4">
+            <a routerLink="/app/marketplace" 
+               class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-750 bg-gray-50 dark:bg-gray-900 text-gray-650 dark:text-gray-300 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition active:scale-95 group shadow-sm">
+              <span class="material-icons text-base group-hover:-translate-x-0.5 transition">arrow_back</span>
+            </a>
+            
+            <div class="space-y-0.5">
+              <!-- Breadcrumbs -->
+              <div class="flex items-center gap-1.5 text-[11px] text-gray-400 font-semibold tracking-wide uppercase">
+                <a routerLink="/app/marketplace" class="hover:text-green-600 transition">Marketplace</a>
+                <span class="material-icons text-[10px]">chevron_right</span>
+                <span class="text-green-650 dark:text-green-450">{{ p.category }}</span>
+              </div>
+              <h1 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white line-clamp-1">
+                {{ p.title }}
+              </h1>
+            </div>
+          </div>
+
+          <!-- Quick Stock Indicator -->
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span [class]="getStockBadgeClass(p.stockStatus)" class="px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider">
+              {{ getStockStatusText(p.stockStatus) }}
+            </span>
+          </div>
+        </div>
+      }
+
       @if (loading()) {
         <fs-loading-skeleton />
       } @else {
         @if (product(); as p) {
-          <div class="grid lg:grid-cols-2 gap-8 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
+          <!-- Two Column Premium Layout -->
+          <div class="grid lg:grid-cols-3 gap-8 items-start">
             
-            <!-- Left: Product Image Carousel -->
-            <div class="space-y-4">
-              <div class="h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 relative group">
-                @if (p.images && p.images.length) {
-                  <img [src]="p.images[activeImageIndex()]" class="max-h-full max-w-full object-contain rounded-lg transition duration-500" alt="{{ p.title }}" />
-                  
-                  <!-- Left/Right Navigation -->
-                  @if (p.images.length > 1) {
-                    <button (click)="prevImage(p.images.length)" class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md text-gray-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition active:scale-90">
-                      <span class="material-icons text-sm">chevron_left</span>
-                    </button>
-                    <button (click)="nextImage(p.images.length)" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md text-gray-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition active:scale-90">
-                      <span class="material-icons text-sm">chevron_right</span>
-                    </button>
+            <!-- LEFT COLUMN: Product Images, Details, & Reviews (Spans 2 cols) -->
+            <div class="lg:col-span-2 space-y-6">
+              
+              <!-- Image Carousel Card -->
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-md">
+                <div class="h-96 flex items-center justify-center bg-gray-50 dark:bg-gray-900/60 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-750 relative group">
+                  @if (p.images && p.images.length) {
+                    <img [src]="p.images[activeImageIndex()]" class="max-h-full max-w-full object-contain rounded-lg transition duration-500" alt="{{ p.title }}" />
+                    
+                    <!-- Left/Right Nav Arrows -->
+                    @if (p.images.length > 1) {
+                      <button (click)="prevImage(p.images.length)" class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg text-gray-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition active:scale-90 opacity-0 group-hover:opacity-100 duration-300">
+                        <span class="material-icons text-sm">chevron_left</span>
+                      </button>
+                      <button (click)="nextImage(p.images.length)" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-gray-800/90 shadow-lg text-gray-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition active:scale-90 opacity-0 group-hover:opacity-100 duration-300">
+                        <span class="material-icons text-sm">chevron_right</span>
+                      </button>
+                    }
+                  } @else {
+                    <div class="text-center text-gray-400">
+                      <span class="material-icons text-6xl">image</span>
+                      <p class="text-sm mt-1">No image available</p>
+                    </div>
                   }
-                } @else {
-                  <div class="text-center text-gray-400">
-                    <span class="material-icons text-6xl">image</span>
-                    <p class="text-sm mt-1">No image available</p>
-                  </div>
-                }
 
-                <!-- Auction Status Badge -->
-                @if (p.auction) {
-                  <span class="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-bold bg-red-600 text-white rounded-full shadow-md flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> Live Auction
-                  </span>
+                  <!-- Live Auction Indicator -->
+                  @if (p.auction) {
+                    <span class="absolute top-3 right-3 px-3 py-1.5 text-[10px] font-bold bg-red-650 text-white rounded-full shadow-md flex items-center gap-1.5 uppercase tracking-wide">
+                      <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> Live Auction
+                    </span>
+                  }
+                </div>
+
+                <!-- Carousel Thumbnails -->
+                @if (p.images && p.images.length > 1) {
+                  <div class="flex items-center gap-2.5 overflow-x-auto py-3 justify-center scrollbar-thin">
+                    @for (img of p.images; track img; let idx = $index) {
+                      <button (click)="activeImageIndex.set(idx)"
+                              [class]="idx === activeImageIndex()
+                                ? 'w-14 h-14 rounded-xl overflow-hidden border-2 border-green-500 scale-105 transition flex-shrink-0 shadow-sm'
+                                : 'w-14 h-14 rounded-xl overflow-hidden border border-gray-250 dark:border-gray-700 opacity-60 hover:opacity-100 hover:scale-102 transition flex-shrink-0 shadow-sm'">
+                        <img [src]="img" class="w-full h-full object-cover" />
+                      </button>
+                    }
+                  </div>
                 }
               </div>
 
-              <!-- Carousel Thumbnails -->
-              @if (p.images && p.images.length > 1) {
-                <div class="flex items-center gap-2 overflow-x-auto py-1 justify-center scrollbar-thin">
-                  @for (img of p.images; track img; let idx = $index) {
-                    <button (click)="activeImageIndex.set(idx)"
-                            [class]="idx === activeImageIndex()
-                              ? 'w-14 h-14 rounded-lg overflow-hidden border-2 border-green-500 scale-105 transition flex-shrink-0'
-                              : 'w-14 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 opacity-60 hover:opacity-100 hover:scale-102 transition flex-shrink-0'">
-                      <img [src]="img" class="w-full h-full object-cover" />
-                    </button>
+              <!-- Product Details / Description -->
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-md space-y-4">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span class="material-icons text-green-600 text-xl">description</span> Product Description
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                  {{ p.description || 'No description provided for this product listing.' }}
+                </p>
+              </div>
+
+              <!-- RATING & REVIEWS STATISTICS BREAKDOWN -->
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-md space-y-6">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-3 flex items-center gap-2">
+                  <span class="material-icons text-amber-500 text-xl">assessment</span> Ratings & Reviews
+                </h2>
+
+                <div class="grid md:grid-cols-3 gap-8 items-center bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-2xl border border-gray-100/50 dark:border-gray-750">
+                  <!-- Score Stats -->
+                  <div class="text-center md:border-r md:border-gray-200 md:dark:border-gray-700 space-y-2">
+                    <p class="text-5xl font-extrabold text-gray-900 dark:text-white">
+                      {{ p.averageRating ? (p.averageRating | number:'1.1-1') : '0.0' }}
+                    </p>
+                    <div class="flex items-center justify-center gap-0.5 text-amber-400">
+                      @for (star of [1,2,3,4,5]; track star) {
+                        <span class="material-icons text-lg">
+                          {{ getStarIconName(p.averageRating || 0, star) }}
+                        </span>
+                      }
+                    </div>
+                    <p class="text-xs text-gray-400 font-semibold">{{ p.totalReviews || 0 }} reviews total</p>
+                  </div>
+
+                  <!-- Distribution Bars -->
+                  <div class="md:col-span-2 space-y-2">
+                    @for (star of [5, 4, 3, 2, 1]; track star) {
+                      <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-gray-500 font-semibold text-right">{{ star }} Star</span>
+                        <div class="flex-grow bg-gray-100 dark:bg-gray-900 h-3 rounded-full overflow-hidden border border-gray-150/20">
+                          <div class="bg-amber-400 h-full rounded-full" 
+                               [style.width.%]="getStarPercentage(star, p.starDistribution, p.totalReviews || 0)"></div>
+                        </div>
+                        <span class="w-12 text-gray-450 text-left">
+                          {{ getStarPercentage(star, p.starDistribution, p.totalReviews || 0) | number:'1.0-0' }}%
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Review Input / Form -->
+                @if (canSubmitReview()) {
+                  <div class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                      <span class="material-icons text-green-600 text-sm">rate_review</span>
+                      {{ editingReviewId() ? 'Edit Your Review' : 'Write a Review' }}
+                    </h3>
+                    
+                    <!-- Star Rating click selector -->
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs text-gray-400 font-semibold mr-2">Your Rating:</span>
+                      @for (star of [1,2,3,4,5]; track star) {
+                        <button type="button" (click)="newReviewRating.set(star)" class="text-amber-400 hover:scale-110 active:scale-95 transition outline-none">
+                          <span class="material-icons text-2xl">
+                            {{ star <= newReviewRating() ? 'star' : 'star_border' }}
+                          </span>
+                        </button>
+                      }
+                    </div>
+
+                    <div class="space-y-3">
+                      <textarea [(ngModel)]="newReviewComment" rows="3" placeholder="Share your experience using this product. Be descriptive..."
+                                class="w-full text-xs sm:text-sm rounded-xl border border-gray-250 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white resize-none"></textarea>
+                      
+                      <div class="flex justify-end gap-2">
+                        @if (editingReviewId()) {
+                          <button (click)="cancelReviewEdit()" class="px-4 py-2 border border-gray-200 dark:border-gray-750 text-gray-650 dark:text-gray-300 font-semibold text-xs rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition">
+                            Cancel
+                          </button>
+                        }
+                        <button (click)="submitReview(p.id)" [disabled]="!newReviewRating() || isSubmittingReview()"
+                                class="px-5 py-2 bg-green-650 text-white font-bold text-xs rounded-xl shadow hover:bg-green-700 active:scale-95 transition disabled:opacity-50">
+                          {{ isSubmittingReview() ? 'Submitting...' : editingReviewId() ? 'Update Review' : 'Submit Review' }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2 border border-amber-100/50">
+                    <span class="material-icons text-sm">info</span>
+                    <span>You have already reviewed this product. You can update or delete your review below.</span>
+                  </div>
+                }
+
+                <!-- Reviews List -->
+                <div class="space-y-4 pt-2">
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider text-gray-400">Customer Comments</h3>
+
+                  @if (reviews().length === 0) {
+                    <p class="text-xs text-gray-400 italic">No reviews written for this product yet. Be the first to write one!</p>
+                  } @else {
+                    <div class="space-y-3">
+                      @for (rev of reviews(); track rev.id) {
+                        <div class="bg-gray-50/30 dark:bg-gray-900/10 border border-gray-150 dark:border-gray-750 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-gray-250 dark:hover:border-gray-700 transition">
+                          <div class="space-y-1 flex-grow">
+                            <!-- Rating & Name -->
+                            <div class="flex items-center gap-2 flex-wrap">
+                              <div class="flex items-center text-amber-400 gap-0.5">
+                                @for (star of [1,2,3,4,5]; track star) {
+                                  <span class="material-icons text-xs">
+                                    {{ star <= rev.rating ? 'star' : 'star_border' }}
+                                  </span>
+                                }
+                              </div>
+                              <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ rev.reviewerName }}</span>
+                              @if (isMyReview(rev.reviewerId)) {
+                                <span class="text-[9px] font-bold text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-950/30 border border-green-150/40 px-1.5 py-0.2 rounded">Your Review</span>
+                              }
+                            </div>
+                            <!-- Review Text -->
+                            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-normal">{{ rev.reviewText }}</p>
+                          </div>
+
+                          <!-- Owner Actions (Edit/Delete) -->
+                          @if (isMyReview(rev.reviewerId)) {
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                              <button (click)="editReview(rev)" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-205 dark:bg-gray-800 dark:hover:bg-gray-750 text-gray-650 dark:text-gray-300 flex items-center justify-center transition active:scale-90" title="Edit Review">
+                                <span class="material-icons text-sm">edit</span>
+                              </button>
+                              <button (click)="deleteReview(rev.id)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center justify-center transition active:scale-90" title="Delete Review">
+                                <span class="material-icons text-sm">delete</span>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Reviews Pagination -->
+                    @if (totalReviewsCount() > reviewsPageSize) {
+                      <div class="flex items-center justify-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
+                        <button (click)="prevReviewsPage()" 
+                                [disabled]="reviewsPage === 0"
+                                class="px-3 py-1.5 bg-gray-50 border border-gray-250 dark:bg-gray-800 dark:border-gray-750 text-gray-500 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95 disabled:opacity-40">
+                          Previous
+                        </button>
+                        <span class="text-xs text-gray-400">Page {{ reviewsPage + 1 }}</span>
+                        <button (click)="nextReviewsPage()" 
+                                [disabled]="(reviewsPage + 1) * reviewsPageSize >= totalReviewsCount()"
+                                class="px-3 py-1.5 bg-gray-50 border border-gray-250 dark:bg-gray-800 dark:border-gray-750 text-gray-500 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition active:scale-95 disabled:opacity-40">
+                          Next
+                        </button>
+                      </div>
+                    }
                   }
                 </div>
-              }
+              </div>
             </div>
-            
-            <!-- Right: Details and Action Forms -->
-            <div class="flex flex-col justify-between space-y-6">
-              <div class="space-y-4">
-                <div class="flex flex-wrap gap-2 items-center justify-between">
-                  <span class="px-3 py-1 text-xs font-semibold text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/30 border border-green-100/30 dark:border-green-800/30 rounded-full w-max">
-                    {{ p.category }}
-                  </span>
-                  
-                  <span [class]="getStockBadgeClass(p.stockStatus)" class="px-2.5 py-1 text-xs font-bold rounded-full">
-                    {{ getStockStatusText(p.stockStatus) }}
-                  </span>
-                </div>
-                
-                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">{{ p.title }}</h1>
-                
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Listed by: <span class="font-bold text-gray-700 dark:text-gray-200">{{ p.sellerName }}</span>
-                </p>
 
-                <div class="border-t border-b border-gray-100 dark:border-gray-700/60 py-4">
+            <!-- RIGHT COLUMN: Sticky Buy & Bidding Panel -->
+            <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-20">
+              
+              <!-- Pricing & Action Panel -->
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-md space-y-6">
+                <!-- Auction status or Fixed Price -->
+                <div>
                   @if (p.auction) {
-                    <div class="space-y-2">
-                      <span class="text-xs font-bold uppercase tracking-wider text-red-500 flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                        Bidding Open
-                      </span>
-                      <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-extrabold text-gray-900 dark:text-white">₹{{ p.currentBid || p.startingBid }}</span>
-                        <span class="text-xs text-gray-400">Current Bid</span>
+                    <div class="space-y-1">
+                      <div class="flex items-baseline gap-1">
+                        <span class="text-gray-450 text-xs font-bold uppercase tracking-wider block">Current Bid</span>
                       </div>
-                      <p class="text-xs text-gray-400 font-medium">Starting Bid: ₹{{ p.startingBid }}</p>
+                      <div class="flex items-baseline gap-1.5">
+                        <span class="text-3xl font-extrabold text-gray-900 dark:text-white">₹{{ p.currentBid || p.startingBid }}</span>
+                      </div>
+                      <p class="text-xs text-gray-400">Starting Bid: ₹{{ p.startingBid }}</p>
                       @if (p.auctionEndTime) {
-                        <p class="text-xs text-amber-600 font-bold flex items-center gap-1">
+                        <p class="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 pt-1.5">
                           <span class="material-icons text-sm">schedule</span> Closes: {{ p.auctionEndTime | date:'medium' }}
                         </p>
                       }
                     </div>
                   } @else {
                     <div class="space-y-1">
-                      <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-extrabold text-green-600 dark:text-green-400">₹{{ p.price }}</span>
+                      <span class="text-gray-450 text-[10px] font-bold uppercase tracking-wider block">Price</span>
+                      <div class="flex items-baseline gap-1.5">
+                        <span class="text-4xl font-extrabold text-green-600 dark:text-green-400">₹{{ p.price }}</span>
                         <span class="text-xs text-gray-400">/ {{ p.unit || 'Kg' }}</span>
                       </div>
-                      <div class="flex items-center gap-2 pt-1">
-                        <span class="text-xs text-gray-500">Stock Available: <strong class="text-gray-800 dark:text-gray-200">{{ p.stock }} {{ p.unit || 'Kg' }}</strong></span>
-                        @if (p.stockStatus === 'LOW_STOCK') {
-                          <span class="text-[10px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded border border-amber-100/50">Only {{ p.stock }} left!</span>
-                        }
-                      </div>
                     </div>
                   }
                 </div>
 
-                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{{ p.description }}</p>
-              </div>
-
-              <!-- Action Controls Card -->
-              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700">
-                @if (p.auction) {
-                  <!-- Bidding Form -->
-                  <form (ngSubmit)="placeBid()" class="space-y-3">
-                    <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Place Your Bid</h3>
-                    <div class="flex gap-2">
-                      <input type="number" [(ngModel)]="bidAmount" name="bidAmount" placeholder="Enter bid amount in ₹" required class="flex-1 border rounded-xl px-4 py-3 bg-white dark:bg-gray-800 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-gray-900 dark:text-white" />
-                      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition">
-                        Bid
-                      </button>
-                    </div>
-                    <p class="text-[10px] text-gray-400">Min bid must be higher than current bid ₹{{ p.currentBid || p.startingBid }}</p>
-                  </form>
-                } @else {
-                  <!-- Purchase / Cart Form -->
-                  <div class="space-y-4">
-                    <!-- Qty Input Capping at Stock -->
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-bold text-gray-500 uppercase">Purchase Quantity</span>
-                      <div class="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800">
-                        <button (click)="decreaseQty()" 
-                                [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty <= 1"
-                                class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-600 transition active:scale-95 disabled:opacity-30">
-                          <span class="material-icons text-sm">remove</span>
-                        </button>
-                        <span class="w-8 text-center text-xs font-bold text-gray-950 dark:text-white">{{ orderQty }}</span>
-                        <button (click)="increaseQty(p.stock)" 
-                                [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty >= p.stock"
-                                class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-600 transition active:scale-95 disabled:opacity-30">
-                          <span class="material-icons text-sm">add</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Direct Checkout (Buy Now) Address input -->
-                    <div class="space-y-2 pt-2 border-t border-gray-150 dark:border-gray-800">
-                      <label class="block text-[10px] font-bold text-gray-400 uppercase">Direct Order Delivery Address</label>
-                      <input type="text" [(ngModel)]="deliveryAddress" placeholder="Enter delivery address for instant checkout" class="w-full border rounded-xl px-3.5 py-2.5 bg-white dark:bg-gray-800 text-xs sm:text-sm outline-none focus:border-green-500 transition text-gray-950 dark:text-white" />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                      <!-- Add to Cart Button -->
-                      <button (click)="addToCart()" 
-                              [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0"
-                              class="py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-850 dark:hover:bg-gray-750 text-gray-800 dark:text-gray-200 font-bold rounded-xl active:scale-[0.98] transition disabled:opacity-50 text-xs sm:text-sm flex items-center justify-center gap-1.5">
-                        <span class="material-icons text-base">shopping_cart</span>
-                        Add to Cart
-                      </button>
-
-                      <!-- Buy Now Button -->
-                      <button (click)="placeOrder()" 
-                              [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0 || !deliveryAddress.trim()"
-                              class="py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50 text-xs sm:text-sm flex items-center justify-center gap-1.5">
-                        <span class="material-icons text-base">shopping_bag</span>
-                        Buy Now
-                      </button>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-
-          <!-- RATING & REVIEWS STATISTICS BREAKDOWN -->
-          <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 space-y-6">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-3 flex items-center gap-2">
-              <span class="material-icons text-amber-500">assessment</span> Ratings & Reviews
-            </h2>
-
-            <div class="grid md:grid-cols-3 gap-8 items-center">
-              <!-- Score Stats -->
-              <div class="text-center md:border-r md:border-gray-100 md:dark:border-gray-700 space-y-2">
-                <p class="text-5xl font-extrabold text-gray-900 dark:text-white">
-                  {{ p.averageRating ? (p.averageRating | number:'1.1-1') : '0.0' }}
-                </p>
-                <div class="flex items-center justify-center gap-0.5 text-amber-400">
-                  @for (star of [1,2,3,4,5]; track star) {
-                    <span class="material-icons text-lg">
-                      {{ getStarIconName(p.averageRating || 0, star) }}
-                    </span>
-                  }
-                </div>
-                <p class="text-xs text-gray-400 font-semibold">{{ p.totalReviews || 0 }} reviews total</p>
-              </div>
-
-              <!-- Distribution Bars -->
-              <div class="md:col-span-2 space-y-2.5">
-                @for (star of [5, 4, 3, 2, 1]; track star) {
-                  <div class="flex items-center gap-3 text-xs">
-                    <span class="w-12 text-gray-500 font-semibold text-right">{{ star }} Star</span>
-                    <div class="flex-grow bg-gray-100 dark:bg-gray-900 h-3 rounded-full overflow-hidden border border-gray-150/20">
-                      <div class="bg-amber-400 h-full rounded-full" 
-                           [style.width.%]="getStarPercentage(star, p.starDistribution, p.totalReviews || 0)"></div>
-                    </div>
-                    <span class="w-12 text-gray-400 text-left">
-                      {{ getStarPercentage(star, p.starDistribution, p.totalReviews || 0) | number:'1.0-0' }}%
-                    </span>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <div class="h-px bg-gray-100 dark:bg-gray-750"></div>
-
-            <!-- Review Input / Form -->
-            @if (canSubmitReview()) {
-              <div class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 space-y-4">
-                <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">
-                  {{ editingReviewId() ? 'Edit Your Review' : 'Write a Review' }}
-                </h3>
-                
-                <!-- Star Rating click selector -->
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs text-gray-400 font-medium mr-2">Your Rating:</span>
-                  @for (star of [1,2,3,4,5]; track star) {
-                    <button type="button" (click)="newReviewRating.set(star)" class="text-amber-400 hover:scale-110 active:scale-95 transition outline-none">
-                      <span class="material-icons text-2xl">
-                        {{ star <= newReviewRating() ? 'star' : 'star_border' }}
-                      </span>
-                    </button>
-                  }
-                </div>
-
-                <div class="space-y-3">
-                  <textarea [(ngModel)]="newReviewComment" rows="3" placeholder="Share your experience using this product. Be descriptive..."
-                            class="w-full text-xs sm:text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 outline-none focus:border-green-500 transition text-gray-900 dark:text-white resize-none"></textarea>
-                  
-                  <div class="flex justify-end gap-2">
-                    @if (editingReviewId()) {
-                      <button (click)="cancelReviewEdit()" class="px-4 py-2 border border-gray-200 dark:border-gray-750 text-gray-650 dark:text-gray-300 font-semibold text-xs rounded-xl hover:bg-gray-100 dark:hover:bg-gray-850 transition">
-                        Cancel
-                      </button>
-                    }
-                    <button (click)="submitReview(p.id)" [disabled]="!newReviewRating() || isSubmittingReview()"
-                            class="px-5 py-2 bg-green-600 text-white font-bold text-xs rounded-xl shadow hover:bg-green-700 active:scale-95 transition disabled:opacity-50">
-                      {{ isSubmittingReview() ? 'Submitting...' : editingReviewId() ? 'Update Review' : 'Submit Review' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            } @else {
-              <div class="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
-                <span class="material-icons text-sm">info</span>
-                <span>You have already reviewed this product. You can update or delete your review below.</span>
-              </div>
-            }
-
-            <!-- Reviews List -->
-            <div class="space-y-4">
-              <h3 class="text-base font-bold text-gray-900 dark:text-white">Customer Reviews</h3>
-
-              @if (reviews().length === 0) {
-                <p class="text-xs text-gray-400 italic">No reviews written for this product yet. Be the first to write one!</p>
-              } @else {
-                <div class="space-y-3.5">
-                  @for (rev of reviews(); track rev.id) {
-                    <div class="bg-gray-50/50 dark:bg-gray-900/20 border border-gray-100 dark:border-gray-750 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gray-200 dark:hover:border-gray-700 transition">
+                <div class="border-t border-gray-100 dark:border-gray-750/70 pt-4 space-y-4">
+                  @if (p.auction) {
+                    <!-- Bidding Form -->
+                    <form (ngSubmit)="placeBid()" class="space-y-3">
                       <div class="space-y-1">
-                        <!-- Rating & Name -->
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <div class="flex items-center text-amber-400 gap-0.5">
-                            @for (star of [1,2,3,4,5]; track star) {
-                              <span class="material-icons text-xs">
-                                {{ star <= rev.rating ? 'star' : 'star_border' }}
-                              </span>
-                            }
-                          </div>
-                          <span class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ rev.reviewerName }}</span>
-                          @if (isMyReview(rev.reviewerId)) {
-                            <span class="text-[9px] font-bold text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-950/30 border border-green-100/50 px-1.5 py-0.2 rounded">Your Review</span>
-                          }
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Bid Amount (₹)</label>
+                        <input type="number" [(ngModel)]="bidAmount" name="bidAmount" placeholder="Enter bid amount in ₹" required class="w-full border border-gray-250 dark:border-gray-700 rounded-xl px-4 py-3 bg-gray-50 dark:bg-gray-900 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-gray-900 dark:text-white" />
+                      </div>
+                      <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition">
+                        Place Bid
+                      </button>
+                      <p class="text-[10px] text-gray-400 text-center leading-normal">Your bid must be higher than ₹{{ p.currentBid || p.startingBid }}</p>
+                    </form>
+                  } @else {
+                    <!-- Purchase Form -->
+                    <div class="space-y-4">
+                      <!-- Quantity Selector -->
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Quantity</span>
+                        <div class="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900">
+                          <button (click)="decreaseQty()" 
+                                  [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty <= 1"
+                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-650 transition active:scale-95 disabled:opacity-30">
+                            <span class="material-icons text-sm">remove</span>
+                          </button>
+                          <span class="w-8 text-center text-xs font-bold text-gray-950 dark:text-white">{{ orderQty }}</span>
+                          <button (click)="increaseQty(p.stock)" 
+                                  [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty >= p.stock"
+                                  class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-green-650 transition active:scale-95 disabled:opacity-30">
+                            <span class="material-icons text-sm">add</span>
+                          </button>
                         </div>
-                        <!-- Review Text -->
-                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-normal">{{ rev.reviewText }}</p>
                       </div>
 
-                      <!-- Owner Actions (Edit/Delete) -->
-                      @if (isMyReview(rev.reviewerId)) {
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                          <button (click)="editReview(rev)" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-650 dark:text-gray-300 flex items-center justify-center transition active:scale-90" title="Edit Review">
-                            <span class="material-icons text-sm">edit</span>
-                          </button>
-                          <button (click)="deleteReview(rev.id)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center justify-center transition active:scale-90" title="Delete Review">
-                            <span class="material-icons text-sm">delete</span>
-                          </button>
-                        </div>
-                      }
+                      <!-- Direct Order Delivery Address -->
+                      <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-750">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Shipping Address (For Buy Now)</label>
+                        <input type="text" [(ngModel)]="deliveryAddress" placeholder="Enter full address for direct checkout" class="w-full border border-gray-250 dark:border-gray-700 rounded-xl px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 text-xs outline-none focus:border-green-500 transition text-gray-950 dark:text-white" />
+                      </div>
+
+                      <!-- Actions buttons -->
+                      <div class="flex flex-col gap-2.5 pt-2">
+                        <button (click)="addToCart()" 
+                                [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0"
+                                class="w-full py-3.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-850 dark:hover:bg-gray-750 text-gray-800 dark:text-gray-250 font-extrabold rounded-xl active:scale-[0.98] transition disabled:opacity-50 text-xs flex items-center justify-center gap-1.5 border border-gray-200/50 dark:border-gray-700/50">
+                          <span class="material-icons text-base">shopping_cart</span>
+                          Add to Cart
+                        </button>
+
+                        <button (click)="placeOrder()" 
+                                [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0 || !deliveryAddress.trim()"
+                                class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-extrabold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50 text-xs flex items-center justify-center gap-1.5">
+                          <span class="material-icons text-base">shopping_bag</span>
+                          Buy Now
+                        </button>
+                      </div>
                     </div>
                   }
                 </div>
+              </div>
 
-                <!-- Reviews Pagination -->
-                @if (totalReviewsCount() > reviewsPageSize) {
-                  <div class="flex items-center justify-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
-                    <button (click)="prevReviewsPage()" 
-                            [disabled]="reviewsPage === 0"
-                            class="px-3 py-1.5 bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 text-gray-500 rounded-lg text-xs font-bold hover:bg-gray-100 transition active:scale-95 disabled:opacity-40">
-                      Previous
-                    </button>
-                    <span class="text-xs text-gray-400">Page {{ reviewsPage + 1 }}</span>
-                    <button (click)="nextReviewsPage()" 
-                            [disabled]="(reviewsPage + 1) * reviewsPageSize >= totalReviewsCount()"
-                            class="px-3 py-1.5 bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 text-gray-500 rounded-lg text-xs font-bold hover:bg-gray-100 transition active:scale-95 disabled:opacity-40">
-                      Next
-                    </button>
+              <!-- Seller Profile Panel -->
+              <div class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-100 dark:border-gray-700 shadow-md space-y-4">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Seller Information</h3>
+                
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow">
+                    {{ p.sellerName ? p.sellerName.charAt(0).toUpperCase() : 'S' }}
                   </div>
-                }
-              }
+                  <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">{{ p.sellerName }}</h4>
+                    <span class="px-1.5 py-0.5 text-[9px] font-bold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20 rounded">Verified Listing</span>
+                  </div>
+                </div>
+
+                <div class="h-px bg-gray-100 dark:bg-gray-750"></div>
+
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span class="flex items-center gap-1"><span class="material-icons text-sm">location_on</span> Location:</span>
+                  <span class="font-semibold text-gray-700 dark:text-gray-200">{{ p.location || 'Not Specified' }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span class="flex items-center gap-1"><span class="material-icons text-sm">star</span> Seller Rating:</span>
+                  <span class="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-0.5">
+                    4.8★ <span class="text-[10px] text-gray-400">(45 sales)</span>
+                  </span>
+                </div>
+              </div>
+
             </div>
+            
           </div>
         }
       }
     </div>
-  `
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
 export class ProductDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -412,7 +466,7 @@ export class ProductDetailComponent implements OnInit {
     };
   }
 
-  // Carousel helper
+  // Carousel helpers
   nextImage(length: number): void {
     this.activeImageIndex.update(curr => (curr + 1) % length);
   }
@@ -421,7 +475,7 @@ export class ProductDetailComponent implements OnInit {
     this.activeImageIndex.update(curr => (curr - 1 + length) % length);
   }
 
-  // Stock Form actions
+  // Qty helpers
   increaseQty(stock: number): void {
     if (this.orderQty < stock) {
       this.orderQty++;
@@ -498,7 +552,7 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
-  // Reviews section actions
+  // Reviews actions
   isMyReview(reviewerId: number): boolean {
     const currentId = this.authService.currentUser()?.id;
     return Number(reviewerId) === Number(currentId);
@@ -507,7 +561,6 @@ export class ProductDetailComponent implements OnInit {
   canSubmitReview(): boolean {
     const currentId = this.authService.currentUser()?.id;
     if (!currentId) return false;
-    // Check if user already has a review in the listed collection
     const hasReviewed = this.reviews().some(r => Number(r.reviewerId) === Number(currentId));
     return !hasReviewed || !!this.editingReviewId();
   }
@@ -549,7 +602,6 @@ export class ProductDetailComponent implements OnInit {
     this.editingReviewId.set(rev.id);
     this.newReviewRating.set(rev.rating);
     this.newReviewComment = rev.reviewText;
-    // scroll review input into view
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
@@ -590,7 +642,7 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
-  // Distribution helper
+  // Statistics helper
   getStarPercentage(star: number, distribution: Record<number, number> | undefined, total: number): number {
     if (!distribution || total === 0) return 0;
     const count = distribution[star] || 0;
@@ -604,7 +656,7 @@ export class ProductDetailComponent implements OnInit {
     return 'star_border';
   }
 
-  // Stock Badge helper
+  // Badges helper
   getStockStatusText(status: string): string {
     switch (status) {
       case 'IN_STOCK': return 'In Stock';
@@ -617,13 +669,13 @@ export class ProductDetailComponent implements OnInit {
   getStockBadgeClass(status: string): string {
     switch (status) {
       case 'IN_STOCK':
-        return 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-950/40 border border-green-150/40';
+        return 'text-green-750 bg-green-50 dark:text-green-400 dark:bg-green-950/40 border border-green-200/50';
       case 'LOW_STOCK':
-        return 'text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40 border border-amber-150/40';
+        return 'text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40 border border-amber-200/50';
       case 'OUT_OF_STOCK':
-        return 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40 border border-red-150/40';
+        return 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40 border border-red-200/50';
       default:
-        return 'text-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-950/40 border border-gray-150/40';
+        return 'text-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-950/40 border border-gray-200/50';
     }
   }
 }
