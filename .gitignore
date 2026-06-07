@@ -113,7 +113,6 @@ lerna-debug.log*
 /farmsetu-backend/out/
 /farmsetu-backend/.gradle/
 /farmsetu-backend/build/
-application.properties
 # Compiled Java class files
 *.class
 /farmsetu-backend/**/*.class
@@ -148,13 +147,11 @@ application.properties
 *.env
 
 # Spring Boot Configuration Secrets (sensitive Postgres/Redis/API secrets)
-/farmsetu-backend/src/main/resources/application.properties
 /farmsetu-backend/src/main/resources/application-*.properties
 /farmsetu-backend/src/main/resources/application-*.yml
 /farmsetu-backend/src/main/resources/application-*.yaml
 
 # Explicitly track sample config files if you create them
-!/farmsetu-backend/src/main/resources/application.properties.example
 !/farmsetu-backend/src/main/resources/application-sample.properties
 !/farmsetu-backend/src/main/resources/application-sample.yml
 !/farmsetu-backend/src/main/resources/application-sample.yaml
