@@ -1,0 +1,311 @@
+<div class="h-[calc(100vh-80px)] lg:h-[calc(100vh-64px)] flex bg-white dark:bg-gray-900 overflow-hidden font-sans">
+  
+  <!-- COLUMN 1: EXPERTS LIST (LEFT SIDE) -->
+  <div [class.hidden]="selectedExpert() && windowWidth < 768" class="w-full md:w-80 lg:w-96 flex flex-col border-r border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 shrink-0">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 space-y-3">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Agriculture Experts</h2>
+      <div class="relative">
+        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+        <input type="text" 
+               [ngModel]="searchQuery()"
+               (ngModelChange)="searchQuery.set($event)"
+               placeholder="Search experts by specialty..." 
+               class="w-full pl-9 pr-4 py-2 text-xs bg-gray-100 dark:bg-gray-800 border-0 rounded-xl focus:ring-2 focus:ring-green-600 text-gray-900 dark:text-white">
+      </div>
+    </div>
+
+    <!-- Experts List Items -->
+    <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800/50 scrollbar-thin">
+      @if (filteredExperts.length === 0) {
+        <div class="flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500 space-y-2">
+          <span class="material-icons text-3xl">support_agent</span>
+          <p class="text-xs">No experts online</p>
+        </div>
+      }
+      @for (e of filteredExperts; track e.id) {
+        <button (click)="selectExpert(e)" 
+                [ngClass]="selectedExpert()?.id === e.id ? 'bg-green-50/50 dark:bg-green-950/20' : ''"
+                class="w-full px-4 py-3.5 flex items-start gap-3 hover:bg-gray-100/70 dark:hover:bg-gray-800/40 text-left transition duration-200 group">
+          <!-- Avatar + Status dot -->
+          <div class="relative shrink-0 mt-0.5">
+            <img [src]="e.profilePhoto || 'assets/default-avatar.png'" alt="Expert Avatar" class="w-11 h-11 rounded-full object-cover">
+            <div [class.bg-green-500]="isOnline(e.id)" 
+                 [class.bg-gray-400]="!isOnline(e.id)"
+                 class="absolute right-0 bottom-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 shadow-sm transition"></div>
+          </div>
+
+          <!-- Card Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <span class="font-bold text-sm text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-400 transition truncate">{{ e.name }}</span>
+              <span class="flex items-center gap-0.5 text-orange-500 text-xs font-bold shrink-0">
+                <span class="material-icons text-xs">star</span>
+                {{ e.rating.toFixed(1) }}
+              </span>
+            </div>
+            
+            <p class="text-[10px] font-semibold text-gray-450 dark:text-gray-450 uppercase mb-1">
+              {{ e.id === -1 ? 'Automated Bot' : 'Certified Specialist' }}
+            </p>
+
+            <!-- Specialties badge list -->
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              @for (spec of e.specialties; track spec) {
+                <span class="bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-green-100/30">{{ spec }}</span>
+              }
+            </div>
+          </div>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- COLUMN 2: ACTIVE CONVERSATION PANEL (MIDDLE) -->
+  <div [class.hidden]="!selectedExpert() && windowWidth < 768" class="flex-1 flex flex-col bg-gray-50 dark:bg-gray-950 overflow-hidden relative">
+    @if (selectedExpert()) {
+      <!-- Chat Header -->
+      <header class="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 flex items-center justify-between shadow-sm shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <button (click)="selectedExpert.set(null)" type="button" class="md:hidden p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
+            <span class="material-icons">arrow_back</span>
+          </button>
+          <img [src]="selectedExpert()?.profilePhoto || 'assets/default-avatar.png'" alt="Expert" class="w-10 h-10 rounded-full object-cover">
+          <div class="min-w-0">
+            <h3 class="font-bold text-sm text-gray-900 dark:text-white truncate">{{ selectedExpert()?.name }}</h3>
+            <span class="text-[10px] text-gray-500 dark:text-gray-400 font-semibold truncate block">{{ selectedExpert()?.specialties?.join(' • ') }}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Availability Tag -->
+          <span [class.bg-green-100]="isOnline(selectedExpert()?.id || 0)"
+                [class.text-green-800]="isOnline(selectedExpert()?.id || 0)"
+                [class.bg-gray-100]="!isOnline(selectedExpert()?.id || 0)"
+                [class.text-gray-650]="!isOnline(selectedExpert()?.id || 0)"
+                class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+            {{ isOnline(selectedExpert()?.id || 0) ? 'Available' : 'Offline' }}
+          </span>
+        </div>
+      </header>
+
+      <!-- Message History Scroll list -->
+      <div #messageArea class="flex-1 overflow-y-auto p-4 md:p-6 space-y-2 bg-[#efeae2] dark:bg-[#0b141a] scrollbar-thin flex flex-col">
+        @for (msg of messages(); track msg.id) {
+          <div [class.justify-end]="msg.senderId === currentUser?.id" 
+               [class.justify-start]="msg.senderId !== currentUser?.id"
+               class="flex">
+            <!-- Message Bubble -->
+            <div [ngClass]="msg.senderId === currentUser?.id ? 
+                     'bg-[#d9fdd3] dark:bg-[#005c4b] text-[#111b21] dark:text-[#e9edef] rounded-2xl rounded-tr-none' : 
+                     'bg-white dark:bg-[#202c33] text-[#111b21] dark:text-[#e9edef] rounded-2xl rounded-tl-none'"
+                 class="max-w-[85%] md:max-w-[70%] pt-2 pb-1.5 pl-3 pr-14 shadow-sm relative group transition-all duration-200">
+              
+              <div class="text-xs md:text-sm break-words leading-relaxed pr-1">
+                @switch (msg.messageType) {
+                  @case ('TEXT') {
+                    <p class="whitespace-pre-line inline">{{ msg.messageText }}</p>
+                  }
+                  @case ('IMAGE') {
+                    <div class="rounded-xl overflow-hidden mb-1 border border-gray-150 dark:border-gray-800">
+                      <a [href]="msg.mediaUrl" target="_blank" class="block cursor-zoom-in">
+                        <img [src]="msg.mediaUrl" alt="Shared Image" class="w-full h-auto object-cover max-h-60 hover:opacity-95 transition">
+                      </a>
+                    </div>
+                    @if (msg.messageText && msg.messageText !== 'Voice message') {
+                      <p class="whitespace-pre-line mt-1 text-xs font-medium">{{ msg.messageText }}</p>
+                    }
+                  }
+                  @case ('VOICE') {
+                    <div class="flex items-center gap-3 p-1 min-w-[200px] md:min-w-[240px]">
+                      <button (click)="audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause()" 
+                              type="button" 
+                              class="w-9 h-9 rounded-full bg-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                        <span class="material-icons text-base">{{ audioPlayer.paused ? 'play_arrow' : 'pause' }}</span>
+                      </button>
+                      <div class="flex-1 min-w-0 space-y-1">
+                        <div class="h-1 bg-gray-300 dark:bg-gray-700 rounded-full relative overflow-hidden">
+                          <div [style.width.%]="(audioPlayer.currentTime / (audioPlayer.duration || 1)) * 100"
+                               class="absolute top-0 left-0 bottom-0 bg-green-750"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-gray-500 dark:text-gray-400 font-bold">
+                          <span>{{ formatDuration(audioPlayer.currentTime) }}</span>
+                          <span>{{ formatDuration(audioPlayer.duration || 0) }}</span>
+                        </div>
+                      </div>
+                      <audio #audioPlayer [src]="msg.mediaUrl" (timeupdate)="$any($event)" class="hidden"></audio>
+                    </div>
+                  }
+                  @case ('FILE') {
+                    <a [href]="msg.mediaUrl" target="_blank" class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-700 bg-[#efeae2] dark:bg-gray-900 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                      <span class="material-icons text-green-700 dark:text-green-400 text-2xl">insert_drive_file</span>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold truncate text-[#111b21] dark:text-[#e9edef]">{{ msg.messageText }}</p>
+                        <span class="text-[9px] text-gray-400 font-semibold uppercase">Shared File attachment</span>
+                      </div>
+                    </a>
+                  }
+                }
+              </div>
+
+              <!-- Time / Ticks footer (Absolute positioned) -->
+              <div class="absolute bottom-1 right-2 flex items-center gap-1 text-[9px] text-gray-400 dark:text-gray-400 select-none">
+                <span>{{ formatTime(msg.createdAt) }}</span>
+                @if (msg.senderId === currentUser?.id && msg.receiverId !== -1) {
+                  <span class="material-icons text-xs leading-none shrink-0" 
+                        [class.text-blue-500]="msg.read"
+                        [class.text-green-600]="msg.read"
+                        [class.text-gray-400]="!msg.read">
+                    {{ msg.read ? 'done_all' : 'done' }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- AI Typing pulse indicator bubble -->
+        @if (isAiLoading()) {
+          <div class="flex justify-start">
+            <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-tl-none border border-gray-150/45 dark:border-gray-700 shadow-sm flex items-center gap-1.5">
+              <span class="w-2 h-2 bg-gray-450 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+              <span class="w-2 h-2 bg-gray-450 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+              <span class="w-2 h-2 bg-gray-450 dark:bg-gray-500 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- FOOTER: INPUT CONTROLS -->
+      <footer class="p-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden" accept="image/*,application/pdf,application/msword,text/plain,audio/*">
+        
+        <div class="flex items-center gap-2">
+          <!-- File Attach -->
+          <button (click)="triggerFileUpload()" 
+                  [disabled]="isRecording() || selectedExpert()?.id === -1"
+                  type="button" 
+                  class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-green-600 disabled:opacity-50 transition shrink-0">
+            <span class="material-icons text-xl">add</span>
+          </button>
+
+          <!-- Input bar or recording display -->
+          <div class="flex-1 min-w-0 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center px-3 py-1 text-sm">
+            @if (isRecording()) {
+              <div class="flex items-center justify-between w-full py-1 text-red-500 font-semibold text-xs md:text-sm animate-pulse">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 bg-red-600 rounded-full inline-block animate-ping"></span>
+                  <span>Recording Voice Note: {{ formatDuration(recordingDuration()) }}</span>
+                </div>
+                <button (click)="stopRecording(false)" type="button" class="text-gray-500 hover:text-red-600 font-bold px-2 py-0.5 rounded hover:bg-gray-200">Cancel</button>
+              </div>
+            } @else {
+              <textarea [(ngModel)]="messageText" 
+                        (keydown.enter)="$event.preventDefault(); sendMessage()"
+                        rows="1"
+                        placeholder="Type a message to expert..." 
+                        class="flex-1 py-1.5 bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white resize-none text-xs md:text-sm scrollbar-none"></textarea>
+            }
+          </div>
+
+          <!-- Actions -->
+          @if (!messageText.trim() && !isRecording()) {
+            <button (click)="startRecording()" 
+                    [disabled]="selectedExpert()?.id === -1"
+                    type="button" 
+                    class="p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-500 hover:text-red-600 disabled:opacity-50 transition shrink-0">
+              <span class="material-icons text-xl">mic</span>
+            </button>
+          } @else if (isRecording()) {
+            <button (click)="stopRecording(true)" 
+                    type="button" 
+                    class="p-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+              <span class="material-icons text-base">send</span>
+            </button>
+          } @else {
+            <button (click)="sendMessage()" 
+                    type="button" 
+                    class="p-2.5 rounded-xl bg-green-700 hover:bg-green-800 text-white flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+              <span class="material-icons text-base">send</span>
+            </button>
+          }
+        </div>
+      </footer>
+    } @else {
+      <!-- Placeholder welcome view -->
+      <div class="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50 dark:bg-gray-950 text-center text-gray-400 dark:text-gray-500 space-y-4">
+        <div class="w-20 h-20 rounded-full bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 flex items-center justify-center shadow-inner">
+          <span class="material-icons text-4xl">support_agent</span>
+        </div>
+        <div class="space-y-1.5 max-w-sm">
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Expert Advisory Dashboard</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Consult with certified agricultural experts, agronomists, and soil specialists, or ask the instant AI bot.</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- COLUMN 3: EXPERT PROFILE PANEL (RIGHT SIDE) -->
+  @if (selectedExpert()) {
+    <div class="hidden md:flex w-72 lg:w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex-col h-full shrink-0 animate-fade-in">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between shrink-0">
+        <h4 class="font-bold text-sm text-gray-900 dark:text-white">Expert Profile</h4>
+      </div>
+      
+      <!-- Profile Content -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin">
+        <!-- Main profile photo + name -->
+        <div class="flex flex-col items-center text-center space-y-2">
+          <img [src]="selectedExpert()?.profilePhoto || 'assets/default-avatar.png'" alt="Expert Profile Photo" class="w-24 h-24 rounded-full object-cover shadow-md ring-4 ring-green-50 dark:ring-green-950/30">
+          <div>
+            <h3 class="font-extrabold text-sm text-gray-900 dark:text-white">{{ selectedExpert()?.name }}</h3>
+            <span class="inline-block bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">{{ selectedExpert()?.id === -1 ? 'Bot' : 'Consultant' }}</span>
+          </div>
+        </div>
+
+        <!-- Consultation reviews/ratings -->
+        <div class="bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/50 rounded-2xl p-4 text-center space-y-1 shadow-sm">
+          <div class="flex items-center justify-center gap-1 text-orange-500">
+            <span class="material-icons text-lg">star</span>
+            <span class="text-sm font-extrabold text-gray-900 dark:text-white">{{ selectedExpert()?.rating?.toFixed(1) }}</span>
+            <span class="text-[10px] text-gray-400 dark:text-gray-500 font-bold">(120+ reviews)</span>
+          </div>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide font-bold">Average Consultation Rating</p>
+        </div>
+
+        <!-- Detailed rows -->
+        <div class="space-y-4 text-xs">
+          <!-- Specialties -->
+          <div>
+            <p class="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider text-[9px] mb-2">Areas of Specialty</p>
+            <div class="flex flex-wrap gap-1.5">
+              @for (spec of selectedExpert()?.specialties; track spec) {
+                <span class="bg-green-50/70 dark:bg-green-950/20 text-green-700 dark:text-green-400 text-[10px] font-bold px-3 py-1 rounded-lg border border-green-100/30">{{ spec }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div>
+            <p class="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider text-[9px] mb-1">About Bio</p>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-100 dark:border-gray-800/50">
+              {{ selectedExpert()?.bio }}
+            </p>
+          </div>
+
+          <!-- Book a Consultation call CTA -->
+          @if (selectedExpert()?.id !== -1) {
+            <div class="pt-2">
+              <button (click)="bookVideoCall()" 
+                      type="button" 
+                      class="w-full py-3 rounded-xl bg-green-700 hover:bg-green-800 text-white text-xs font-bold shadow-md hover:shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2">
+                <span class="material-icons text-base">video_call</span>
+                Book Video Consultation
+              </button>
+              <p class="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1.5 font-semibold">Get 1-on-1 audio/video guidance</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

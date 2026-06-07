@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'ngx-toastr/toastr';
+
+:root {
+  --fs-primary: #16a34a;
+  --fs-secondary: #f59e0b;
+}
+
+body {
+  margin: 0;
+}
+
+.fs-card {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4;
+}
+
+.fs-btn-primary {
+  @apply bg-primary hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition;
+}
+
+.fs-btn-secondary {
+  @apply bg-secondary hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-lg transition;
+}

@@ -171,10 +171,9 @@ google-services.json
 hs_err_pid*
 replay_pid*
 
-
-
-
-
-
-
+.sql
+api_docs.md
+developer_rules.md
+./txt
+.clinerules
 Farmsetu.txt
