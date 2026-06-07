@@ -77,18 +77,18 @@ bin/
 # ------------------------------------------
 node_modules/
 /node_modules/
-/farmsetu-frontend/node_modules/
+/frontend/node_modules/
 
 # ------------------------------------------
-# Angular Frontend (farmsetu-frontend)
+# Angular Frontend (frontend)
 # ------------------------------------------
-/farmsetu-frontend/dist/
-/farmsetu-frontend/tmp/
-/farmsetu-frontend/out-tsc/
-/farmsetu-frontend/.angular/
-/farmsetu-frontend/.sass-cache/
-/farmsetu-frontend/connect.lock
-/farmsetu-frontend/coverage/
+/frontend/dist/
+/frontend/tmp/
+/frontend/out-tsc/
+/frontend/.angular/
+/frontend/.sass-cache/
+/frontend/connect.lock
+/frontend/coverage/
 
 # Log files
 npm-debug.log*
@@ -99,42 +99,41 @@ lerna-debug.log*
 
 # Angular Local environment files
 # (API keys for Twilio, Razorpay, Maps, OpenAI, OpenWeatherMap, Firebase)
-/farmsetu-frontend/src/environments/environment.development.ts
-/farmsetu-frontend/src/environments/environment.production.ts
-/farmsetu-frontend/src/environments/environment.local.ts
+/frontend/src/environments/environment.development.ts
+/frontend/src/environments/environment.production.ts
+/frontend/src/environments/environment.local.ts
 
 # db
 ./database/*
 # ------------------------------------------
-# Spring Boot Backend (farmsetu-backend)
+# Spring Boot Backend (backend)
 # ------------------------------------------
-/farmsetu-backend/target/
-/farmsetu-backend/bin/
-/farmsetu-backend/out/
-/farmsetu-backend/.gradle/
-/farmsetu-backend/build/
-application.properties
+/backend/target/
+/backend/bin/
+/backend/out/
+/backend/.gradle/
+/backend/build/
 # Compiled Java class files
 *.class
-/farmsetu-backend/**/*.class
+/backend/**/*.class
 
 # Log files
-/farmsetu-backend/*.log
-/farmsetu-backend/logs/
+/backend/*.log
+/backend/logs/
 
 # Maven-specific files
-/farmsetu-backend/pom.xml.tag
-/farmsetu-backend/pom.xml.releaseBackup
-/farmsetu-backend/pom.xml.versionsBackup
-/farmsetu-backend/pom.xml.next
-/farmsetu-backend/release.properties
-/farmsetu-backend/dependency-reduced-pom.xml
-/farmsetu-backend/buildNumber.properties
-/farmsetu-backend/.mvn/timing.properties
+/backend/pom.xml.tag
+/backend/pom.xml.releaseBackup
+/backend/pom.xml.versionsBackup
+/backend/pom.xml.next
+/backend/release.properties
+/backend/dependency-reduced-pom.xml
+/backend/buildNumber.properties
+/backend/.mvn/timing.properties
 
 # Maven wrapper
 # Keep the wrapper jar if you use it, or comment out to ignore it
-# !/farmsetu-backend/.mvn/wrapper/maven-wrapper.jar
+# !/backend/.mvn/wrapper/maven-wrapper.jar
 
 # ------------------------------------------
 # Secrets, Configurations & Credentials
@@ -148,16 +147,14 @@ application.properties
 *.env
 
 # Spring Boot Configuration Secrets (sensitive Postgres/Redis/API secrets)
-/farmsetu-backend/src/main/resources/application.properties
-/farmsetu-backend/src/main/resources/application-*.properties
-/farmsetu-backend/src/main/resources/application-*.yml
-/farmsetu-backend/src/main/resources/application-*.yaml
+/backend/src/main/resources/application-*.properties
+/backend/src/main/resources/application-*.yml
+/backend/src/main/resources/application-*.yaml
 
 # Explicitly track sample config files if you create them
-!/farmsetu-backend/src/main/resources/application.properties.example
-!/farmsetu-backend/src/main/resources/application-sample.properties
-!/farmsetu-backend/src/main/resources/application-sample.yml
-!/farmsetu-backend/src/main/resources/application-sample.yaml
+!/backend/src/main/resources/application-sample.properties
+!/backend/src/main/resources/application-sample.yml
+!/backend/src/main/resources/application-sample.yaml
 
 # Firebase service account credentials
 *firebase-auth*.json
@@ -171,10 +168,9 @@ google-services.json
 hs_err_pid*
 replay_pid*
 
-
-
-
-
-
-
+.sql
+api_docs.md
+developer_rules.md
+./txt
+.clinerules
 Farmsetu.txt
