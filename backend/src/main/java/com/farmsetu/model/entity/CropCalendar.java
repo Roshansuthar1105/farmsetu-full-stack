@@ -1,5 +1,7 @@
 package com.farmsetu.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.farmsetu.model.enums.CalendarStatus;
 import com.farmsetu.model.enums.CropSeason;
 import jakarta.persistence.Column;
@@ -28,13 +30,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CropCalendar extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "farmer_id", nullable = false)
+    @JsonIgnore
     private User farmer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "crop_id")
     private Crop crop;
 
@@ -58,5 +62,6 @@ public class CropCalendar extends BaseEntity {
 
     @OneToMany(mappedBy = "calendar", fetch = FetchType.LAZY)
     @Builder.Default
+    @JsonIgnore
     private List<CalendarTask> tasks = new ArrayList<>();
 }

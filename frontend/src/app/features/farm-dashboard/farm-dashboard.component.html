@@ -1,0 +1,570 @@
+@if (loading()) {
+  <div class="p-6">
+    <fs-loading-skeleton />
+  </div>
+} @else {
+  <div class="space-y-6">
+    <!-- WELCOME GREETER HEADER -->
+    <div class="relative bg-gradient-to-r from-green-600 to-emerald-800 text-white rounded-3xl p-6 lg:p-8 shadow-xl overflow-hidden animate-fade-in">
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSIv+PC9zdmc+')] opacity-20"></div>
+      <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-semibold uppercase tracking-wider mb-3">Farm Operations Center</span>
+          <h1 class="text-3xl font-extrabold tracking-tight">
+            {{ farmProfile?.user?.name || 'Farmer\'s Hub' }}
+          </h1>
+          <p class="text-green-100 text-sm mt-1 max-w-xl font-medium">
+            {{ farmProfile?.user?.bio || 'Manage crop cultivation schedules, track live soil nutrients, monitor weather parameters, and map boundaries.' }}
+          </p>
+        </div>
+        @if (selectedFarm()) {
+          <button (click)="openEditModal()" type="button"
+                  class="flex items-center gap-2 bg-white text-green-700 hover:bg-green-50 font-bold px-5 py-3 rounded-2xl shadow-lg transition active:scale-95 text-xs">
+            <span class="material-icons text-base">edit</span>
+            Edit Selected Farm
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- TABS CONTAINER OR EMPTY STATE -->
+    @if (farms().length === 0) {
+      <div class="fs-card text-center py-16 max-w-lg mx-auto border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl mt-8">
+        <span class="material-icons text-green-500 text-6xl animate-pulse">landscape</span>
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white mt-4">No Farms Registered</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto leading-relaxed">
+          Create your first farm plot to begin tracking environmental soil nutrients, monitoring local weather sensors, and mapping boundaries on Leaflet.
+        </p>
+        <button (click)="openCreateModal()" type="button"
+                class="mt-6 bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold text-xs px-6 py-3 rounded-2xl shadow-lg hover:shadow-green-500/10 transition active:scale-95">
+          Create Your First Farm
+        </button>
+      </div>
+    } @else {
+      <!-- FARMS NAVIGATION TABS -->
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Your Registered Farms</h2>
+          @if (selectedFarm()) {
+            <button (click)="deleteSelectedFarm()" type="button"
+                    class="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-xl transition font-bold">
+              <span class="material-icons text-sm">delete</span>
+              Delete Current Farm
+            </button>
+          }
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-3 pr-1 py-1">
+          @for (farm of farms(); track farm.id) {
+            <button (click)="selectFarm(farm)" type="button"
+                    [class.farm-tab-active]="selectedFarm()?.id === farm.id"
+                    class="farm-tab flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-4 py-3 rounded-2xl shadow-sm hover:shadow-md transition text-left shrink-0">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center transition"
+                   [ngClass]="selectedFarm()?.id === farm.id ? 'bg-white text-green-600' : 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400'">
+                <span class="material-icons text-lg">landscape</span>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-gray-800 dark:text-white">{{ farm.name || 'Primary Farm' }}</h4>
+                <p class="text-[9px] text-gray-400 font-medium mt-0.5">{{ farm.farmArea ? (farm.farmArea + ' Acres') : '--' }}</p>
+              </div>
+            </button>
+          }
+          
+          <button (click)="openCreateModal()" type="button"
+                  class="flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-green-500 hover:text-green-600 text-gray-400 px-4 py-3 rounded-2xl transition font-extrabold text-xs text-left shrink-0 min-h-[54px]">
+            <span class="material-icons">add_circle_outline</span>
+            Add New Farm
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN GRID CONTENT -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- LEFT & MIDDLE COLUMNS (METRICS AND MAPS) -->
+        <div class="lg:col-span-2 space-y-6">
+          
+          <!-- CORE FARM DETAILS STATS GRID -->
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">landscape</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Farm Area</p>
+                <h4 class="text-xs font-bold text-gray-800 dark:text-white mt-0.5">
+                  User: {{ selectedFarm()?.farmArea ? (selectedFarm()?.farmArea + ' Ac') : '--' }}
+                </h4>
+                @if (selectedFarm()?.calculatedArea) {
+                  <p class="text-[9px] text-green-600 dark:text-green-400 font-bold leading-none mt-1">
+                    GPS Calc: {{ selectedFarm()?.calculatedArea }} Ac
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">grass</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Soil Type</p>
+                <h4 class="text-base font-bold text-gray-800 dark:text-white mt-0.5 capitalize">
+                  {{ selectedFarm()?.soilType || '--' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">water_drop</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Water Source</p>
+                <h4 class="text-base font-bold text-gray-800 dark:text-white mt-0.5 capitalize">
+                  {{ selectedFarm()?.waterSource || '--' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">eco</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Farming Type</p>
+                <h4 class="text-base font-bold text-gray-800 dark:text-white mt-0.5 capitalize">
+                  {{ selectedFarm()?.farmingType || '--' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">work</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Experience</p>
+                <h4 class="text-base font-bold text-gray-800 dark:text-white mt-0.5">
+                  {{ farmProfile?.farmingExperience ? (farmProfile?.farmingExperience + ' Years') : '--' }}
+                </h4>
+              </div>
+            </div>
+
+            <div class="fs-card flex items-center gap-4 hover:border-green-500/30 transition group">
+              <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <span class="material-icons text-2xl">science</span>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Soil pH Level</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-base font-bold text-gray-800 dark:text-white">
+                    {{ selectedFarm()?.soilPh || '--' }}
+                  </span>
+                  @if (selectedFarm()?.soilPh) {
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none" 
+                          [ngClass]="getPhStatus(selectedFarm()?.soilPh).colorClass">
+                      {{ getPhStatus(selectedFarm()?.soilPh).label }}
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SOIL NUTRIENTS & HEALTH SENSORS SATELLITE -->
+          <div class="fs-card space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-icons text-green-600 dark:text-green-400">memory</span>
+                <h3 class="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Soil Nutrients & Environmental Sensors</h3>
+              </div>
+              <span class="flex items-center gap-1 text-[10px] bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-bold">
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                Live Sync
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <!-- NUTRIENTS -->
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Nitrogen (N)</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.nitrogen || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">mg/kg</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full transition-all duration-500" [style.width.%]="selectedFarm()?.nitrogen ? (selectedFarm()!.nitrogen! * 0.8) : 0"></div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Phosphorus (P)</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.phosphorus || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">mg/kg</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div class="bg-purple-500 h-full rounded-full transition-all duration-500" [style.width.%]="selectedFarm()?.phosphorus ? (selectedFarm()!.phosphorus! * 1.5) : 0"></div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Potassium (K)</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.potassium || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">mg/kg</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div class="bg-orange-500 h-full rounded-full transition-all duration-500" [style.width.%]="selectedFarm()?.potassium ? (selectedFarm()!.potassium! * 0.4) : 0"></div>
+                </div>
+              </div>
+
+              <!-- ENV SENSORS -->
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Temperature</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.temperature || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">°C</span>
+                </div>
+                <span class="material-icons absolute top-3 right-3 text-red-400/20 text-3xl group-hover:scale-110 transition">thermostat</span>
+              </div>
+
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Humidity</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.humidity || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">%</span>
+                </div>
+                <span class="material-icons absolute top-3 right-3 text-cyan-400/20 text-3xl group-hover:scale-110 transition">water</span>
+              </div>
+
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Rainfall</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.rainfall || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">mm</span>
+                </div>
+                <span class="material-icons absolute top-3 right-3 text-indigo-400/20 text-3xl group-hover:scale-110 transition">grain</span>
+              </div>
+
+              <div class="p-3 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-gray-100/50 dark:border-gray-700/50 flex flex-col justify-between min-h-[90px] relative overflow-hidden group">
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Water Level</span>
+                <div class="flex items-baseline gap-1 mt-2">
+                  <span class="text-xl font-extrabold text-gray-800 dark:text-white">{{ selectedFarm()?.waterLevel || '--' }}</span>
+                  <span class="text-[10px] text-gray-400">m</span>
+                </div>
+                <span class="material-icons absolute top-3 right-3 text-teal-400/20 text-3xl group-hover:scale-110 transition">waves</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FARM MAP & BOUNDARY SECTION -->
+          <div class="fs-card space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-icons text-green-600 dark:text-green-400">map</span>
+                <h3 class="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Farm Map & Boundary Polygon</h3>
+              </div>
+              @if (selectedFarm()?.latitude && selectedFarm()?.longitude) {
+                <span class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
+                  GPS: {{ selectedFarm()?.latitude }}, {{ selectedFarm()?.longitude }}
+                </span>
+              } @else {
+                <span class="text-[10px] text-red-500 bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded-md font-bold">
+                  Location Unmapped
+                </span>
+              }
+            </div>
+            <div class="relative w-full h-[320px] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-inner">
+              <div id="mainMap" class="w-full h-full z-10"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN (CALENDARS AND ALERTS) -->
+        <div class="space-y-6">
+          
+          <!-- CROP CALENDARS COMPONENT -->
+          <div class="fs-card space-y-4">
+            <div class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-3">
+              <span class="material-icons text-green-600 dark:text-green-400">calendar_month</span>
+              <h3 class="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Active Crop Calendars</h3>
+            </div>
+
+            <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              @if (activeCalendars.length > 0) {
+                @for (cal of activeCalendars; track cal.id) {
+                  <div class="p-3 bg-gray-50/50 dark:bg-gray-900/10 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h4 class="font-bold text-xs text-gray-800 dark:text-white">{{ cal.crop?.name || 'Crop Plan' }}</h4>
+                        <p class="text-[9px] text-gray-400 mt-0.5">{{ cal.season }} Season | {{ cal.year }}</p>
+                      </div>
+                      <span class="text-[8px] font-bold uppercase px-2 py-0.5 rounded-full"
+                            [ngClass]="cal.status === 'ACTIVE' ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400' : 'bg-gray-100 text-gray-500'">
+                        {{ cal.status }}
+                      </span>
+                    </div>
+                    <div class="mt-3">
+                      <div class="flex justify-between text-[9px] text-gray-400 mb-1">
+                        <span>Planted: {{ cal.plantingDate }}</span>
+                        <span>Harvest: {{ cal.expectedHarvestDate }}</span>
+                      </div>
+                      <!-- Mock progress bar -->
+                      <div class="w-full bg-gray-200 dark:bg-gray-700 h-1 rounded-full">
+                        <div class="bg-green-500 h-full rounded-full" style="width: 45%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <!-- Empty state -->
+                <div class="text-center py-6">
+                  <span class="material-icons text-gray-300 dark:text-gray-600 text-5xl">agriculture</span>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">No active crop calendars planned.</p>
+                  <a routerLink="/app/crop-calendar" class="inline-block mt-3 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:hover:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-extrabold px-4 py-2 rounded-xl transition">
+                    Create First Plan
+                  </a>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- RECENT ADVISORY ALERTS -->
+          <div class="fs-card space-y-4">
+            <div class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-3">
+              <span class="material-icons text-green-600 dark:text-green-400">notifications</span>
+              <h3 class="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">Advisory Alerts</h3>
+            </div>
+
+            <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              @if (recentNotifications.length > 0) {
+                @for (alert of recentNotifications; track alert.id) {
+                  <div class="flex gap-3 p-2.5 rounded-xl bg-gray-50/50 dark:bg-gray-900/10 border border-gray-100 dark:border-gray-700 relative">
+                    <span class="material-icons text-xs text-orange-500 mt-0.5">warning</span>
+                    <div>
+                      <h4 class="font-semibold text-xs text-gray-800 dark:text-white">{{ alert.title }}</h4>
+                      <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{{ alert.message }}</p>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <!-- Empty state -->
+                <div class="text-center py-6">
+                  <span class="material-icons text-gray-300 dark:text-gray-600 text-5xl">check_circle</span>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">No warnings. Your farm is looking good!</p>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    }
+  </div>
+}
+
+<!-- EDIT / CREATE PROFILE MODAL -->
+@if (isEditModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none">
+    
+    <!-- Modal Backdrop -->
+    <div (click)="closeEditModal()" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+    
+    <!-- Modal Container -->
+    <div class="relative w-full max-w-4xl mx-auto my-6 px-4 z-50 animate-scale-up">
+      <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col max-h-[90dvh]">
+        
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
+          <div class="flex items-center gap-2">
+            <span class="material-icons text-green-600 dark:text-green-400">edit_road</span>
+            <h2 class="text-lg font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
+              {{ isAddingNewFarm() ? 'Register New Farm' : 'Update Farm details' }}
+            </h2>
+          </div>
+          <button (click)="closeEditModal()" type="button"
+                  class="p-1 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin">
+          <form [formGroup]="editForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- LEFT COLUMN: FORM CONTROLS -->
+            <div class="space-y-4">
+              <h3 class="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 pb-1.5">General Parameters</h3>
+              
+              <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Farm Name</label>
+                <input type="text" formControlName="name" placeholder="e.g. Primary Farm, North Field"
+                       class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                 <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Farm Area (Acres)</label>
+                  <input type="number" formControlName="farmArea" step="0.1"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                  @if (editForm.get('calculatedArea')?.value) {
+                    <p class="text-[9px] text-green-600 dark:text-green-400 font-bold mt-1.5">
+                      Map Calculated: {{ editForm.get('calculatedArea')?.value }} Acres
+                    </p>
+                  }
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Farming Type</label>
+                  <select formControlName="farmingType"
+                          class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition cursor-pointer">
+                    <option value="ORGANIC">Organic</option>
+                    <option value="CONVENTIONAL">Conventional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Soil Type</label>
+                  <select formControlName="soilType"
+                          class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition cursor-pointer">
+                    <option value="loamy">Loamy</option>
+                    <option value="clay">Clay</option>
+                    <option value="sandy">Sandy</option>
+                    <option value="silt">Silt</option>
+                    <option value="peaty">Peaty</option>
+                    <option value="chalky">Chalky</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Soil pH</label>
+                  <input type="number" formControlName="soilPh" step="0.1"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Water Source</label>
+                <select formControlName="waterSource"
+                        class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition cursor-pointer">
+                  <option value="borewell">Borewell</option>
+                  <option value="canal">Canal</option>
+                  <option value="rainfed">Rainfed</option>
+                  <option value="drip">Drip Irrigation</option>
+                  <option value="sprinkler">Sprinkler</option>
+                </select>
+              </div>
+
+              <!-- SOIL & SENSOR PARAMETERS -->
+              <h3 class="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700 pb-1.5 pt-4">Nutrients & Sensor Inputs</h3>
+              
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Nitrogen (N)</label>
+                  <input type="number" formControlName="nitrogen"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Phosphorus (P)</label>
+                  <input type="number" formControlName="phosphorus"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">Potassium (K)</label>
+                  <input type="number" formControlName="potassium"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Temp (°C)</label>
+                  <input type="number" formControlName="temperature" step="0.1"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Humidity (%)</label>
+                  <input type="number" formControlName="humidity"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Rainfall (mm)</label>
+                  <input type="number" formControlName="rainfall"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Water Level (m)</label>
+                  <input type="number" formControlName="waterLevel" step="0.1"
+                         class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs dark:text-white outline-none focus:border-green-500 transition">
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: LEAFLET MAP INTERACTION -->
+            <div class="space-y-4 flex flex-col">
+              <div class="flex justify-between items-center border-b border-gray-100 dark:border-gray-700 pb-1.5">
+                <h3 class="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Locate Farm & Draw Boundary</h3>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" (click)="toggleDrawingMode()"
+                          [class.bg-green-600]="isDrawingMode"
+                          [class.text-white]="isDrawingMode"
+                          class="px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 text-[9px] font-bold uppercase transition flex items-center gap-1">
+                    <span class="material-icons text-[10px]">gesture</span>
+                    {{ isDrawingMode ? 'Drawing On' : 'Draw Boundary' }}
+                  </button>
+                  @if (modalDrawnPoints.length > 0) {
+                    <button type="button" (click)="completePolygon()"
+                            class="px-2 py-1 rounded-md bg-green-50 hover:bg-green-100 text-green-700 text-[9px] font-bold uppercase transition flex items-center gap-1">
+                      <span class="material-icons text-[10px]">check</span>
+                      Close Shape
+                    </button>
+                    <button type="button" (click)="clearBoundaryDrawing()"
+                            class="px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 text-red-600 text-[9px] font-bold uppercase transition flex items-center gap-1">
+                      <span class="material-icons text-[10px]">delete</span>
+                      Clear
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Map Container -->
+              <div class="relative w-full flex-1 min-h-[300px] md:min-h-[360px] rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div id="modalMap" class="absolute inset-0 z-10"></div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 text-[10px] text-gray-400 font-medium bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div>Center Lat: <span class="text-gray-800 dark:text-gray-200 font-bold">{{ editForm.get('latitude')?.value || '--' }}</span></div>
+                <div>Center Lng: <span class="text-gray-800 dark:text-gray-200 font-bold">{{ editForm.get('longitude')?.value || '--' }}</span></div>
+                <div class="col-span-2 mt-1">
+                  💡 <i>Drag the marker to set center. Click "Draw Boundary" and click points on the map, then click "Close Shape" to save your boundary outline.</i>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-850/50 rounded-b-3xl">
+          <button (click)="closeEditModal()" type="button"
+                  class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 transition active:scale-95">
+            Cancel
+          </button>
+          <button (click)="saveDetails()" type="button"
+                  class="px-5 py-2.5 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-600 hover:shadow-lg hover:shadow-green-500/10 text-white text-xs font-bold transition active:scale-95">
+            Save Farm Details
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+}

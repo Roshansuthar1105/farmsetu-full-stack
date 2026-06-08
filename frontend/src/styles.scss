@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import 'ngx-toastr/toastr';
+@import 'leaflet/dist/leaflet.css';
 
 :root {
   --fs-primary: #16a34a;

@@ -2,12 +2,14 @@ package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
 import com.farmsetu.model.entity.FarmerProfile;
+import com.farmsetu.model.entity.Farm;
 import com.farmsetu.service.FarmDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,5 +41,21 @@ public class FarmDashboardController {
     @PutMapping("/farm-details/{id}")
     public ApiResponse<FarmerProfile> updateFarmDetails(@PathVariable Long id, @RequestBody FarmerProfile profile) {
         return ApiResponse.ok(farmDashboardService.saveFarmDetails(id, profile));
+    }
+
+    @PostMapping("/farms/{userId}")
+    public ApiResponse<Farm> createFarm(@PathVariable Long userId, @RequestBody Farm farm) {
+        return ApiResponse.ok(farmDashboardService.saveNewFarm(userId, farm));
+    }
+
+    @PutMapping("/farms/{userId}/{farmId}")
+    public ApiResponse<Farm> updateFarm(@PathVariable Long userId, @PathVariable Long farmId, @RequestBody Farm farm) {
+        return ApiResponse.ok(farmDashboardService.updateFarm(userId, farmId, farm));
+    }
+
+    @DeleteMapping("/farms/{userId}/{farmId}")
+    public ApiResponse<Void> deleteFarm(@PathVariable Long userId, @PathVariable Long farmId) {
+        farmDashboardService.deleteFarm(userId, farmId);
+        return ApiResponse.ok(null);
     }
 }

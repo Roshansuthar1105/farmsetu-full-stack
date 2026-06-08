@@ -1,5 +1,7 @@
 package com.farmsetu.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.farmsetu.model.enums.CropSeason;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -31,6 +33,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "soilTypes"})
 public class Crop extends BaseEntity {
 
     @Column(nullable = false)
@@ -48,6 +51,7 @@ public class Crop extends BaseEntity {
     @CollectionTable(name = "crop_soil_types", joinColumns = @JoinColumn(name = "crop_id"))
     @Column(name = "soil_type")
     @Builder.Default
+    @JsonIgnore
     private List<String> soilTypes = new ArrayList<>();
 
     @Column(name = "water_requirement")

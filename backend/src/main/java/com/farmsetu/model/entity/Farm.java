@@ -3,15 +3,13 @@ package com.farmsetu.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.farmsetu.model.enums.FarmingType;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,26 +17,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "farmer_profiles")
+@Table(name = "farms")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class FarmerProfile extends BaseEntity {
+public class Farm extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(name = "farm_area")
     private Double farmArea;
+
+    @Column(name = "calculated_area")
+    private Double calculatedArea;
 
     @Column(name = "soil_type")
     private String soilType;
@@ -48,15 +49,6 @@ public class FarmerProfile extends BaseEntity {
 
     @Column(name = "water_source")
     private String waterSource;
-
-    @Column(name = "farming_experience")
-    private Integer farmingExperience;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "farmer_profile_crops", joinColumns = @JoinColumn(name = "profile_id"))
-    @Column(name = "crop_name")
-    @Builder.Default
-    private List<String> currentCrops = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "farming_type")
@@ -74,4 +66,7 @@ public class FarmerProfile extends BaseEntity {
 
     @Column(name = "water_level")
     private Double waterLevel;
+
+    private Double latitude;
+    private Double longitude;
 }
