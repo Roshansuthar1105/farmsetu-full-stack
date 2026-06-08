@@ -43,4 +43,8 @@ public class CropService {
                 ))
                 .toList();
     }
+
+    public Crop create(Crop crop) {
+        return cropRepository.save(crop);
+    }
 }

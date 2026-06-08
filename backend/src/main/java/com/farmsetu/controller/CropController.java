@@ -40,4 +40,9 @@ public class CropController {
     public ApiResponse<List<Crop>> bySeason(@PathVariable String season) {
         return ApiResponse.ok(cropService.getBySeason(season));
     }
+
+    @PostMapping
+    public ApiResponse<Crop> create(@RequestBody Crop crop) {
+        return ApiResponse.ok(cropService.create(crop));
+    }
 }

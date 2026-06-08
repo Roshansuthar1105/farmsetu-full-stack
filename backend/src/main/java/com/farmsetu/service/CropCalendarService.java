@@ -73,4 +73,8 @@ public class CropCalendarService {
     public void deleteTask(Long taskId) {
         calendarTaskRepository.deleteById(taskId);
     }
+
+    public List<CalendarTask> getTasksByCalendar(Long calendarId) {
+        return calendarTaskRepository.findByCalendarId(calendarId);
+    }
 }

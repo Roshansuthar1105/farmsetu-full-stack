@@ -2,6 +2,7 @@ package com.farmsetu.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.farmsetu.model.enums.CalendarStatus;
 import com.farmsetu.model.enums.CropSeason;
 import jakarta.persistence.Column;
@@ -35,7 +36,7 @@ public class CropCalendar extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "farmer_id", nullable = false)
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private User farmer;
 
     @ManyToOne(fetch = FetchType.EAGER)

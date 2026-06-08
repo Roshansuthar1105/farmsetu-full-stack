@@ -59,4 +59,9 @@ public class CropCalendarController {
         cropCalendarService.deleteTask(taskId);
         return ApiResponse.ok(null);
     }
+
+    @GetMapping("/{id}/tasks")
+    public ApiResponse<List<CalendarTask>> getTasks(@PathVariable Long id) {
+        return ApiResponse.ok(cropCalendarService.getTasksByCalendar(id));
+    }
 }

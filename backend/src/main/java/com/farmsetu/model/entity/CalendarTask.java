@@ -17,6 +17,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "calendar_tasks")
 @Getter
@@ -28,6 +30,7 @@ public class CalendarTask extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendar_id", nullable = false)
+    @JsonIgnore
     private CropCalendar calendar;
 
     @Column(name = "task_name", nullable = false)
