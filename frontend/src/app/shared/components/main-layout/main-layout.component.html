@@ -1,44 +1,93 @@
 <div class="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 pb-16 lg:pb-0">
   
   <!-- DESKTOP SIDEBAR -->
-  <aside [class.lg:hidden]="!showSidebar()" class="hidden lg:flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm shrink-0">
-    <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-start">
-      <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu Logo" class="h-10 w-auto object-contain max-w-full">
+  <aside [class.w-64]="showSidebar()" [class.w-20]="!showSidebar()" class="hidden lg:flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm shrink-0 h-[100dvh] sticky top-0 transition-all duration-300 ease-in-out">
+    <div [class.px-6]="showSidebar()" [class.px-4]="!showSidebar()" class="py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center transition-all duration-300">
+      <img [src]="showSidebar() 
+                  ? (theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png') 
+                  : (theme.darkMode() ? 'assets/favicon-white.png' : 'assets/favicon.png')" 
+           alt="FarmSetu Logo" 
+           [class.h-10]="showSidebar()"
+           [class.h-8]="!showSidebar()"
+           class="w-auto object-contain max-w-full transition-all duration-300">
     </div>
 
     <!-- Navigation items (Desktop) -->
-    <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-1.5 scrollbar-thin">
-      <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2">Main Features</p>
+    <nav [class.px-4]="showSidebar()" [class.px-3.5]="!showSidebar()" class="flex-1 overflow-y-auto py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
+      @if (showSidebar()) {
+        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Main Features</p>
+      } @else {
+        <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
+      }
+      
       @for (item of primaryNavItems; track item.path) {
         <a [routerLink]="item.path"
            routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group">
-          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition">{{ item.icon }}</span>
-          {{ t(item.labelKey) }}
+           [class.justify-start]="showSidebar()"
+           [class.justify-center]="!showSidebar()"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group relative">
+          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition shrink-0">{{ item.icon }}</span>
+          @if (showSidebar()) {
+            <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
+          } @else {
+            <!-- Floating Tooltip -->
+            <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+              {{ t(item.labelKey) }}
+            </span>
+          }
         </a>
       }
 
-      <div class="h-px bg-gray-100 dark:bg-gray-700 my-4"></div>
-      <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2">Services & Advisory</p>
+      <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
+      
+      @if (showSidebar()) {
+        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Services & Advisory</p>
+      }
+      
       @for (item of secondaryNavItems; track item.path) {
         <a [routerLink]="item.path"
            routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group">
-          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition">{{ item.icon }}</span>
-          {{ t(item.labelKey) }}
+           [class.justify-start]="showSidebar()"
+           [class.justify-center]="!showSidebar()"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group relative">
+          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition shrink-0">{{ item.icon }}</span>
+          @if (showSidebar()) {
+            <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
+          } @else {
+            <!-- Floating Tooltip -->
+            <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+              {{ t(item.labelKey) }}
+            </span>
+          }
         </a>
       }
     </nav>
 
     <!-- Sidebar Footer (Desktop) -->
-    <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/10 space-y-3">
+    <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/10 space-y-3 transition-all duration-300">
       <button type="button" (click)="theme.toggleDark()"
-              class="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition active:scale-[0.98]">
-        <span>{{ theme.darkMode() ? '☀️ Light Mode' : '🌙 Dark Mode' }}</span>
+              class="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition active:scale-[0.98] relative group">
+        <span class="material-icons text-base shrink-0">{{ theme.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
+        @if (showSidebar()) {
+          <span class="transition-all duration-300 whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
+        } @else {
+          <!-- Tooltip -->
+          <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+            {{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}
+          </span>
+        }
       </button>
       <button type="button" (click)="logout()"
-              class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold transition active:scale-[0.98]">
-        Logout
+              class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold transition active:scale-[0.98] flex items-center justify-center gap-2 relative group">
+        <span class="material-icons text-base shrink-0">logout</span>
+        @if (showSidebar()) {
+          <span class="transition-all duration-300 whitespace-nowrap">Logout</span>
+        } @else {
+          <!-- Tooltip -->
+          <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+            Logout
+          </span>
+        }
       </button>
     </div>
   </aside>
@@ -93,10 +142,24 @@
     </header>
 
     <!-- CONTENT BODY -->
-    <main class="flex-1 overflow-y-auto">
-      <div class="p-4 lg:p-6">
+    <main class="flex-1 overflow-y-auto flex flex-col justify-between">
+      <div class="p-4 lg:p-6 flex-1">
         <router-outlet />
       </div>
+      
+      <!-- Shared Layout Footer -->
+      <footer class="bg-white dark:bg-gray-800 border-t border-gray-150 dark:border-gray-700 py-5 px-6 mt-auto text-center sm:text-left transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="text-gray-500 dark:text-gray-400 text-xs">
+            &copy; 2026 FarmSetu Platform. All rights reserved.
+          </div>
+          <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Help & Support</a>
+          </div>
+        </div>
+      </footer>
     </main>
   </div>
 

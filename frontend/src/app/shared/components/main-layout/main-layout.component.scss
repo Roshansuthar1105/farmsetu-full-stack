@@ -40,3 +40,17 @@
 a, button {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Premium tooltip slide & fade micro-animation */
+.group {
+  .absolute.left-full {
+    transform: translateX(-10px);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  &:hover .absolute.left-full {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
