@@ -9,11 +9,13 @@
            alt="FarmSetu Logo" 
            [class.h-10]="showSidebar()"
            [class.h-8]="!showSidebar()"
+           [class.rounded-full]="!showSidebar()"
+           [class.aspect-square]="!showSidebar()"
            class="w-auto object-contain max-w-full transition-all duration-300">
     </div>
 
     <!-- Navigation items (Desktop) -->
-    <nav [class.px-4]="showSidebar()" [class.px-3.5]="!showSidebar()" class="flex-1 overflow-y-auto py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
+    <nav [class.px-4]="showSidebar()" [class.px-3.5]="!showSidebar()" class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
       @if (showSidebar()) {
         <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Main Features</p>
       } @else {
@@ -31,7 +33,7 @@
             <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
           } @else {
             <!-- Floating Tooltip -->
-            <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+            <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
               {{ t(item.labelKey) }}
             </span>
           }
@@ -55,7 +57,7 @@
             <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
           } @else {
             <!-- Floating Tooltip -->
-            <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+            <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
               {{ t(item.labelKey) }}
             </span>
           }
@@ -72,7 +74,7 @@
           <span class="transition-all duration-300 whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
         } @else {
           <!-- Tooltip -->
-          <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+          <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
             {{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}
           </span>
         }
@@ -84,7 +86,7 @@
           <span class="transition-all duration-300 whitespace-nowrap">Logout</span>
         } @else {
           <!-- Tooltip -->
-          <span class="absolute left-full ml-4 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
+          <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
             Logout
           </span>
         }
