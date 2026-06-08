@@ -121,6 +121,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/crops/admin-crops.component').then(m => m.AdminCropsComponent)
       },
       {
+        path: 'market-prices',
+        loadComponent: () => import('./features/admin/crops/market-prices-bulk.component').then(m => m.MarketPricesBulkComponent)
+      },
+      {
         path: 'email',
         loadComponent: () => import('./features/admin/email/admin-email.component').then(m => m.AdminEmailComponent)
       },

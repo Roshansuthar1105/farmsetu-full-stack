@@ -21,13 +21,30 @@ public class WeatherController {
     @GetMapping("")
     public ApiResponse<Map<String, Object>> weather(
             @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lon) {
-        Double targetLat = lat != null ? lat : 28.6139;
-        Double targetLon = lon != null ? lon : 77.209;
-        return ApiResponse.ok(Map.of(
-            "current", weatherService.current(targetLat, targetLon, null),
-            "forecast", weatherService.forecast(targetLat, targetLon, 7)
-        ));
+            @RequestParam(required = false) Double lon,
+            @RequestParam(required = false) String city) {
+        Double targetLat = lat;
+        Double targetLon = lon;
+        String resolvedCity = city;
+
+        if (city != null && !city.trim().isEmpty()) {
+            Map<String, Object> coords = weatherService.resolveCity(city);
+            if (coords != null) {
+                targetLat = (Double) coords.get("lat");
+                targetLon = (Double) coords.get("lng");
+                resolvedCity = (String) coords.get("city");
+            } else {
+                resolvedCity = city + " (Location Not Found)";
+            }
+        }
+
+        if (targetLat == null) targetLat = 28.6139;
+        if (targetLon == null) targetLon = 77.209;
+
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("current", weatherService.current(targetLat, targetLon, resolvedCity));
+        result.put("forecast", weatherService.forecast(targetLat, targetLon, 7));
+        return ApiResponse.ok(result);
     }
 
     @GetMapping("/current")
@@ -35,15 +52,48 @@ public class WeatherController {
             @RequestParam(required = false) Double lat,
             @RequestParam(required = false) Double lng,
             @RequestParam(required = false) String city) {
-        return ApiResponse.ok(weatherService.current(lat, lng, city));
+        Double targetLat = lat;
+        Double targetLng = lng;
+        String resolvedCity = city;
+
+        if (city != null && !city.trim().isEmpty()) {
+            Map<String, Object> coords = weatherService.resolveCity(city);
+            if (coords != null) {
+                targetLat = (Double) coords.get("lat");
+                targetLng = (Double) coords.get("lng");
+                resolvedCity = (String) coords.get("city");
+            } else {
+                resolvedCity = city + " (Location Not Found)";
+            }
+        }
+
+        if (targetLat == null) targetLat = 28.6139;
+        if (targetLng == null) targetLng = 77.209;
+
+        return ApiResponse.ok(weatherService.current(targetLat, targetLng, resolvedCity));
     }
 
     @GetMapping("/forecast")
     public ApiResponse<List<Map<String, Object>>> forecast(
             @RequestParam(required = false) Double lat,
             @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) String city,
             @RequestParam(defaultValue = "7") int days) {
-        return ApiResponse.ok(weatherService.forecast(lat, lng, days));
+        Double targetLat = lat;
+        Double targetLng = lng;
+
+        if (city != null && !city.trim().isEmpty()) {
+            Map<String, Object> coords = weatherService.resolveCity(city);
+            if (coords != null) {
+                targetLat = (Double) coords.get("lat");
+                targetLng = (Double) coords.get("lng");
+            }
+        }
+
+        if (targetLat == null) targetLat = 28.6139;
+        if (targetLng == null) targetLng = 77.209;
+
+        return ApiResponse.ok(weatherService.forecast(targetLat, targetLng, days));
     }
 
     @GetMapping("/alerts")
