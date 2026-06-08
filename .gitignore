@@ -86,6 +86,7 @@ node_modules/
 /frontend/tmp/
 /frontend/out-tsc/
 /frontend/.angular/
+frontend/.angular/cache/
 /frontend/.sass-cache/
 /frontend/connect.lock
 /frontend/coverage/
