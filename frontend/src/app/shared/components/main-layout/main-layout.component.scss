@@ -2,23 +2,6 @@
   display: block;
 }
 
-/* Custom scrollbars for clean lists */
-.scrollbar-thin {
-  &::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.2);
-    border-radius: 99px;
-    &:hover {
-      background: rgba(156, 163, 175, 0.4);
-    }
-  }
-}
 
 /* Slide-in slide-over drawer animation for mobile */
 @keyframes slideIn {

@@ -33,20 +33,4 @@
   animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Scrollbar customization */
-.scrollbar-thin {
-  &::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.2);
-    border-radius: 99px;
-    &:hover {
-      background: rgba(156, 163, 175, 0.4);
-    }
-  }
-}
+

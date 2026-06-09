@@ -207,21 +207,7 @@ interface ForecastDay {
       </div>
     </div>
   `,
-  styles: [`
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 9999px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-  `]
+  styles: []
 })
 export class WeatherComponent implements OnInit {
   private readonly api = inject(ApiService);

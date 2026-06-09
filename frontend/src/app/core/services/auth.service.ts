@@ -75,6 +75,11 @@ export class AuthService {
     return localStorage.getItem('fs_access_token');
   }
 
+  updateCurrentUser(user: User): void {
+    localStorage.setItem('fs_user', JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
   private setSession(res: AuthResponse): void {
     localStorage.setItem('fs_access_token', res.accessToken);
     localStorage.setItem('fs_refresh_token', res.refreshToken);

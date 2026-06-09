@@ -18,4 +18,14 @@ export class UserService {
   getBadges(): Observable<any[]> {
     return this.api.get<any[]>('/api/users/me/badges');
   }
+
+  updateProfilePhoto(userId: number, photoUrl: string): Observable<User> {
+    return this.api.put<User>(`/api/users/${userId}/profile-photo?url=${encodeURIComponent(photoUrl)}`, null);
+  }
+
+  uploadFile(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.api.post<string>('/api/chats/upload', formData);
+  }
 }
