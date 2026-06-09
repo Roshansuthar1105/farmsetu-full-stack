@@ -56,6 +56,7 @@ export class MainLayoutComponent {
     { path: '/app/crop-calendar', labelKey: 'nav.calendar', icon: 'calendar_month' },
     { path: '/app/disease-detection', labelKey: 'nav.disease', icon: 'biotech' },
     { path: '/app/mandi-finder', labelKey: 'nav.mandi', icon: 'map' },
+    { path: '/app/water-queue', labelKey: 'nav.waterQueue', icon: 'water_drop' },
     { path: '/app/financial', labelKey: 'nav.finance', icon: 'payments' },
     { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' }
   ];

@@ -86,6 +86,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/mandi-finder/mandi-finder.component').then(m => m.MandiFinderComponent)
       },
       {
+        path: 'water-queue',
+        loadComponent: () => import('./features/water-queue/water-queue.component').then(m => m.WaterQueueComponent)
+      },
+      {
         path: 'financial',
         loadComponent: () => import('./features/financial/financial.component').then(m => m.FinancialComponent)
       },
@@ -135,6 +139,10 @@ export const routes: Routes = [
       {
         path: 'orders',
         loadComponent: () => import('./features/admin/orders/admin-orders.component').then(m => m.AdminOrdersComponent)
+      },
+      {
+        path: 'water-queue',
+        loadComponent: () => import('./features/admin/water-queue/admin-water-queue.component').then(m => m.AdminWaterQueueComponent)
       }
       // ,
       // {

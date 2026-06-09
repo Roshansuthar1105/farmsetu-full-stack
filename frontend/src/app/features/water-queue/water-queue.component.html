@@ -1,0 +1,395 @@
+<div class="space-y-6 animate-slide-up pb-10">
+  
+  <!-- HEADER -->
+  <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-green-600 text-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-2">
+        <span class="material-icons text-white animate-bounce">water_drop</span>
+        {{ i18n.t('waterQueue.title') }}
+      </h1>
+      <p class="text-sm text-blue-100 mt-1 max-w-xl">
+        {{ i18n.t('waterQueue.subtitle') }}
+      </p>
+    </div>
+    
+    <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/20 text-xs font-semibold self-start md:self-auto">
+      <span class="material-icons text-green-300">verified</span>
+      <span>Community Shared System</span>
+    </div>
+  </div>
+
+  <!-- MAIN TAB SWITCHER -->
+  <div class="flex p-1 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl max-w-md">
+    <button (click)="onTabChange('book')"
+            [class.bg-white]="activeTab() === 'book'"
+            [class.dark:bg-gray-800]="activeTab() === 'book'"
+            [class.shadow-sm]="activeTab() === 'book'"
+            [class.text-green-600]="activeTab() === 'book'"
+            [class.dark:text-green-400]="activeTab() === 'book'"
+            [class.font-extrabold]="activeTab() === 'book'"
+            [class.text-gray-500]="activeTab() !== 'book'"
+            [class.dark:text-gray-400]="activeTab() !== 'book'"
+            class="flex-1 py-3 text-xs font-semibold rounded-xl transition duration-200 focus:outline-none flex items-center justify-center gap-1.5">
+      <span class="material-icons text-sm">schedule</span>
+      {{ i18n.t('waterQueue.bookSlot') }}
+    </button>
+    <button (click)="onTabChange('my')"
+            [class.bg-white]="activeTab() === 'my'"
+            [class.dark:bg-gray-800]="activeTab() === 'my'"
+            [class.shadow-sm]="activeTab() === 'my'"
+            [class.text-green-600]="activeTab() === 'my'"
+            [class.dark:text-green-400]="activeTab() === 'my'"
+            [class.font-extrabold]="activeTab() === 'my'"
+            [class.text-gray-500]="activeTab() !== 'my'"
+            [class.dark:text-gray-400]="activeTab() !== 'my'"
+            class="flex-1 py-3 text-xs font-semibold rounded-xl transition duration-200 focus:outline-none flex items-center justify-center gap-1.5">
+      <span class="material-icons text-sm">assignment</span>
+      {{ i18n.t('waterQueue.myBookings') }}
+      <span *ngIf="myBookings().length > 0" class="ml-1 bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+        {{ myBookings().length }}
+      </span>
+    </button>
+    <button (click)="onTabChange('live')"
+            [class.bg-white]="activeTab() === 'live'"
+            [class.dark:bg-gray-800]="activeTab() === 'live'"
+            [class.shadow-sm]="activeTab() === 'live'"
+            [class.text-green-600]="activeTab() === 'live'"
+            [class.dark:text-green-400]="activeTab() === 'live'"
+            [class.font-extrabold]="activeTab() === 'live'"
+            [class.text-gray-500]="activeTab() !== 'live'"
+            [class.dark:text-gray-400]="activeTab() !== 'live'"
+            class="flex-1 py-3 text-xs font-semibold rounded-xl transition duration-200 focus:outline-none flex items-center justify-center gap-1.5">
+      <span class="material-icons text-sm">visibility</span>
+      {{ i18n.t('waterQueue.liveQueue') }}
+    </button>
+  </div>
+
+  <!-- MESSAGES -->
+  <div *ngIf="successMsg()" class="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-400 rounded-xl text-xs flex items-center gap-2 animate-slide-up">
+    <span class="material-icons text-sm">check_circle</span>
+    <span class="font-semibold">{{ successMsg() }}</span>
+  </div>
+
+  <div *ngIf="errorMsg()" class="p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-400 rounded-xl text-xs flex items-center gap-2 animate-slide-up">
+    <span class="material-icons text-sm">error</span>
+    <span class="font-semibold">{{ errorMsg() }}</span>
+  </div>
+
+  <!-- TAB CONTENT: BOOK SLOT -->
+  <div *ngIf="activeTab() === 'book'" class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up">
+    
+    <!-- Form Card -->
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-6">
+      <h2 class="font-extrabold text-gray-900 dark:text-white text-base border-b border-gray-100 dark:border-gray-700 pb-3 flex items-center gap-2">
+        <span class="material-icons text-blue-500">app_registration</span>
+        New Watering Booking Slot
+      </h2>
+
+      <!-- AI Weather Warn Popup Context Inside Form (Inline Card) -->
+      <div *ngIf="weatherWarning()" class="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl space-y-4 animate-slide-up relative overflow-hidden">
+        <!-- Pulse effect -->
+        <div class="absolute -right-10 -top-10 w-28 h-28 bg-amber-500/10 rounded-full blur-xl animate-pulse"></div>
+
+        <div class="flex gap-3">
+          <span class="material-icons text-amber-500 text-2xl animate-bounce">thunderstorm</span>
+          <div>
+            <h4 class="font-extrabold text-amber-800 dark:text-amber-400 text-xs uppercase tracking-wider">
+              {{ i18n.t('waterQueue.warningTitle') }}
+            </h4>
+            <p class="text-xs text-gray-600 dark:text-gray-300 mt-2 font-medium leading-relaxed">
+              {{ weatherWarning()?.warningMessage }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5 pt-2 border-t border-amber-200/50 dark:border-amber-900/20 justify-end">
+          <button (click)="cancelBypass()" class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-xs font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/80 transition active:scale-[0.98]">
+            {{ i18n.t('waterQueue.modify') }}
+          </button>
+          <button (click)="proceedWithBypass()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition active:scale-[0.98] flex items-center gap-1">
+            <span class="material-icons text-sm">forward</span>
+            {{ i18n.t('waterQueue.proceedAnyway') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Form -->
+      <form *ngIf="!weatherWarning()" [formGroup]="bookingForm" (ngSubmit)="onCheckBooking()" class="space-y-5">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
+            {{ i18n.t('waterQueue.selectSource') }}
+          </label>
+          <div class="relative">
+            <select formControlName="waterSourceId" 
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 transition appearance-none cursor-pointer">
+              <option value="" disabled>{{ i18n.t('waterQueue.selectSourcePlaceholder') }}</option>
+              <option *ngFor="let s of sources()" [value]="s.id">
+                💧 {{ s.name }} ({{ s.type }} - {{ s.location }})
+              </option>
+            </select>
+            <span class="material-icons absolute right-4 top-3.5 text-gray-400 pointer-events-none">expand_more</span>
+          </div>
+          <p *ngIf="bookingForm.get('waterSourceId')?.touched && bookingForm.get('waterSourceId')?.errors?.['required']" class="text-rose-500 text-[10px] mt-1 font-bold">
+            Please select a water source
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
+              {{ i18n.t('waterQueue.bookingDate') }}
+            </label>
+            <input type="date" formControlName="bookingDate" 
+                   class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 transition cursor-pointer" />
+            <p *ngIf="bookingForm.get('bookingDate')?.touched && bookingForm.get('bookingDate')?.errors?.['required']" class="text-rose-500 text-[10px] mt-1 font-bold">
+              Please choose a date
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
+              {{ i18n.t('waterQueue.duration') }}
+            </label>
+            <div class="flex items-center gap-3">
+              <input type="range" min="0.5" max="12" step="0.5" formControlName="hoursRequested" 
+                     class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-600" />
+              <span class="text-xs font-extrabold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800/40 shrink-0">
+                {{ bookingForm.get('hoursRequested')?.value }} Hours
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
+            {{ i18n.t('waterQueue.notes') }}
+          </label>
+          <textarea formControlName="notes" rows="3" placeholder="Enter crop details or instructions (e.g. Cotton crop field irrigation)..." 
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none text-xs font-semibold text-gray-900 dark:text-white focus:border-green-500 transition resize-none"></textarea>
+        </div>
+
+        <button type="submit" [disabled]="loading()" 
+                class="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-extrabold rounded-xl shadow-md shadow-green-600/10 transition active:scale-[0.98] flex items-center justify-center gap-2">
+          <span class="material-icons text-sm">{{ loading() ? 'hourglass_top' : 'check' }}</span>
+          {{ loading() ? 'Analyzing Weather & Saving...' : i18n.t('waterQueue.submit') }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800/30 rounded-2xl p-6 shadow-sm border border-blue-100 dark:border-gray-700 flex flex-col justify-between">
+      <div class="space-y-4">
+        <h3 class="font-extrabold text-blue-600 dark:text-blue-400 text-sm flex items-center gap-2 uppercase tracking-wide">
+          <span class="material-icons text-base">psychology</span>
+          Smart Irrigation System
+        </h3>
+        
+        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+          Our **AI Rain Advisor** monitors open meteorology forecasts for your specific farm coordinates.
+        </p>
+
+        <div class="space-y-3 pt-2">
+          <div class="flex gap-2.5 items-start">
+            <span class="material-icons text-sm text-green-500 shrink-0 mt-0.5 font-bold">check_circle</span>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">**Prevents Root Rot**: Checks if a heavy rain storm will overlap with scheduled watering.</p>
+          </div>
+          <div class="flex gap-2.5 items-start">
+            <span class="material-icons text-sm text-green-500 shrink-0 mt-0.5 font-bold">check_circle</span>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">**Conserves Water**: Automatically prompts you to delay bookings on rainy days.</p>
+          </div>
+          <div class="flex gap-2.5 items-start">
+            <span class="material-icons text-sm text-green-500 shrink-0 mt-0.5 font-bold">check_circle</span>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">**Saves Crop**: Ensures you do not flush expensive fertilizer out of critical soil layers.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-blue-200/50 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+            <span class="material-icons text-base">agriculture</span>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200">Active Crops</h4>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500">
+              {{ auth.currentUser()?.currentCrops?.join(', ') || 'No crops selected' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT: MY SLOTS -->
+  <div *ngIf="activeTab() === 'my'" class="animate-slide-up space-y-4">
+    <div *ngIf="myBookings().length === 0" class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+      <span class="material-icons text-4xl text-gray-300 dark:text-gray-600">water_damage</span>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-bold">{{ i18n.t('waterQueue.noBookings') }}</p>
+    </div>
+
+    <div *ngIf="myBookings().length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div *ngFor="let b of myBookings()" 
+           class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
+        <div class="space-y-3">
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <h3 class="font-extrabold text-gray-900 dark:text-white text-sm">
+                💧 {{ b.waterSourceName }}
+              </h3>
+              <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-bold mt-0.5">
+                {{ b.waterSourceType }}
+              </p>
+            </div>
+            <span [class]="getStatusClass(b.status)" class="text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase">
+              {{ b.status }}
+            </span>
+          </div>
+
+          <!-- Timeline Details -->
+          <div class="bg-gray-50 dark:bg-gray-900/60 p-3 rounded-xl space-y-2 border border-gray-100 dark:border-gray-800/40 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Date:</span>
+              <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ formatDate(b.bookingDate) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Duration:</span>
+              <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ b.hoursRequested }} Hours</span>
+            </div>
+            <div *ngIf="b.queuePosition" class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Queue Position:</span>
+              <span class="text-blue-600 dark:text-blue-400 font-black">#{{ b.queuePosition }}</span>
+            </div>
+            <div *ngIf="b.scheduledStartTime" class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Scheduled Start:</span>
+              <span class="text-green-600 dark:text-green-400 font-black">{{ formatTime(b.scheduledStartTime) }}</span>
+            </div>
+            <div *ngIf="b.notes" class="pt-1.5 border-t border-gray-200/30 text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
+              <strong>Notes:</strong> {{ b.notes }}
+            </div>
+          </div>
+
+          <!-- Rain Warning Indicator -->
+          <div *ngIf="b.weatherWarning" class="p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 rounded-lg text-[10px] flex items-center gap-1.5 font-bold">
+            <span class="material-icons text-xs">warning</span>
+            Weather Warning Enabled ({{ b.weatherRainChance }}% rain risk bypassed)
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 pt-2 border-t border-gray-150 dark:border-gray-700/50">
+          <button *ngIf="b.status === 'PENDING' || b.status === 'APPROVED'" 
+                  (click)="onCancelBooking(b.id)" 
+                  class="px-3.5 py-2 border border-rose-200 hover:bg-rose-50 text-rose-600 dark:border-rose-900/30 dark:hover:bg-rose-950/20 dark:text-rose-400 text-xs font-bold rounded-xl active:scale-[0.98] transition flex items-center gap-1">
+            <span class="material-icons text-sm">cancel</span>
+            {{ i18n.t('waterQueue.cancelBooking') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CONTENT: LIVE QUEUE -->
+  <div *ngIf="activeTab() === 'live'" class="animate-slide-up space-y-6">
+    <!-- Filters card -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex flex-wrap gap-4 items-center justify-between">
+      <div class="flex flex-wrap gap-3 items-center flex-1">
+        <!-- Source Selector -->
+        <div class="w-64 max-w-full">
+          <label class="block text-[9px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Select Water Source</label>
+          <div class="relative">
+            <select [value]="selectedLiveSourceId()" 
+                    (change)="selectedLiveSourceId.set($any($event.target).value ? +$any($event.target).value : null); loadLiveQueue()"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4.5 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 cursor-pointer appearance-none">
+              <option *ngFor="let s of sources()" [value]="s.id">💧 {{ s.name }}</option>
+            </select>
+            <span class="material-icons absolute right-3.5 top-3 text-gray-400 pointer-events-none">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Date Selector -->
+        <div class="w-48 max-w-full">
+          <label class="block text-[9px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Watering Date</label>
+          <input type="date" [value]="selectedLiveDate()" 
+                 (change)="selectedLiveDate.set($any($event.target).value); loadLiveQueue()"
+                 class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 cursor-pointer" />
+        </div>
+      </div>
+
+      <button (click)="loadLiveQueue()" class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-650 transition active:scale-95">
+        <span class="material-icons text-base">refresh</span>
+      </button>
+    </div>
+
+    <!-- Timeline Results -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-6">
+      <h3 class="font-extrabold text-gray-950 dark:text-white text-base flex items-center gap-2">
+        <span class="material-icons text-blue-500">route</span>
+        {{ i18n.t('waterQueue.liveTimelineTitle') }} {{ formatDate(selectedLiveDate()) }}
+      </h3>
+
+      <div *ngIf="liveQueue().length === 0" class="text-center py-10">
+        <span class="material-icons text-3xl text-gray-300 dark:text-gray-600">view_timeline</span>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 font-bold">{{ i18n.t('waterQueue.noLiveQueue') }}</p>
+      </div>
+
+      <!-- Vertical Timeline -->
+      <div *ngIf="liveQueue().length > 0" class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-blue-100 dark:before:bg-gray-700">
+        <div *ngFor="let item of liveQueue(); let idx = index" 
+             [class.border-green-500]="item.farmerId === auth.currentUser()?.id"
+             [class.dark:border-green-400]="item.farmerId === auth.currentUser()?.id"
+             [class.ring-2]="item.farmerId === auth.currentUser()?.id"
+             [class.ring-green-500]="item.farmerId === auth.currentUser()?.id"
+             [class.ring-opacity-20]="item.farmerId === auth.currentUser()?.id"
+             class="relative p-4 rounded-2xl border border-gray-150 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition hover:bg-gray-50 dark:hover:bg-gray-900/50">
+          
+          <!-- Marker dot -->
+          <div [class.bg-blue-500]="idx === 0"
+               [class.ring-blue-500]="idx === 0"
+               [class.ring-opacity-30]="idx === 0"
+               [class.animate-pulse]="idx === 0"
+               [class.bg-green-500]="idx > 0 && item.farmerId === auth.currentUser()?.id"
+               [class.bg-gray-300]="idx > 0 && item.farmerId !== auth.currentUser()?.id"
+               [class.dark:bg-gray-600]="idx > 0 && item.farmerId !== auth.currentUser()?.id"
+               class="absolute -left-6 top-5 w-4 h-4 rounded-full border-4 border-white dark:border-gray-800 ring-4 ring-transparent shrink-0"></div>
+
+          <!-- Farmer Info -->
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-gray-900 dark:text-white text-xs">
+                {{ item.farmerName }}
+              </span>
+              <span *ngIf="item.farmerId === auth.currentUser()?.id" class="bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-400 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                Your Turn
+              </span>
+              <span *ngIf="idx === 0" class="bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-400 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                <span class="w-1 h-1 rounded-full bg-blue-500 animate-ping"></span>
+                {{ i18n.t('waterQueue.active') }}
+              </span>
+              <span *ngIf="idx > 0" class="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                {{ i18n.t('waterQueue.upcoming') }}
+              </span>
+            </div>
+            <p *ngIf="item.notes" class="text-[10px] text-gray-400 dark:text-gray-500 italic max-w-md truncate">
+              "{{ item.notes }}"
+            </p>
+          </div>
+
+          <!-- Schedule time & details -->
+          <div class="flex items-center gap-4 text-xs font-bold">
+            <div class="text-right">
+              <p class="text-gray-950 dark:text-gray-200">{{ formatTime(item.scheduledStartTime) }}</p>
+              <p class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                {{ item.hoursRequested }} Hours duration
+              </p>
+            </div>
+            <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 font-black flex items-center justify-center text-xs border border-blue-100 dark:border-blue-950 shrink-0">
+              #{{ item.queuePosition }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

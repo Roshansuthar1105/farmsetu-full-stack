@@ -20,6 +20,7 @@ import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
           <a routerLink="/admin/market-prices" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Market Bulk Upload</a>
           <a routerLink="/admin/email" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Email Broadcaster</a>
           <a routerLink="/admin/orders" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Manage Orders</a>
+          <a routerLink="/admin/water-queue" routerLinkActive="text-secondary" class="block py-2 text-gray-400 hover:text-white">Manage Water Queue</a>
           <a routerLink="/app/dashboard" class="block py-2 text-gray-400 hover:text-white">← App Dashboard</a>
         </nav>
       </aside>
