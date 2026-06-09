@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://farmsetu-2-0.onrender.com',
-  wsUrl: 'https://farmsetu-2-0.onrender.com'
+  apiUrl: 'http://localhost:8080',
+  wsUrl: 'http://localhost:8080'
 };

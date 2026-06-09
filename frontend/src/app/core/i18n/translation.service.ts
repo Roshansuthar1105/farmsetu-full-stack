@@ -11,13 +11,13 @@ export class TranslationService {
   private readonly LANG_KEY = 'app_language';
 
   init(defaultLang: string = 'en') {
-    this.translate.addLangs(['en', 'es', 'fr']);
+    this.translate.addLangs(['en', 'hn']);
     this.translate.setDefaultLang(defaultLang);
     
     const browserLang = this.translate.getBrowserLang();
     const savedLang = this.storage.getItem<string>(this.LANG_KEY);
     
-    const langToUse = savedLang || (browserLang && browserLang.match(/en|es|fr/) ? browserLang : defaultLang);
+    const langToUse = savedLang || (browserLang && browserLang.match(/en|hn/) ? browserLang : defaultLang);
     this.setLanguage(langToUse);
   }
 

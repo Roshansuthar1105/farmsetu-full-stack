@@ -25,6 +25,9 @@ DROP TABLE IF EXISTS chats CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS stories CASCADE;
 DROP TABLE IF EXISTS posts CASCADE;
+DROP TABLE IF EXISTS user_watchlist CASCADE;
+DROP TABLE IF EXISTS daily_prices CASCADE;
+DROP TABLE IF EXISTS commodities CASCADE;
 DROP TABLE IF EXISTS market_prices CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS farmer_profiles CASCADE;
@@ -289,6 +292,38 @@ CREATE TABLE mandi_facilities (
     PRIMARY KEY (mandi_id, facility)
 );
 
+CREATE TABLE commodities (
+    id                  BIGSERIAL PRIMARY KEY,
+    name                VARCHAR(255) NOT NULL,
+    category            VARCHAR(100) NOT NULL,
+    local_name          VARCHAR(255),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE daily_prices (
+    id                  BIGSERIAL PRIMARY KEY,
+    mandi_id            BIGINT NOT NULL REFERENCES mandis(id) ON DELETE CASCADE,
+    commodity_id        BIGINT NOT NULL REFERENCES commodities(id) ON DELETE CASCADE,
+    min_price           NUMERIC(10, 2) NOT NULL,
+    max_price           NUMERIC(10, 2) NOT NULL,
+    modal_price         NUMERIC(10, 2) NOT NULL,
+    arrival_volume      NUMERIC(12, 2) NOT NULL,
+    price_date          DATE NOT NULL,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE user_watchlist (
+    id                  BIGSERIAL PRIMARY KEY,
+    user_id             BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    commodity_id        BIGINT REFERENCES commodities(id) ON DELETE CASCADE,
+    mandi_id            BIGINT REFERENCES mandis(id) ON DELETE CASCADE,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_watchlist UNIQUE (user_id, commodity_id, mandi_id)
+);
+
 CREATE TABLE govt_schemes (
     id                      BIGSERIAL PRIMARY KEY,
     name                    VARCHAR(500) NOT NULL,
@@ -550,7 +585,8 @@ BEGIN
         'chats', 'posts', 'comments', 'stories', 'market_prices', 'mandis',
         'govt_schemes', 'insurance_schemes', 'crop_calendar', 'calendar_tasks',
         'disease_detections', 'notifications', 'reviews', 'news', 'resources',
-        'badges', 'user_badges', 'farm_expenses', 'admin_logs'
+        'badges', 'user_badges', 'farm_expenses', 'admin_logs', 'commodities',
+        'daily_prices', 'user_watchlist'
     ])
     LOOP
         EXECUTE format('

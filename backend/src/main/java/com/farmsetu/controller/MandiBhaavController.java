@@ -71,7 +71,9 @@ public class MandiBhaavController {
     }
 
     @GetMapping("/forecast/{commodityId}")
-    public ApiResponse<Map<String, Object>> getForecast(@PathVariable Long commodityId) {
-        return ApiResponse.ok(mandiBhaavService.getForecast(commodityId));
+    public ApiResponse<Map<String, Object>> getForecast(
+            @PathVariable Long commodityId,
+            @RequestParam(required = false) Integer days) {
+        return ApiResponse.ok(mandiBhaavService.getForecast(commodityId, days));
     }
 }

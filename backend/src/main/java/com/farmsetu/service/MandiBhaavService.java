@@ -30,10 +30,12 @@ public class MandiBhaavService {
     private static final double DEFAULT_LNG = 75.8577; // Indore Lng
     private static final double TRANSPORT_RATE_PER_Q_KM = 5.0; // ₹5 per quintal per km
 
+    @Transactional(readOnly = true)
     public List<Commodity> getCommodities() {
         return commodityRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getLatestPrices(Double lat, Double lng, Double radiusKm, Long userId) {
         double queryLat = lat != null ? lat : DEFAULT_LAT;
         double queryLng = lng != null ? lng : DEFAULT_LNG;
@@ -63,10 +65,27 @@ public class MandiBhaavService {
 
         List<Map<String, Object>> response = new ArrayList<>();
         for (DailyPrice dp : latestPrices) {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", dp.getId());
-            map.put("mandi", dp.getMandi());
-            map.put("commodity", dp.getCommodity());
+
+            // Eagerly build mandi map to avoid proxy serialization issues
+            Map<String, Object> mandiMap = new LinkedHashMap<>();
+            mandiMap.put("id", dp.getMandi().getId());
+            mandiMap.put("name", dp.getMandi().getName());
+            mandiMap.put("state", dp.getMandi().getState());
+            mandiMap.put("district", dp.getMandi().getDistrict());
+            mandiMap.put("latitude", dp.getMandi().getLatitude());
+            mandiMap.put("longitude", dp.getMandi().getLongitude());
+            map.put("mandi", mandiMap);
+
+            // Eagerly build commodity map
+            Map<String, Object> commMap = new LinkedHashMap<>();
+            commMap.put("id", dp.getCommodity().getId());
+            commMap.put("name", dp.getCommodity().getName());
+            commMap.put("category", dp.getCommodity().getCategory());
+            commMap.put("localName", dp.getCommodity().getLocalName());
+            map.put("commodity", commMap);
+
             map.put("minPrice", dp.getMinPrice());
             map.put("maxPrice", dp.getMaxPrice());
             map.put("modalPrice", dp.getModalPrice());
@@ -91,14 +110,33 @@ public class MandiBhaavService {
         return response;
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getWatchlist(Long userId) {
         List<UserWatchlist> items = userWatchlistRepository.findByUserId(userId);
         return items.stream().map(item -> {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", item.getId());
-            map.put("commodity", item.getCommodity());
-            map.put("mandi", item.getMandi());
-            
+
+            // Build commodity map eagerly
+            if (item.getCommodity() != null) {
+                Map<String, Object> commMap = new LinkedHashMap<>();
+                commMap.put("id", item.getCommodity().getId());
+                commMap.put("name", item.getCommodity().getName());
+                commMap.put("category", item.getCommodity().getCategory());
+                commMap.put("localName", item.getCommodity().getLocalName());
+                map.put("commodity", commMap);
+            }
+
+            // Build mandi map eagerly
+            if (item.getMandi() != null) {
+                Map<String, Object> mandiMap = new LinkedHashMap<>();
+                mandiMap.put("id", item.getMandi().getId());
+                mandiMap.put("name", item.getMandi().getName());
+                mandiMap.put("state", item.getMandi().getState());
+                mandiMap.put("district", item.getMandi().getDistrict());
+                map.put("mandi", mandiMap);
+            }
+
             // Get latest price for this combination if available
             if (item.getCommodity() != null && item.getMandi() != null) {
                 List<DailyPrice> dpList = dailyPriceRepository.findLatestPricesForCommodityInMandis(
@@ -155,6 +193,7 @@ public class MandiBhaavService {
         userWatchlistRepository.delete(item);
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> compareRoi(Long commodityId, double quantity, Double lat, Double lng, Long userId) {
         double queryLat = lat != null ? lat : DEFAULT_LAT;
         double queryLng = lng != null ? lng : DEFAULT_LNG;
@@ -168,10 +207,11 @@ public class MandiBhaavService {
             }
         }
 
-        // Fetch closest mandis within 150km radius
-        List<Mandi> mandis = mandiRepository.findNearby(queryLat, queryLng, 150.0);
+        // Fetch closest mandis within 500km radius
+        List<Mandi> mandis = mandiRepository.findNearby(queryLat, queryLng, 500.0);
         if (mandis.isEmpty()) {
-            mandis = mandiRepository.findAll().stream().limit(5).collect(Collectors.toList());
+            // Fallback: use all mandis regardless of distance
+            mandis = mandiRepository.findAll();
         }
 
         if (mandis.isEmpty()) {
@@ -199,8 +239,18 @@ public class MandiBhaavService {
             // Net Profit = Revenue - Transport Cost
             BigDecimal netProfit = totalRevenue.subtract(transportCost);
 
-            Map<String, Object> map = new HashMap<>();
-            map.put("mandi", mandi);
+            Map<String, Object> map = new LinkedHashMap<>();
+
+            // Build mandi map eagerly to avoid lazy proxy issues
+            Map<String, Object> mandiMap = new LinkedHashMap<>();
+            mandiMap.put("id", mandi.getId());
+            mandiMap.put("name", mandi.getName());
+            mandiMap.put("state", mandi.getState());
+            mandiMap.put("district", mandi.getDistrict());
+            mandiMap.put("latitude", mandi.getLatitude());
+            mandiMap.put("longitude", mandi.getLongitude());
+            map.put("mandi", mandiMap);
+
             map.put("distance", Math.round(distance * 10.0) / 10.0);
             map.put("modalPrice", dp.getModalPrice());
             map.put("totalRevenue", totalRevenue.setScale(2, RoundingMode.HALF_UP));
@@ -214,22 +264,33 @@ public class MandiBhaavService {
         return result;
     }
 
-    public Map<String, Object> getForecast(Long commodityId) {
-        LocalDate to = LocalDate.now();
-        LocalDate from = to.minusDays(30);
-        List<DailyPrice> history = dailyPriceRepository.findByCommodityIdAndPriceDateBetweenOrderByPriceDateAsc(commodityId, from, to);
+    @Transactional(readOnly = true)
+    public Map<String, Object> getForecast(Long commodityId, Integer days) {
+        int historyDays = (days != null && days > 0) ? days : 30;
 
-        if (history.isEmpty()) {
-            // Fetch all records for this commodity if 30 days is empty
+        List<DailyPrice> history;
+        if (historyDays >= 9999) {
+            // "All data" mode
             history = dailyPriceRepository.findByCommodityIdOrderByPriceDateDesc(commodityId)
                     .stream()
-                    .limit(30)
+                    .sorted(Comparator.comparing(DailyPrice::getPriceDate))
+                    .collect(Collectors.toList());
+        } else {
+            LocalDate to = LocalDate.now();
+            LocalDate from = to.minusDays(historyDays);
+            history = dailyPriceRepository.findByCommodityIdAndPriceDateBetweenOrderByPriceDateAsc(commodityId, from, to);
+        }
+
+        if (history.isEmpty()) {
+            // Fetch all records for this commodity if period is empty
+            history = dailyPriceRepository.findByCommodityIdOrderByPriceDateDesc(commodityId)
+                    .stream()
                     .sorted(Comparator.comparing(DailyPrice::getPriceDate))
                     .collect(Collectors.toList());
         }
 
         List<Map<String, Object>> historicalPoints = history.stream().map(dp -> {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new LinkedHashMap<>();
             map.put("date", dp.getPriceDate().toString());
             map.put("price", dp.getModalPrice());
             map.put("volume", dp.getArrivalVolume());
@@ -270,7 +331,7 @@ public class MandiBhaavService {
                 forecastedY = forecastedY * (1.0 + (Math.random() - 0.5) * 0.01);
                 
                 LocalDate forecastDate = lastDate.plusDays(i);
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new LinkedHashMap<>();
                 map.put("date", forecastDate.toString());
                 map.put("price", BigDecimal.valueOf(forecastedY).setScale(2, RoundingMode.HALF_UP));
                 forecastPoints.add(map);
@@ -279,14 +340,14 @@ public class MandiBhaavService {
             // Absolute fallback mock data
             LocalDate base = LocalDate.now();
             for (int i = 1; i <= 15; i++) {
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new LinkedHashMap<>();
                 map.put("date", base.plusDays(i).toString());
                 map.put("price", BigDecimal.valueOf(2500 + i * 5).setScale(2, RoundingMode.HALF_UP));
                 forecastPoints.add(map);
             }
         }
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new LinkedHashMap<>();
         response.put("history", historicalPoints);
         response.put("forecast", forecastPoints);
         return response;

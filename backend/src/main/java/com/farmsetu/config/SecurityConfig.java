@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/news/**", "/api/resources/**",
                                 "/api/schemes/**", "/api/insurance/**", "/api/products/**",
-                                "/api/market/**", "/api/weather/**", "/api/crops/**").permitAll()
+                                "/api/market/**", "/api/weather/**", "/api/crops/**", "/api/mandi-bhaav/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())

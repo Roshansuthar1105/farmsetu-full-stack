@@ -121,6 +121,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/crops/admin-crops.component').then(m => m.AdminCropsComponent)
       },
       {
+        path: 'mandis',
+        loadComponent: () => import('./features/admin/mandis/admin-mandis.component').then(m => m.AdminMandisComponent)
+      },
+      {
         path: 'market-prices',
         loadComponent: () => import('./features/admin/crops/market-prices-bulk.component').then(m => m.MarketPricesBulkComponent)
       },

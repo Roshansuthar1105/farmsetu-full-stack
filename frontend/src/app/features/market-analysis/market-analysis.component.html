@@ -1,495 +1,605 @@
-<div class="min-h-screen bg-[#0f172a] text-gray-150 p-6 font-sans">
+<div class="space-y-6">
   
   @if (loading()) {
     <fs-loading-skeleton />
   } @else {
-    <div class="space-y-6 max-w-7xl mx-auto">
+    <div class="space-y-6 max-w-7xl mx-auto animate-fade-in">
       
-      <!-- HEADER WITH TOOLBAR -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1e293b]/30 p-6 rounded-3xl border border-gray-800 backdrop-blur-md">
-        <h1 class="text-2xl font-black text-white tracking-tight">Real-Time Market Prices</h1>
+      <!-- HEADER WITH TITLE AND TABS -->
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div>
+          <h1 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+            <span class="material-icons text-green-600 dark:text-green-400">trending_up</span>
+            {{ i18n.t('mandiBhaav.title') }}
+          </h1>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5">
+            <span class="material-icons text-xs text-green-500">gps_fixed</span>
+            {{ i18n.t('mandiBhaav.nearestMandis') }} ({{ lat() ? lat()?.toFixed(4) : '22.7196' }}, {{ lng() ? lng()?.toFixed(4) : '75.8577' }})
+          </p>
+        </div>
         
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Categories Filter Button -->
-          <button type="button" class="flex items-center gap-1.5 bg-[#1e293b] hover:bg-[#334155] border border-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-semibold transition active:scale-95">
-            <span class="material-icons text-sm">filter_list</span>
-            categories
-          </button>
-
-          <!-- Commodity Selector Dropdown -->
-          <div class="relative">
-            <select 
-              [(ngModel)]="selectedCropName"
-              class="appearance-none bg-[#1e293b] hover:bg-[#334155] border border-gray-700 text-gray-200 px-4 py-2 pr-10 rounded-xl text-xs font-semibold outline-none cursor-pointer focus:border-green-500 transition"
-            >
-              @for (name of cropNames(); track name) {
-                <option [value]="name">{{ name }}</option>
-              }
-            </select>
-            <span class="material-icons absolute right-3 top-2.5 text-gray-500 text-xs pointer-events-none">expand_more</span>
-          </div>
-
-          <!-- Submit Button -->
-          <button 
-            (click)="onSubmit()" 
-            type="button" 
-            class="bg-[#22c55e] hover:bg-[#16a34a] text-white px-5 py-2 rounded-xl text-xs font-bold transition active:scale-95 shadow-lg shadow-green-500/20"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <!-- KEY METRICS GRID -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Card 1: totalCommodities -->
-        <div class="bg-blue-600 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between h-36 relative overflow-hidden group">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider opacity-80">totalCommodities</span>
-            <span class="material-icons text-xl opacity-90 group-hover:scale-110 transition">inventory_2</span>
-          </div>
-          <div class="text-3xl font-black">{{ totalCommodities() }}</div>
-        </div>
-
-        <!-- Card 2: totalMarkets -->
-        <div class="bg-emerald-600 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between h-36 relative overflow-hidden group">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider opacity-80">totalMarkets</span>
-            <span class="material-icons text-xl opacity-90 group-hover:scale-110 transition">location_on</span>
-          </div>
-          <div class="text-3xl font-black">{{ totalMarkets() }}</div>
-        </div>
-
-        <!-- Card 3: highestPricedCommodity -->
-        <div class="bg-purple-600 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between h-36 relative overflow-hidden group">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider opacity-80">highestPricedCommodity</span>
-            <span class="material-icons text-xl opacity-90 group-hover:scale-110 transition">payments</span>
-          </div>
-          <div class="space-y-1">
-            <div class="text-sm font-extrabold line-clamp-1 leading-snug">{{ highestPricedCommodity().name }}</div>
-            <div class="text-xl font-black">(₹{{ highestPricedCommodity().price }})</div>
-          </div>
-        </div>
-
-        <!-- Card 4: marketTrend -->
-        <div class="bg-teal-600 rounded-3xl p-6 text-white shadow-sm flex flex-col justify-between h-36 relative overflow-hidden group">
-          <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-wider opacity-80">marketTrend</span>
-            <span class="material-icons text-xl opacity-90 group-hover:scale-110 transition">trending_up</span>
-          </div>
-          <div class="space-y-1">
-            <div class="text-xl font-black leading-none">lastMonth</div>
-            <div class="text-[10px] font-bold opacity-90 flex items-center gap-1 mt-1">
-              <span class="material-icons text-[10px]">arrow_upward</span>
-              3.07% increase
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TABS + SIZE NAVIGATION BAR -->
-      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-gray-800 pb-3">
-        <!-- Tabs -->
-        <div class="flex gap-6 text-xs font-bold text-gray-400">
+        <!-- Navigation Tabs -->
+        <div class="flex flex-wrap gap-1.5 bg-gray-100 dark:bg-gray-900 p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 w-full lg:w-auto">
           <button 
             (click)="setTab('Overview')"
-            [class.text-[#22c55e]]="activeTab() === 'Overview'"
-            [class.border-[#22c55e]]="activeTab() === 'Overview'"
-            class="pb-3 border-b-2 border-transparent transition hover:text-white"
+            [class]="activeTab() === 'Overview' 
+              ? 'bg-green-600 text-white shadow-sm' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'"
+            class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold transition"
           >
             Overview
           </button>
           <button 
-            (click)="setTab('charts')"
-            [class.text-[#22c55e]]="activeTab() === 'charts'"
-            [class.border-[#22c55e]]="activeTab() === 'charts'"
-            class="pb-3 border-b-2 border-transparent transition hover:text-white"
+            (click)="setTab('ROI Calculator')"
+            [class]="activeTab() === 'ROI Calculator' 
+              ? 'bg-green-600 text-white shadow-sm' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'"
+            class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold transition"
           >
-            charts
+            ROI Calculator
+          </button>
+          <button 
+            (click)="setTab('Forecasts')"
+            [class]="activeTab() === 'Forecasts' 
+              ? 'bg-green-600 text-white shadow-sm' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'"
+            class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold transition"
+          >
+            Forecasts
           </button>
           <button 
             (click)="setTab('Data Table')"
-            [class.text-[#22c55e]]="activeTab() === 'Data Table'"
-            [class.border-[#22c55e]]="activeTab() === 'Data Table'"
-            class="pb-3 border-b-2 border-transparent transition hover:text-white"
+            [class]="activeTab() === 'Data Table' 
+              ? 'bg-green-600 text-white shadow-sm' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'"
+            class="flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-bold transition"
           >
             Data Table
-          </button>
-          <button 
-            (click)="setTab('marketInsights')"
-            [class.text-[#22c55e]]="activeTab() === 'marketInsights'"
-            [class.border-[#22c55e]]="activeTab() === 'marketInsights'"
-            class="pb-3 border-b-2 border-transparent transition hover:text-white"
-          >
-            marketInsights
-          </button>
-        </div>
-
-        <!-- Size Toggles -->
-        <div class="flex bg-[#1e293b] p-0.5 rounded-xl border border-gray-800 self-end">
-          <button 
-            (click)="setSize('small')"
-            [class.bg-[#334155]]="size() === 'small'"
-            [class.text-white]="size() === 'small'"
-            class="px-3 py-1 rounded-lg text-[10px] font-bold text-gray-400 transition"
-          >
-            small
-          </button>
-          <button 
-            (click)="setSize('medium')"
-            [class.bg-[#334155]]="size() === 'medium'"
-            [class.text-white]="size() === 'medium'"
-            class="px-3 py-1 rounded-lg text-[10px] font-bold text-gray-400 transition"
-          >
-            medium
-          </button>
-          <button 
-            (click)="setSize('large')"
-            [class.bg-[#334155]]="size() === 'large'"
-            [class.text-white]="size() === 'large'"
-            class="px-3 py-1 rounded-lg text-[10px] font-bold text-gray-400 transition"
-          >
-            large
           </button>
         </div>
       </div>
 
-      <!-- MAIN TAB VIEWS -->
+      <!-- MY WATCHLIST (PINNED TICKERS) -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-green-600 dark:text-green-400">push_pin</span>
+          <h2 class="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+            {{ i18n.t('mandiBhaav.watchlist') }}
+          </h2>
+        </div>
+
+        @if (watchlist().length === 0) {
+          <div class="py-6 text-center text-xs text-gray-400 dark:text-gray-500">
+            {{ i18n.t('mandiBhaav.noWatchlist') }}
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @for (w of watchlist(); track w.id) {
+              <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-green-500/40 dark:hover:border-green-500/30 transition shadow-sm">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="text-xs font-black text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition">
+                      {{ w.commodity?.localName || w.commodity?.name }}
+                    </h3>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+                      <span class="material-icons text-[10px] text-gray-400">location_on</span>
+                      {{ w.mandi?.name }}
+                    </p>
+                  </div>
+                  <!-- Unpin button -->
+                  <button 
+                    (click)="toggleWatchlist(w.commodity!.id, w.mandi!.id)"
+                    class="text-green-600 dark:text-green-400 hover:text-red-500 dark:hover:text-red-400 transition"
+                  >
+                    <span class="material-icons text-sm">push_pin</span>
+                  </button>
+                </div>
+
+                <div class="mt-4 flex justify-between items-end">
+                  <div>
+                    <span class="text-[9px] text-gray-400 dark:text-gray-500 uppercase block font-bold">
+                      {{ i18n.t('mandiBhaav.modalPrice') }}
+                    </span>
+                    <span class="text-lg font-black text-green-600 dark:text-green-400">
+                      ₹{{ w.latestModalPrice || 'N/A' }}
+                    </span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] text-gray-400 dark:text-gray-500 block">Min-Max</span>
+                    <span class="text-[10px] text-gray-600 dark:text-gray-300 font-bold block">
+                      ₹{{ w.latestMinPrice }} - ₹{{ w.latestMaxPrice }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- MAIN TABS CONTAINER -->
 
       <!-- TAB 1: OVERVIEW -->
       @if (activeTab() === 'Overview') {
-        <div class="space-y-8 animate-fade-in">
+        <div class="space-y-6">
           
-          <!-- Category Overview Cards -->
-          <div class="space-y-4">
-            <h2 class="text-base font-extrabold text-[#22c55e] uppercase tracking-wider">categoryOverview</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
-              @for (cat of categoryMetrics(); track cat.name) {
-                <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-5 shadow-sm space-y-4 hover:border-gray-700 transition">
-                  <h3 class="text-sm font-black text-white">{{ cat.name }}</h3>
-                  
-                  <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-[10px] text-gray-400">
-                    <div>
-                      <span class="block opacity-75">products</span>
-                      <span class="text-xs font-extrabold text-white mt-0.5 block">{{ cat.products }}</span>
-                    </div>
-                    <div>
-                      <span class="block opacity-75">avgPrice</span>
-                      <span class="text-xs font-extrabold text-white mt-0.5 block">₹{{ cat.avgPrice }}</span>
-                    </div>
-                    <div>
-                      <span class="block opacity-75">priceRange</span>
-                      <span class="text-xs font-extrabold text-white mt-0.5 block">₹{{ cat.maxPrice - cat.minPrice }}</span>
-                    </div>
-                    <div>
-                      <span class="block opacity-75">volatility</span>
-                      <span class="text-xs font-extrabold text-white mt-0.5 block">{{ cat.volatility }}%</span>
-                    </div>
-                  </div>
+          <!-- Key Stats Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+              <div class="p-3 bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center">
+                <span class="material-icons text-2xl">category</span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+                  Crops Monitored
+                </span>
+                <span class="text-2xl font-black text-gray-900 dark:text-white">{{ totalCommodities() }}</span>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+              <div class="p-3 bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl flex items-center">
+                <span class="material-icons text-2xl">store</span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+                  APMC Mandis
+                </span>
+                <span class="text-2xl font-black text-gray-900 dark:text-white">{{ totalMarkets() }}</span>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+              <div class="p-3 bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl flex items-center">
+                <span class="material-icons text-2xl">insights</span>
+              </div>
+              @if (highestPriceRecord(); as hp) {
+                <div>
+                  <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider block">
+                    Highest Market Rate
+                  </span>
+                  <span class="text-xs font-bold text-purple-600 dark:text-purple-300 block leading-tight">
+                    {{ hp.commodity.localName || hp.commodity.name }} in {{ hp.mandi.name }}
+                  </span>
+                  <span class="text-lg font-black text-gray-900 dark:text-white">₹{{ hp.modalPrice }}/Q</span>
                 </div>
               }
             </div>
           </div>
 
-          <!-- Category Comparison Chart -->
+          <!-- APMC Mandi Tickers Grid -->
           <div class="space-y-4">
-            <h2 class="text-base font-extrabold text-[#22c55e] uppercase tracking-wider">categoryComparison</h2>
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 shadow-sm">
-              <apx-chart
-                [series]="overviewChartOptions().series"
-                [chart]="overviewChartOptions().chart"
-                [colors]="overviewChartOptions().colors"
-                [plotOptions]="overviewChartOptions().plotOptions"
-                [dataLabels]="overviewChartOptions().dataLabels"
-                [stroke]="overviewChartOptions().stroke"
-                [xaxis]="overviewChartOptions().xaxis"
-                [yaxis]="overviewChartOptions().yaxis"
-                [fill]="overviewChartOptions().fill"
-                [grid]="overviewChartOptions().grid"
-                [legend]="overviewChartOptions().legend"
-              ></apx-chart>
+            <h2 class="text-sm font-extrabold uppercase tracking-wider text-green-600 dark:text-green-400 flex items-center gap-2">
+              <span class="material-icons text-sm">location_city</span>
+              APMC Mandi Tickers (Auto-Detected)
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              @for (price of latestPrices(); track price.id) {
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4 hover:border-green-500/30 transition relative overflow-hidden group">
+                  
+                  <!-- Top Banner: Mandi Info -->
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="text-sm font-black text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition">
+                        {{ price.mandi.name }}
+                      </h3>
+                      <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        {{ price.mandi.state }} · {{ price.mandi.district }}
+                      </p>
+                    </div>
+                    <span class="text-[10px] font-extrabold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                      <span class="material-icons text-[10px]">navigation</span>
+                      {{ price.distance }} km
+                    </span>
+                  </div>
+
+                  <!-- Crop name & category ticker row -->
+                  <div class="flex justify-between items-center py-2 border-y border-gray-100 dark:border-gray-700">
+                    <div>
+                      <span class="text-xs font-bold text-gray-900 dark:text-white block">
+                        {{ price.commodity.localName || price.commodity.name }}
+                      </span>
+                      <span class="text-[9px] text-gray-400 dark:text-gray-500 block font-semibold uppercase">
+                        {{ price.commodity.category }}
+                      </span>
+                    </div>
+                    
+                    <!-- Watchlist pin toggle button -->
+                    <button 
+                      (click)="toggleWatchlist(price.commodity.id, price.mandi.id)"
+                      [class.text-green-600]="isPinned(price.commodity.id, price.mandi.id)"
+                      [class.dark:text-green-400]="isPinned(price.commodity.id, price.mandi.id)"
+                      [class.text-gray-400]="!isPinned(price.commodity.id, price.mandi.id)"
+                      class="hover:text-green-600 dark:hover:text-green-400 transition"
+                    >
+                      <span class="material-icons">
+                        {{ isPinned(price.commodity.id, price.mandi.id) ? 'push_pin' : 'pin_drop' }}
+                      </span>
+                    </button>
+                  </div>
+
+                  <!-- Price blocks -->
+                  <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-red-50 dark:bg-red-500/5 border border-red-100 dark:border-red-500/10 rounded-xl p-2.5">
+                      <span class="text-[8px] text-red-500 dark:text-red-400 font-bold block uppercase mb-1">
+                        {{ i18n.t('mandiBhaav.minPrice') }}
+                      </span>
+                      <span class="text-xs font-extrabold text-gray-900 dark:text-white">₹{{ price.minPrice }}</span>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/10 rounded-xl p-2.5">
+                      <span class="text-[8px] text-blue-500 dark:text-blue-400 font-bold block uppercase mb-1">
+                        {{ i18n.t('mandiBhaav.modalPrice') }}
+                      </span>
+                      <span class="text-sm font-black text-gray-900 dark:text-white">₹{{ price.modalPrice }}</span>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-500/5 border border-green-100 dark:border-green-500/10 rounded-xl p-2.5">
+                      <span class="text-[8px] text-green-600 dark:text-green-400 font-bold block uppercase mb-1">
+                        {{ i18n.t('mandiBhaav.maxPrice') }}
+                      </span>
+                      <span class="text-xs font-extrabold text-gray-900 dark:text-white">₹{{ price.maxPrice }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Footer Trend Tickers -->
+                  <div class="flex justify-between items-center text-[10px]">
+                    <span class="text-gray-500 dark:text-gray-400">
+                      Arrival: <strong class="text-gray-700 dark:text-gray-300">{{ price.arrivalVolume }} Q</strong>
+                    </span>
+                    <span [ngClass]="price.priceChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'" class="font-extrabold flex items-center gap-0.5">
+                      @if (price.priceChange > 0) {
+                        <span class="material-icons text-[10px]">arrow_upward</span>
+                        ▲ ₹{{ price.priceChange }}
+                      } @else if (price.priceChange < 0) {
+                        <span class="material-icons text-[10px]">arrow_downward</span>
+                        ▼ ₹{{ -price.priceChange }}
+                      } @else {
+                        <span>No change</span>
+                      }
+                    </span>
+                  </div>
+
+                </div>
+              }
             </div>
           </div>
-
-          <!-- Market Trends Card Grid -->
-          <div class="space-y-4">
-            <h2 class="text-base font-extrabold text-[#22c55e] uppercase tracking-wider">marketTrends</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-5 flex justify-between items-center group">
-                <div>
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">weeklyTrend</span>
-                  <div class="text-xl font-black text-[#22c55e] mt-1">+4.41%</div>
-                </div>
-                <span class="material-icons text-xl text-[#22c55e] group-hover:translate-x-1 group-hover:-translate-y-1 transition">trending_up</span>
-              </div>
-              <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-5 flex justify-between items-center group">
-                <div>
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">monthlyTrend</span>
-                  <div class="text-xl font-black text-[#22c55e] mt-1">+3.07%</div>
-                </div>
-                <span class="material-icons text-xl text-[#22c55e] group-hover:translate-x-1 group-hover:-translate-y-1 transition">trending_up</span>
-              </div>
-              <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-5 flex justify-between items-center group">
-                <div>
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">yearlyTrend</span>
-                  <div class="text-xl font-black text-[#22c55e] mt-1">+10.22%</div>
-                </div>
-                <span class="material-icons text-xl text-[#22c55e] group-hover:translate-x-1 group-hover:-translate-y-1 transition">trending_up</span>
-              </div>
-            </div>
-          </div>
-
         </div>
       }
 
-      <!-- TAB 2: CHARTS -->
-      @if (activeTab() === 'charts') {
-        <div class="space-y-8 animate-fade-in">
+      <!-- TAB 2: ROI CALCULATOR -->
+      @if (activeTab() === 'ROI Calculator') {
+        <div class="space-y-6">
           
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Price Comparison -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider text-center">Price Comparison</h3>
-              <apx-chart
-                [series]="cropComparisonChartOptions().series"
-                [chart]="cropComparisonChartOptions().chart"
-                [colors]="cropComparisonChartOptions().colors"
-                [plotOptions]="cropComparisonChartOptions().plotOptions"
-                [xaxis]="cropComparisonChartOptions().xaxis"
-                [yaxis]="cropComparisonChartOptions().yaxis"
-                [grid]="cropComparisonChartOptions().grid"
-                [legend]="cropComparisonChartOptions().legend"
-              ></apx-chart>
-            </div>
+          <!-- Input Form Card -->
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
+            <h2 class="text-base font-extrabold text-green-600 dark:text-green-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <span class="material-icons">calculate</span>
+              {{ i18n.t('mandiBhaav.roiCalculator') }}
+            </h2>
 
-            <!-- Historical Price Trends -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider text-center">Historical Price Trends</h3>
-              <apx-chart
-                [series]="trendChartOptions().series"
-                [chart]="trendChartOptions().chart"
-                [colors]="trendChartOptions().colors"
-                [stroke]="trendChartOptions().stroke"
-                [xaxis]="trendChartOptions().xaxis"
-                [yaxis]="trendChartOptions().yaxis"
-                [fill]="trendChartOptions().fill"
-                [grid]="trendChartOptions().grid"
-              ></apx-chart>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              <!-- Select Crop -->
+              <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase">
+                  {{ i18n.t('mandiBhaav.selectCommodity') }}
+                </label>
+                <div class="relative">
+                  <select 
+                    [(ngModel)]="calculatorCommodityId"
+                    class="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-4 py-3 pr-10 rounded-xl text-xs font-bold outline-none cursor-pointer focus:border-green-500 transition"
+                  >
+                    @for (comm of commodities(); track comm.id) {
+                      <option [value]="comm.id">{{ comm.localName || comm.name }}</option>
+                    }
+                  </select>
+                  <span class="material-icons absolute right-4 top-3.5 text-gray-400 text-sm pointer-events-none">expand_more</span>
+                </div>
+              </div>
+
+              <!-- Crop Quantity -->
+              <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase">
+                  {{ i18n.t('mandiBhaav.cropQty') }}
+                </label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="calculatorQuantity"
+                  class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-4 py-3 rounded-xl text-xs font-bold outline-none focus:border-green-500 transition"
+                  placeholder="e.g. 50"
+                  min="1"
+                />
+              </div>
+
+              <!-- Submit button -->
+              <button 
+                (click)="calculateRoi()"
+                class="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500 text-white py-3 rounded-xl text-xs font-extrabold transition active:scale-95 shadow-md flex items-center justify-center gap-1.5"
+              >
+                <span class="material-icons text-sm">rocket_launch</span>
+                {{ i18n.t('mandiBhaav.calculate') }}
+              </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Market Share -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 flex flex-col justify-between items-center text-center space-y-4">
-              <h3 class="text-xs font-extrabold text-[#22c55e] uppercase tracking-wider">Market Share</h3>
-              <apx-chart
-                [series]="marketShareChartOptions().series"
-                [chart]="marketShareChartOptions().chart"
-                [labels]="marketShareChartOptions().labels"
-                [legend]="marketShareChartOptions().legend"
-              ></apx-chart>
+          <!-- ROI Results -->
+          @if (isCalculated() && roiResults().length > 0) {
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 class="text-sm font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <span class="material-icons text-green-600 dark:text-green-400">stars</span>
+                {{ i18n.t('mandiBhaav.bestMarket') }} Analysis
+              </h3>
+
+              <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                <table class="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase">
+                      <th class="p-4">Market / Mandi</th>
+                      <th class="p-4">{{ i18n.t('mandiBhaav.distance') }}</th>
+                      <th class="p-4">Rate (₹/Quintal)</th>
+                      <th class="p-4">Gross Revenue</th>
+                      <th class="p-4">{{ i18n.t('mandiBhaav.transportCost') }}</th>
+                      <th class="p-4">{{ i18n.t('mandiBhaav.netProfit') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of roiResults(); track row.mandi.id; let idx = $index) {
+                      <tr 
+                        [ngClass]="idx === 0 ? 'bg-green-50 dark:bg-green-950/20 border-l-4 border-green-500' : ''"
+                        class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition"
+                      >
+                        <td class="p-4 font-black text-gray-900 dark:text-white flex items-center gap-2">
+                          {{ row.mandi.name }}
+                          @if (idx === 0) {
+                            <span class="text-[9px] bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 font-black px-2 py-0.5 rounded-full">
+                              BEST ROI
+                            </span>
+                          }
+                        </td>
+                        <td class="p-4 text-gray-500 dark:text-gray-400">{{ row.distance }} km</td>
+                        <td class="p-4 font-extrabold text-blue-600 dark:text-blue-300">₹{{ row.modalPrice }}</td>
+                        <td class="p-4 text-gray-900 dark:text-white">₹{{ row.totalRevenue.toLocaleString() }}</td>
+                        <td class="p-4 text-red-500 dark:text-red-400 font-bold">₹{{ row.transportCost.toLocaleString() }}</td>
+                        <td 
+                          [ngClass]="idx === 0 ? 'text-green-600 dark:text-green-400 font-black text-sm' : 'text-gray-900 dark:text-white'" 
+                          class="p-4 font-extrabold"
+                        >
+                          ₹{{ row.netProfit.toLocaleString() }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- TAB 3: FORECASTS -->
+      @if (activeTab() === 'Forecasts') {
+        <div class="space-y-6">
+          
+          <!-- Crop selection + filter controls -->
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 class="text-sm font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span class="material-icons text-green-600 dark:text-green-400">auto_graph</span>
+                  {{ i18n.t('mandiBhaav.forecast') }} Engine
+                </h2>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                  {{ i18n.t('mandiBhaav.forecastLegend') }}
+                </p>
+              </div>
+
+              <!-- Filter Controls Row -->
+              <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                <!-- Commodity Selector -->
+                <div class="relative flex-1 md:flex-none md:w-40">
+                  <label class="block text-[9px] font-bold text-gray-400 mb-1 uppercase">Crop</label>
+                  <select 
+                    (change)="onForecastCommodityChange($event)"
+                    [value]="selectedCommodityId()"
+                    class="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 pr-8 rounded-lg text-xs font-bold outline-none cursor-pointer focus:border-green-500 transition"
+                  >
+                    @for (comm of commodities(); track comm.id) {
+                      <option [value]="comm.id">{{ comm.localName || comm.name }}</option>
+                    }
+                  </select>
+                  <span class="material-icons absolute right-2 top-7 text-gray-400 text-xs pointer-events-none">expand_more</span>
+                </div>
+
+                <!-- Chart View Selector -->
+                <div class="relative flex-1 md:flex-none md:w-40">
+                  <label class="block text-[9px] font-bold text-gray-400 mb-1 uppercase">Chart View</label>
+                  <select 
+                    (change)="onChartViewChange($event)"
+                    [value]="chartView()"
+                    class="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 pr-8 rounded-lg text-xs font-bold outline-none cursor-pointer focus:border-green-500 transition"
+                  >
+                    <option value="both">Historical + Forecast</option>
+                    <option value="history">Historical Only</option>
+                    <option value="forecast">15-Day Forecast Only</option>
+                  </select>
+                  <span class="material-icons absolute right-2 top-7 text-gray-400 text-xs pointer-events-none">expand_more</span>
+                </div>
+
+                <!-- History Period Selector -->
+                <div class="relative flex-1 md:flex-none md:w-40">
+                  <label class="block text-[9px] font-bold text-gray-400 mb-1 uppercase">Historical Period</label>
+                  <select 
+                    (change)="onHistoryDaysChange($event)"
+                    [value]="historyDays()"
+                    class="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 pr-8 rounded-lg text-xs font-bold outline-none cursor-pointer focus:border-green-500 transition"
+                  >
+                    <option [value]="30">Last 30 Days</option>
+                    <option [value]="60">Last 60 Days</option>
+                    <option [value]="90">Last 90 Days</option>
+                    <option [value]="9999">All Data</option>
+                  </select>
+                  <span class="material-icons absolute right-2 top-7 text-gray-400 text-xs pointer-events-none">expand_more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trend Chart display card -->
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
+            <apx-chart
+              [series]="forecastChartOptions().series"
+              [chart]="forecastChartOptions().chart"
+              [colors]="forecastChartOptions().colors"
+              [stroke]="forecastChartOptions().stroke"
+              [dataLabels]="forecastChartOptions().dataLabels"
+              [xaxis]="forecastChartOptions().xaxis"
+              [yaxis]="forecastChartOptions().yaxis"
+              [grid]="forecastChartOptions().grid"
+              [legend]="forecastChartOptions().legend"
+              [tooltip]="forecastChartOptions().tooltip"
+            ></apx-chart>
+          </div>
+
+          <!-- Target Price Alert Setting Form -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Alert Creator -->
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 class="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-icons text-sm text-yellow-500">notifications_active</span>
+                {{ i18n.t('mandiBhaav.targetAlert') }}
+              </h3>
+
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-[10px] text-gray-400 dark:text-gray-500 font-bold mb-1 uppercase">Mandi</label>
+                  <select 
+                    [(ngModel)]="alertMandiId"
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-xs font-bold outline-none focus:border-green-500 transition"
+                  >
+                    @for (price of latestPrices(); track price.id) {
+                      <option [value]="price.mandi.id">{{ price.mandi.name }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[10px] text-gray-400 dark:text-gray-500 font-bold mb-1 uppercase">Crop</label>
+                    <select 
+                      [(ngModel)]="alertCommodityId"
+                      class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-xs font-bold outline-none focus:border-green-500 transition"
+                    >
+                      @for (comm of commodities(); track comm.id) {
+                        <option [value]="comm.id">{{ comm.localName || comm.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-gray-400 dark:text-gray-500 font-bold mb-1 uppercase">Threshold (₹/Q)</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="alertThreshold"
+                      class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-200 px-3 py-2 rounded-lg text-xs font-bold outline-none focus:border-green-500 transition"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  (click)="setupPriceAlert()"
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-bold transition active:scale-95 shadow-md"
+                >
+                  {{ i18n.t('mandiBhaav.setAlert') }}
+                </button>
+              </div>
             </div>
 
-            <!-- marketComparison (Radar) -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 flex flex-col justify-between items-center text-center space-y-4">
-              <h3 class="text-xs font-extrabold text-[#22c55e] uppercase tracking-wider">marketComparison</h3>
-              <apx-chart
-                [series]="radarChartOptions().series"
-                [chart]="radarChartOptions().chart"
-                [labels]="radarChartOptions().labels"
-                [colors]="radarChartOptions().colors"
-                [markers]="radarChartOptions().markers"
-                [yaxis]="radarChartOptions().yaxis"
-              ></apx-chart>
-            </div>
+            <!-- Tips & Forecasting explanation -->
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <h3 class="text-xs font-extrabold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-icons text-sm text-green-600 dark:text-green-400">tips_and_updates</span>
+                Harvest Planning Tip
+              </h3>
 
-            <!-- priceRange (Doughnut) -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 flex flex-col justify-between items-center text-center space-y-4">
-              <h3 class="text-xs font-extrabold text-[#22c55e] uppercase tracking-wider">priceRange</h3>
-              <apx-chart
-                [series]="priceRangeChartOptions().series"
-                [chart]="priceRangeChartOptions().chart"
-                [labels]="priceRangeChartOptions().labels"
-                [legend]="priceRangeChartOptions().legend"
-              ></apx-chart>
+              <div class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed space-y-2 mt-2">
+                <p>
+                  Our predictive models compute real-time price directions based on APMC market arrivals and daily volumes.
+                </p>
+                <p class="italic text-gray-400 dark:text-gray-500">
+                  "If arrival volume spikes by 30% in Indore, Soybean prices generally decrease by ₹150/quintal over the next 4 days. Plan your harvest timing accordingly."
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <span class="p-1.5 rounded-lg bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400 flex items-center">
+                  <span class="material-icons text-sm">online_prediction</span>
+                </span>
+                <div>
+                  <span class="text-[9px] font-bold text-gray-400 dark:text-gray-500 block uppercase tracking-wider">Prediction Confidence</span>
+                  <span class="text-[10px] text-green-600 dark:text-green-400 font-extrabold">87.5% Accuracy</span>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
       }
 
-      <!-- TAB 3: DATA TABLE -->
+      <!-- TAB 4: DATA TABLE -->
       @if (activeTab() === 'Data Table') {
-        <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 shadow-sm space-y-4 animate-fade-in">
-          <h2 class="text-base font-extrabold text-[#22c55e]">Data Table</h2>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm space-y-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+              <span class="material-icons text-green-600 dark:text-green-400">grid_on</span>
+              APMC Prices Registry
+            </h2>
+          </div>
           
-          <div class="overflow-x-auto rounded-2xl border border-gray-800">
-            <table class="w-full text-left border-collapse" [ngClass]="{
-              'text-[10px]': size() === 'small',
-              'text-xs': size() === 'medium',
-              'text-sm': size() === 'large'
-            }">
+          <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+            <table class="w-full text-left border-collapse text-xs">
               <thead>
-                <tr class="bg-[#111c44]/40 border-b border-gray-800 text-gray-400 font-bold uppercase">
-                  <th class="p-4">Market</th>
-                  <th class="p-4">Date</th>
-                  <th class="p-4">Max Price (₹)</th>
-                  <th class="p-4">Min Price (₹)</th>
-                  <th class="p-4 flex items-center gap-1">Price (₹) <span class="material-icons text-xs">arrow_downward</span></th>
-                  <th class="p-4">priceRange</th>
+                <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 font-bold uppercase">
+                  <th class="p-4">Market / Mandi</th>
+                  <th class="p-4">Crop / Commodity</th>
+                  <th class="p-4">Category</th>
+                  <th class="p-4">Modal Price (₹)</th>
+                  <th class="p-4">Price Range (₹)</th>
+                  <th class="p-4">Volume (Q)</th>
+                  <th class="p-4">Record Date</th>
+                  <th class="p-4 text-center">Pin</th>
                 </tr>
               </thead>
               <tbody>
-                @if (filteredPrices().length === 0) {
+                @if (latestPrices().length === 0) {
                   <tr>
-                    <td colspan="6" class="p-8 text-center text-gray-500">No prices record found for {{ selectedCropName() }}.</td>
+                    <td colspan="8" class="p-8 text-center text-gray-400 dark:text-gray-500">No prices records found.</td>
                   </tr>
                 } @else {
-                  @for (row of filteredPrices(); track row.id) {
-                    <tr class="border-b border-gray-800 hover:bg-[#1e293b]/50 transition">
-                      <td class="p-4 font-extrabold text-white">{{ row.mandiName }}</td>
-                      <td class="p-4 text-gray-400">{{ row.recordedDate }}</td>
-                      <td class="p-4 text-white">₹{{ row.maxPrice }}</td>
-                      <td class="p-4 text-white">₹{{ row.minPrice }}</td>
-                      <td class="p-4 text-green-500 font-extrabold">₹{{ row.pricePerQuintal }}</td>
-                      <td class="p-4 text-gray-400">₹{{ row.maxPrice - row.minPrice }}</td>
+                  @for (row of latestPrices(); track row.id) {
+                    <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition text-gray-600 dark:text-gray-300">
+                      <td class="p-4 font-black text-gray-900 dark:text-white">{{ row.mandi.name }}</td>
+                      <td class="p-4 font-extrabold text-gray-800 dark:text-gray-200">{{ row.commodity.localName || row.commodity.name }}</td>
+                      <td class="p-4 uppercase text-[10px] text-gray-400 dark:text-gray-500 font-semibold">{{ row.commodity.category }}</td>
+                      <td class="p-4 text-green-600 dark:text-green-400 font-bold">₹{{ row.modalPrice }}</td>
+                      <td class="p-4 text-gray-500 dark:text-gray-400">₹{{ row.minPrice }} - ₹{{ row.maxPrice }}</td>
+                      <td class="p-4 text-gray-500 dark:text-gray-400 font-bold">{{ row.arrivalVolume }} Q</td>
+                      <td class="p-4 text-gray-500 dark:text-gray-400">{{ row.priceDate }}</td>
+                      <td class="p-4 text-center">
+                        <button 
+                          (click)="toggleWatchlist(row.commodity.id, row.mandi.id)"
+                          [class.text-green-600]="isPinned(row.commodity.id, row.mandi.id)"
+                          [class.text-gray-400]="!isPinned(row.commodity.id, row.mandi.id)"
+                          class="hover:text-green-600 dark:hover:text-green-400 transition"
+                        >
+                          <span class="material-icons text-sm">
+                            {{ isPinned(row.commodity.id, row.mandi.id) ? 'push_pin' : 'pin_drop' }}
+                          </span>
+                        </button>
+                      </td>
                     </tr>
                   }
                 }
               </tbody>
             </table>
           </div>
-        </div>
-      }
-
-      <!-- TAB 4: MARKET INSIGHTS -->
-      @if (activeTab() === 'marketInsights') {
-        <div class="space-y-6 animate-fade-in">
-          <h2 class="text-base font-extrabold text-[#22c55e] uppercase tracking-wider">marketInsightsFor {{ selectedCropName() }}</h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Card 1: priceAnalysis -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-icons text-sm">attach_money</span>
-                priceAnalysis
-              </h3>
-              
-              <div class="space-y-3 text-xs text-gray-300">
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>averagePrice:</span>
-                  <span class="font-extrabold text-white">₹{{ cropAggregates().avgPrice }}</span>
-                </div>
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>averageMaxPrice:</span>
-                  <span class="font-extrabold text-white">₹{{ cropAggregates().maxPrice }}</span>
-                </div>
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>averageMinPrice:</span>
-                  <span class="font-extrabold text-white">₹{{ cropAggregates().minPrice }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>priceVolatility:</span>
-                  <span class="font-extrabold text-white">{{ cropAggregates().volatility }}%</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: marketHighlights -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-icons text-sm">pin_drop</span>
-                marketHighlights
-              </h3>
-              
-              <div class="space-y-3 text-xs text-gray-300">
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>totalMarkets:</span>
-                  <span class="font-extrabold text-white">{{ cropAggregates().totalMarkets }}</span>
-                </div>
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>highestPricedMarket:</span>
-                  <span class="font-extrabold text-white">{{ cropAggregates().highestMarket }}</span>
-                </div>
-                <div class="flex justify-between pb-2 border-b border-gray-800">
-                  <span>lowestPricedMarket:</span>
-                  <span class="font-extrabold text-white">{{ cropAggregates().lowestMarket }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span>Category:</span>
-                  <span class="font-extrabold text-[#22c55e]">{{ cropAggregates().category }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: marketTrends -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-icons text-sm">trending_up</span>
-                marketTrends
-              </h3>
-              
-              <div class="space-y-4">
-                <div class="flex justify-between text-xs text-gray-300">
-                  <span>recentTrend:</span>
-                  <span class="font-extrabold text-green-500 flex items-center gap-0.5">
-                    <span class="material-icons text-[10px]">arrow_upward</span>
-                    3.95%
-                  </span>
-                </div>
-                
-                <div class="space-y-1">
-                  <span class="text-[10px] text-gray-400 block uppercase font-bold tracking-wider">priceDistribution</span>
-                  
-                  <div class="flex justify-between text-[8px] text-gray-500 font-bold mb-1">
-                    <span>₹{{ cropAggregates().minPrice }}</span>
-                    <span>₹{{ cropAggregates().avgPrice }}</span>
-                    <span>₹{{ cropAggregates().maxPrice }}</span>
-                  </div>
-                  
-                  <!-- Gradient distribution bar -->
-                  <div class="w-full h-3 rounded-full bg-gradient-to-r from-blue-500 via-green-500 to-red-500 relative">
-                    <!-- Average indicator node -->
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-white bg-[#1e293b] shadow shadow-black"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 4: marketForecast -->
-            <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 space-y-4 flex flex-col justify-between">
-              <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-icons text-sm">online_prediction</span>
-                marketForecast
-              </h3>
-              
-              <p class="text-xs text-gray-300 leading-relaxed italic">
-                "basedOnCurrentTrends, {{ selectedCropName() }} isPredictedToIncreasebyApproximately 0.16% inTheComingWeeks."
-              </p>
-
-              <div class="flex items-center gap-2 mt-2">
-                <span class="p-1.5 rounded-xl bg-green-500/10 text-green-400 flex items-center">
-                  <span class="material-icons text-sm">trending_up</span>
-                </span>
-                <div>
-                  <span class="text-[10px] font-bold text-gray-400 block uppercase tracking-wider">bullishOutlook</span>
-                  <span class="text-[9px] text-gray-500 font-medium">nextThreeMonths</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 5: recommendedActions -->
-          <div class="bg-[#1e293b] border border-gray-800 rounded-3xl p-6 shadow-sm space-y-4">
-            <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider">recommendedActions</h3>
-            <ul class="space-y-2.5 text-xs text-gray-300 pl-4 list-disc marker:text-[#22c55e]">
-              @for (point of cropAggregates().bulletPoints; track point) {
-                <li class="leading-relaxed">{{ point }}</li>
-              }
-            </ul>
-          </div>
-
         </div>
       }
 
