@@ -134,7 +134,7 @@
           </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
               {{ i18n.t('waterQueue.bookingDate') }}
@@ -148,6 +148,17 @@
 
           <div>
             <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
+              {{ i18n.t('waterQueue.preferredTime') }}
+            </label>
+            <input type="time" formControlName="preferredTime" 
+                   class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 transition cursor-pointer" />
+            <p *ngIf="bookingForm.get('preferredTime')?.touched && bookingForm.get('preferredTime')?.errors?.['required']" class="text-rose-500 text-[10px] mt-1 font-bold">
+              Please choose a preferred time
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 uppercase tracking-wider">
               {{ i18n.t('waterQueue.duration') }}
             </label>
             <div class="flex items-center gap-3">
@@ -156,6 +167,10 @@
               <span class="text-xs font-extrabold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800/40 shrink-0">
                 {{ bookingForm.get('hoursRequested')?.value }} Hours
               </span>
+            </div>
+            <div *ngIf="estimatedWaterSupplied() > 0" class="mt-2 text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+              <span class="material-icons text-xs">water_drop</span>
+              {{ i18n.t('waterQueue.waterSupplied') }}: {{ estimatedWaterSupplied() | number }} {{ i18n.t('waterQueue.liters') }}
             </div>
           </div>
         </div>
@@ -252,8 +267,16 @@
               <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ formatDate(b.bookingDate) }}</span>
             </div>
             <div class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Preferred Time:</span>
+              <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ b.preferredTime || '08:00 AM' }}</span>
+            </div>
+            <div class="flex justify-between">
               <span class="text-gray-400 font-semibold">Duration:</span>
               <span class="text-gray-800 dark:text-gray-200 font-extrabold">{{ b.hoursRequested }} Hours</span>
+            </div>
+            <div *ngIf="b.waterSuppliedLiters" class="flex justify-between">
+              <span class="text-gray-400 font-semibold">Water Supplied:</span>
+              <span class="text-blue-600 dark:text-blue-400 font-black">{{ b.waterSuppliedLiters | number }} Liters</span>
             </div>
             <div *ngIf="b.queuePosition" class="flex justify-between">
               <span class="text-gray-400 font-semibold">Queue Position:</span>

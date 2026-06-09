@@ -32,6 +32,10 @@ public class WaterSource extends BaseEntity {
 
     private Double longitude;
 
+    @Column(name = "flow_rate_lph")
+    @Builder.Default
+    private Double flowRateLph = 15000.0; // default 15,000 liters/hour
+
     @Column(nullable = false)
     @Builder.Default
     private String status = "ACTIVE"; // ACTIVE, MAINTENANCE

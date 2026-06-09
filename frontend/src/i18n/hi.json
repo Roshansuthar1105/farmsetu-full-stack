@@ -93,5 +93,9 @@
   "waterQueue.noLiveQueue": "इस तारीख के लिए अभी तक कोई स्वीकृत स्लॉट नहीं है।",
   "waterQueue.active": "वर्तमान में चालू",
   "waterQueue.upcoming": "कतार में अगला",
-  "waterQueue.waitingApproval": "स्वीकृति की प्रतीक्षा है"
+  "waterQueue.waitingApproval": "स्वीकृति की प्रतीक्षा है",
+  "waterQueue.preferredTime": "पसंदीदा समय",
+  "waterQueue.waterSupplied": "आपूर्ति किया गया पानी (अनुमानित)",
+  "waterQueue.flowRate": "प्रवाह दर",
+  "waterQueue.liters": "लीटर"
 }

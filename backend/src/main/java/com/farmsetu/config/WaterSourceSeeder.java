@@ -33,6 +33,7 @@ public class WaterSourceSeeder implements CommandLineRunner {
                 .location("Chomu Irrigation Zone A, Jaipur")
                 .latitude(27.1662)
                 .longitude(75.7227)
+                .flowRateLph(25000.0) // 25,000 L/hr
                 .status("ACTIVE")
                 .build());
 
@@ -42,6 +43,7 @@ public class WaterSourceSeeder implements CommandLineRunner {
                 .location("Muhana Village Mandi Ground, Jaipur")
                 .latitude(26.8810)
                 .longitude(75.7591)
+                .flowRateLph(18000.0) // 18,000 L/hr
                 .status("ACTIVE")
                 .build());
 
@@ -51,6 +53,7 @@ public class WaterSourceSeeder implements CommandLineRunner {
                 .location("Sikar Road Agro Cluster, Sikar/Jaipur border")
                 .latitude(27.6094)
                 .longitude(75.1399)
+                .flowRateLph(15000.0) // 15,000 L/hr
                 .status("ACTIVE")
                 .build());
 
@@ -60,6 +63,7 @@ public class WaterSourceSeeder implements CommandLineRunner {
                 .location("Bassi Community Shared Reservoir, Bassi")
                 .latitude(26.8378)
                 .longitude(76.0435)
+                .flowRateLph(12000.0) // 12,000 L/hr
                 .status("ACTIVE")
                 .build());
 

@@ -93,5 +93,9 @@
   "waterQueue.noLiveQueue": "No approved slots for this date yet.",
   "waterQueue.active": "Currently Running",
   "waterQueue.upcoming": "Next In Line",
-  "waterQueue.waitingApproval": "Waiting Approval"
+  "waterQueue.waitingApproval": "Waiting Approval",
+  "waterQueue.preferredTime": "Preferred Start Time",
+  "waterQueue.waterSupplied": "Supplied Water (Est.)",
+  "waterQueue.flowRate": "Flow Rate",
+  "waterQueue.liters": "Liters"
 }

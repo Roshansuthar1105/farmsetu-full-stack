@@ -49,6 +49,7 @@ public class WaterQueueService {
         String location = (String) body.get("location");
         Double lat = body.get("latitude") != null ? Double.valueOf(body.get("latitude").toString()) : null;
         Double lng = body.get("longitude") != null ? Double.valueOf(body.get("longitude").toString()) : null;
+        Double flowRateLph = body.get("flowRateLph") != null ? Double.valueOf(body.get("flowRateLph").toString()) : null;
 
         if (name == null || type == null) {
             throw new BadRequestException("Name and Type are required fields");
@@ -60,6 +61,7 @@ public class WaterQueueService {
                 .location(location)
                 .latitude(lat)
                 .longitude(lng)
+                .flowRateLph(flowRateLph != null ? flowRateLph : 15000.0)
                 .status("ACTIVE")
                 .build();
         return waterSourceRepository.save(ws);
@@ -76,6 +78,7 @@ public class WaterQueueService {
         if (body.containsKey("status")) ws.setStatus((String) body.get("status"));
         if (body.containsKey("latitude")) ws.setLatitude(body.get("latitude") != null ? Double.valueOf(body.get("latitude").toString()) : null);
         if (body.containsKey("longitude")) ws.setLongitude(body.get("longitude") != null ? Double.valueOf(body.get("longitude").toString()) : null);
+        if (body.containsKey("flowRateLph")) ws.setFlowRateLph(body.get("flowRateLph") != null ? Double.valueOf(body.get("flowRateLph").toString()) : null);
 
         return waterSourceRepository.save(ws);
     }
@@ -166,7 +169,7 @@ public class WaterQueueService {
     }
 
     @Transactional
-    public Map<String, Object> createBooking(Long userId, Long sourceId, Double hours, LocalDate date, String notes, Boolean bypassWarning) {
+    public Map<String, Object> createBooking(Long userId, Long sourceId, Double hours, LocalDate date, String notes, String preferredTime, Boolean bypassWarning) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         WaterSource source = waterSourceRepository.findById(sourceId)
@@ -189,6 +192,9 @@ public class WaterQueueService {
             return response;
         }
 
+        Double flowRate = source.getFlowRateLph() != null ? source.getFlowRateLph() : 15000.0;
+        Double suppliedWater = flowRate * hours;
+
         WaterBooking booking = WaterBooking.builder()
                 .farmer(user)
                 .waterSource(source)
@@ -197,6 +203,8 @@ public class WaterQueueService {
                 .status("PENDING")
                 .weatherWarning(hasWarning)
                 .weatherRainChance(hasWarning ? (Double) weatherCheck.get("rainChance") : null)
+                .preferredTime(preferredTime)
+                .waterSuppliedLiters(suppliedWater)
                 .notes(notes)
                 .build();
 
@@ -206,7 +214,6 @@ public class WaterQueueService {
         response.put("booking", mapToResponse(saved));
 
         // Create Admin Notification
-        // Since we don't have admins explicitly in a table or list, we can just save it for user if user has admin dashboard or just create it log/audit
         log.info("New water booking requested by user {} for source {}", userId, sourceId);
 
         return response;
@@ -351,6 +358,7 @@ public class WaterQueueService {
         map.put("waterSourceId", booking.getWaterSource().getId());
         map.put("waterSourceName", booking.getWaterSource().getName());
         map.put("waterSourceType", booking.getWaterSource().getType());
+        map.put("waterSourceFlowRateLph", booking.getWaterSource().getFlowRateLph());
         map.put("hoursRequested", booking.getHoursRequested());
         map.put("bookingDate", booking.getBookingDate().toString());
         map.put("status", booking.getStatus());
@@ -358,6 +366,8 @@ public class WaterQueueService {
         map.put("scheduledStartTime", booking.getScheduledStartTime() != null ? booking.getScheduledStartTime().toString() : null);
         map.put("weatherWarning", booking.getWeatherWarning());
         map.put("weatherRainChance", booking.getWeatherRainChance());
+        map.put("preferredTime", booking.getPreferredTime());
+        map.put("waterSuppliedLiters", booking.getWaterSuppliedLiters());
         map.put("notes", booking.getNotes());
         map.put("createdAt", booking.getCreatedAt() != null ? booking.getCreatedAt().toString() : null);
         return map;

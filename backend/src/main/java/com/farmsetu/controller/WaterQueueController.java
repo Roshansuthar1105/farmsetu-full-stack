@@ -54,10 +54,11 @@ public class WaterQueueController {
         Double hours = Double.valueOf(body.get("hoursRequested").toString());
         LocalDate date = LocalDate.parse((CharSequence) body.get("bookingDate"));
         String notes = (String) body.get("notes");
+        String preferredTime = (String) body.get("preferredTime");
         Boolean bypassWarning = (Boolean) body.get("bypassWarning");
 
         return ApiResponse.ok(waterQueueService.createBooking(
-                SecurityUtils.currentUserId(), sourceId, hours, date, notes, bypassWarning));
+                SecurityUtils.currentUserId(), sourceId, hours, date, notes, preferredTime, bypassWarning));
     }
 
     @GetMapping("/bookings/queue")

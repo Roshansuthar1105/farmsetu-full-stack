@@ -29,6 +29,8 @@ interface WaterBooking {
   scheduledStartTime?: string;
   weatherWarning: boolean;
   weatherRainChance?: number;
+  preferredTime?: string;
+  waterSuppliedLiters?: number;
   notes?: string;
   createdAt?: string;
 }
@@ -78,6 +80,19 @@ export class WaterQueueComponent implements OnInit {
   // Pending data to proceed if user chooses to bypass warning
   pendingBookingPayload: any = null;
 
+  readonly selectedSourceIdSignal = signal<number | null>(null);
+  readonly selectedHoursSignal = signal<number>(2.0);
+
+  readonly estimatedWaterSupplied = computed(() => {
+    const sourceId = this.selectedSourceIdSignal();
+    const hours = this.selectedHoursSignal();
+    if (!sourceId) return 0;
+    const selectedSource = this.sources().find(s => s.id === sourceId);
+    if (!selectedSource) return 0;
+    const flowRate = (selectedSource as any).flowRateLph || 15000.0;
+    return flowRate * hours;
+  });
+
   ngOnInit(): void {
     this.initForm();
     this.loadSources();
@@ -89,7 +104,16 @@ export class WaterQueueComponent implements OnInit {
       waterSourceId: ['', Validators.required],
       bookingDate: [new Date().toISOString().split('T')[0], Validators.required],
       hoursRequested: [2.0, [Validators.required, Validators.min(0.5), Validators.max(24)]],
+      preferredTime: ['08:00', Validators.required],
       notes: ['']
+    });
+
+    // Listen to changes
+    this.bookingForm.get('waterSourceId')?.valueChanges.subscribe(val => {
+      this.selectedSourceIdSignal.set(val ? +val : null);
+    });
+    this.bookingForm.get('hoursRequested')?.valueChanges.subscribe(val => {
+      this.selectedHoursSignal.set(val ? +val : 2.0);
     });
   }
 
@@ -183,6 +207,7 @@ export class WaterQueueComponent implements OnInit {
       bookingDate: formValue.bookingDate,
       hoursRequested: formValue.hoursRequested,
       notes: formValue.notes,
+      preferredTime: formValue.preferredTime,
       bypassWarning: bypass
     }).subscribe({
       next: (res) => {

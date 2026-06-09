@@ -57,5 +57,11 @@ public class WaterBooking extends BaseEntity {
     @Column(name = "weather_rain_chance")
     private Double weatherRainChance;
 
+    @Column(name = "preferred_time")
+    private String preferredTime; // e.g. "09:30 AM"
+
+    @Column(name = "water_supplied_liters")
+    private Double waterSuppliedLiters;
+
     private String notes;
 }

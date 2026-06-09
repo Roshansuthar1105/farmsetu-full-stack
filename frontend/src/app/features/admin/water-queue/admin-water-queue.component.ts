@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -11,6 +11,7 @@ interface WaterSource {
   location: string;
   latitude?: number;
   longitude?: number;
+  flowRateLph?: number;
   status: string;
 }
 
@@ -28,6 +29,8 @@ interface WaterBooking {
   scheduledStartTime?: string;
   weatherWarning: boolean;
   weatherRainChance?: number;
+  preferredTime?: string;
+  waterSuppliedLiters?: number;
   notes?: string;
   createdAt?: string;
 }
@@ -57,6 +60,20 @@ export class AdminWaterQueueComponent implements OnInit {
   showAddSourceForm = signal(false);
   editingSourceId = signal<number | null>(null);
 
+  readonly totalWaterSupplied = computed(() => {
+    return this.bookings()
+      .filter(b => b.status === 'COMPLETED' || b.status === 'APPROVED')
+      .reduce((acc, b) => acc + (b.waterSuppliedLiters || 0), 0);
+  });
+
+  readonly pendingRequestsCount = computed(() => {
+    return this.bookings().filter(b => b.status === 'PENDING').length;
+  });
+
+  readonly activeSourcesCount = computed(() => {
+    return this.sources().filter(s => s.status === 'ACTIVE').length;
+  });
+
   ngOnInit(): void {
     this.initForm();
     this.loadBookings();
@@ -69,7 +86,8 @@ export class AdminWaterQueueComponent implements OnInit {
       type: ['Borewell', Validators.required],
       location: ['', Validators.required],
       latitude: [26.8809, Validators.required],
-      longitude: [75.7590, Validators.required]
+      longitude: [75.7590, Validators.required],
+      flowRateLph: [15000, [Validators.required, Validators.min(100)]]
     });
   }
 
@@ -130,7 +148,7 @@ export class AdminWaterQueueComponent implements OnInit {
       this.api.put<WaterSource>(`/api/admin/water-queue/sources/${editingId}`, payload).subscribe({
         next: () => {
           this.toastr.success('Water source updated successfully');
-          this.sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590 });
+          this.sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590, flowRateLph: 15000 });
           this.showAddSourceForm.set(false);
           this.editingSourceId.set(null);
           this.loadSources();
@@ -141,7 +159,7 @@ export class AdminWaterQueueComponent implements OnInit {
       this.api.post<WaterSource>('/api/admin/water-queue/sources', payload).subscribe({
         next: () => {
           this.toastr.success('Water source created successfully');
-          this.sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590 });
+          this.sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590, flowRateLph: 15000 });
           this.showAddSourceForm.set(false);
           this.loadSources();
         },
@@ -157,7 +175,8 @@ export class AdminWaterQueueComponent implements OnInit {
       type: source.type,
       location: source.location,
       latitude: source.latitude || 26.8809,
-      longitude: source.longitude || 75.7590
+      longitude: source.longitude || 75.7590,
+      flowRateLph: source.flowRateLph || 15000
     });
     this.showAddSourceForm.set(true);
   }

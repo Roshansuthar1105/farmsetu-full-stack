@@ -13,6 +13,40 @@
     </div>
   </div>
 
+  <!-- STATS CARDS -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Card 1: Total Supplied -->
+    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] uppercase font-bold tracking-wider text-blue-100">Total Supplied Water</p>
+        <h4 class="text-xl font-black mt-1">{{ totalWaterSupplied() | number }} Liters</h4>
+      </div>
+      <span class="material-icons text-3xl opacity-35">water_drop</span>
+    </div>
+
+    <!-- Card 2: Pending Approval -->
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500">Pending Requests</p>
+        <h4 class="text-xl font-black text-gray-900 dark:text-white mt-1">
+          {{ pendingRequestsCount() }} requests
+        </h4>
+      </div>
+      <span class="material-icons text-3xl text-amber-500 opacity-85">hourglass_empty</span>
+    </div>
+
+    <!-- Card 3: Active Sources -->
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] uppercase font-bold tracking-wider text-gray-400 dark:text-gray-500">Active Sources</p>
+        <h4 class="text-xl font-black text-gray-900 dark:text-white mt-1">
+          {{ activeSourcesCount() }} sources
+        </h4>
+      </div>
+      <span class="material-icons text-3xl text-emerald-500 opacity-85">power</span>
+    </div>
+  </div>
+
   <!-- TABS -->
   <div class="border-b border-gray-200 dark:border-gray-700">
     <nav class="-mb-px flex space-x-6 text-sm">
@@ -81,7 +115,9 @@
               </td>
               <td class="py-3.5 px-4">
                 <span class="font-extrabold text-gray-900 dark:text-white">{{ formatDate(b.bookingDate) }}</span>
+                <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">⏱️ Pref: {{ b.preferredTime || '08:00 AM' }}</span>
                 <span class="block text-[10px] text-gray-400 font-bold mt-0.5">{{ b.hoursRequested }} Hours duration</span>
+                <span *ngIf="b.waterSuppliedLiters" class="block text-[10px] text-blue-600 dark:text-blue-400 font-black mt-0.5">💧 {{ b.waterSuppliedLiters | number }} Liters</span>
               </td>
               <td class="py-3.5 px-4">
                 <span *ngIf="b.weatherWarning" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200/40 dark:border-amber-900/30 font-bold text-[10px]">
@@ -140,7 +176,7 @@
       <h3 class="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider">
         Community Water Sources
       </h3>
-      <button (click)="showAddSourceForm.set(!showAddSourceForm()); editingSourceId.set(null); sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590 })"
+      <button (click)="showAddSourceForm.set(!showAddSourceForm()); editingSourceId.set(null); sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590, flowRateLph: 15000 })"
               class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 text-xs flex items-center gap-1">
         <span class="material-icons text-sm">{{ showAddSourceForm() ? 'remove' : 'add' }}</span>
         {{ showAddSourceForm() ? 'Hide Form' : 'Add Water Source' }}
@@ -186,6 +222,13 @@
           <input type="number" step="0.0001" formControlName="longitude" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 transition" />
         </div>
 
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-wider">Flow Rate (Liters/Hour)</label>
+          <input type="number" formControlName="flowRateLph" placeholder="e.g. 15000" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 outline-none text-xs font-bold text-gray-900 dark:text-white focus:border-green-500 transition" />
+          <p *ngIf="sourceForm.get('flowRateLph')?.touched && sourceForm.get('flowRateLph')?.errors?.['required']" class="text-rose-500 text-[10px] mt-1 font-bold">Flow rate is required</p>
+          <p *ngIf="sourceForm.get('flowRateLph')?.touched && sourceForm.get('flowRateLph')?.errors?.['min']" class="text-rose-500 text-[10px] mt-1 font-bold">Min 100 L/h required</p>
+        </div>
+
         <div class="flex items-end">
           <button type="submit" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-md active:scale-95 transition text-xs flex items-center justify-center gap-1">
             <span class="material-icons text-sm">save</span>
@@ -211,7 +254,10 @@
           </thead>
           <tbody class="divide-y divide-gray-150 dark:divide-gray-700/50">
             <tr *ngFor="let s of sources()" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 text-gray-700 dark:text-gray-300 transition">
-              <td class="py-3.5 px-4 font-extrabold text-gray-950 dark:text-white">💧 {{ s.name }}</td>
+              <td class="py-3.5 px-4 font-extrabold text-gray-950 dark:text-white">
+                💧 {{ s.name }}
+                <span *ngIf="s.flowRateLph" class="block text-[10px] text-blue-600 dark:text-blue-400 font-bold mt-0.5">⚡ {{ s.flowRateLph | number }} L/hr</span>
+              </td>
               <td class="py-3.5 px-4">
                 <span class="font-bold text-gray-500 dark:text-gray-400">{{ s.type }}</span>
               </td>
