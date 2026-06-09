@@ -95,4 +95,22 @@ body {
   scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
 }
 
+/* Chrome Autofill Style Overrides */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important; /* matches dark:bg-gray-800/900 */
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+
 

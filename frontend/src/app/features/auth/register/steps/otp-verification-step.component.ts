@@ -8,45 +8,42 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
   template: `
     <div class="space-y-6 text-center">
 
-      <!-- Illustration -->
+      <!-- Shield/Device Illustration -->
       <div class="flex justify-center">
-        <div class="w-32 h-32 bg-green-100 dark:bg-green-900/30 rounded-full
-                    flex items-center justify-center">
-          <span class="text-6xl">📱</span>
+        <div class="w-20 h-20 bg-green-50 dark:bg-green-950/30 rounded-full flex items-center justify-center border border-green-100 dark:border-green-900/50">
+          <span class="material-icons text-4xl text-green-600 dark:text-green-400">phonelink_lock</span>
         </div>
       </div>
 
       <!-- Heading -->
-      <div>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div class="space-y-1">
+        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">
           Verify Your Number
         </h2>
-        <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm">
-          OTP sent to
-          <span class="font-semibold text-gray-700 dark:text-gray-300">
-            +91 {{ maskedPhone }}
-          </span>
+        <p class="text-gray-400 text-xs">
+          OTP sent to <span class="font-bold text-gray-700 dark:text-gray-300">+91 {{ maskedPhone }}</span>
         </p>
       </div>
 
       <!-- OTP Input -->
-      <fs-otp-input
-        [length]="6"
-        (otpComplete)="onOtpEntered($event)" />
+      <div class="py-2">
+        <fs-otp-input
+          [length]="6"
+          (otpComplete)="onOtpEntered($event)" />
+      </div>
 
-      <!-- Timer -->
-      <div class="text-sm">
+      <!-- Timer / Resend -->
+      <div class="text-xs">
         @if (timerSeconds() > 0) {
-          <p class="text-gray-400">
-            Resend in
+          <p class="text-gray-400 font-medium">
+            Resend OTP in
             <span class="font-bold text-green-600 dark:text-green-400">
               {{ formatTime(timerSeconds()) }}
             </span>
           </p>
         } @else {
           <button (click)="resendOtp()"
-                  class="font-semibold text-green-600 dark:text-green-400
-                         hover:text-green-700 transition-colors">
+                  class="font-bold text-green-600 dark:text-green-400 hover:text-green-700 transition-colors">
             Resend OTP
           </button>
         }
@@ -54,40 +51,42 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
 
       <!-- Error -->
       @if (error()) {
-        <div class="flex items-center justify-center gap-2 p-3 bg-red-50 dark:bg-red-900/20
-                    border border-red-200 dark:border-red-800 rounded-xl">
-          <p class="text-sm text-red-600 dark:text-red-400">{{ error() }}</p>
+        <div class="flex items-center justify-center gap-2.5 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-650 dark:text-red-400 text-xs">
+          <span class="material-icons text-base shrink-0">error_outline</span>
+          <p>{{ error() }}</p>
         </div>
       }
 
       <!-- Verify Button -->
       <button (click)="verify()"
               [disabled]="!enteredOtp() || loading()"
-              class="w-full py-4 rounded-xl text-base font-bold text-white
+              class="w-full rounded-xl text-sm font-bold text-white
                      bg-gradient-to-r from-green-600 to-emerald-600
                      hover:from-green-700 hover:to-emerald-700
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     shadow-lg shadow-green-500/30
-                     transition-all duration-200"
-              style="height: 56px;">
+                     shadow-lg shadow-green-500/10
+                     transition-all duration-200 flex items-center justify-center gap-2"
+              style="height: 48px;">
         @if (loading()) {
-          Verifying...
+          <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          <span>Verifying...</span>
         } @else {
-          Verify ✓
+          <span>Verify ✓</span>
         }
       </button>
 
       <!-- Actions Row -->
-      <div class="flex items-center justify-between text-sm">
+      <div class="flex items-center justify-between text-xs border-t border-gray-100 dark:border-gray-800 pt-4">
         <button (click)="back.emit()"
-                class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300
-                       font-medium transition-colors flex items-center gap-1">
-          ← Back
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-bold transition flex items-center gap-1">
+          <span class="material-icons text-sm">arrow_back</span> Back
         </button>
         <button (click)="changeNumber.emit()"
-                class="text-amber-600 dark:text-amber-400 hover:text-amber-700
-                       font-medium transition-colors">
-          Change number
+                class="text-amber-600 dark:text-amber-400 hover:text-amber-700 font-bold transition">
+          Change Number
         </button>
       </div>
     </div>

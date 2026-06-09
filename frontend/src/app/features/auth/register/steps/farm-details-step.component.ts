@@ -8,99 +8,105 @@ import { RegistrationData } from '../register.component';
   imports: [ReactiveFormsModule],
   template: `
     <div class="space-y-5">
-      <div class="text-center mb-4">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Tell us about your farm 🚜
+      <div class="text-center mb-2">
+        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">
+          Farming Profile 🚜
         </h2>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
-          This helps us give personalized advice
+        <p class="text-gray-400 text-xs">
+          Help us customize your FarmSetu features
         </p>
       </div>
 
       <form [formGroup]="form" (ngSubmit)="onComplete()" class="space-y-4">
 
         <!-- State Dropdown -->
-        <div class="relative">
-          <select formControlName="state"
-                  class="w-full px-4 py-4 text-base rounded-xl appearance-none
-                         border-2 border-gray-200 dark:border-gray-600
-                         bg-gray-50 dark:bg-gray-700
-                         text-gray-900 dark:text-white
-                         focus:border-green-500 focus:ring-4 focus:ring-green-500/20
-                         transition-all duration-200 outline-none">
-            <option value="" disabled>Select State</option>
-            @for (state of states; track state) {
-              <option [value]="state">{{ state }}</option>
-            }
-          </select>
-          <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
-                 viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-            </svg>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">State</label>
+          <div class="relative">
+            <select formControlName="state"
+                    class="w-full px-4 py-3 text-sm rounded-xl appearance-none
+                           border border-gray-300 dark:border-gray-700
+                           bg-gray-50/50 dark:bg-gray-900
+                           text-gray-900 dark:text-white
+                           focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                           transition-all duration-200 outline-none">
+              <option value="" disabled>Select State</option>
+              @for (state of states; track state) {
+                <option [value]="state">{{ state }}</option>
+              }
+            </select>
+            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+              <span class="material-icons text-base text-gray-400">expand_more</span>
+            </div>
           </div>
         </div>
 
-        <!-- District -->
-        <input formControlName="district" placeholder="District"
-               class="w-full px-4 py-4 text-base rounded-xl
-                      border-2 border-gray-200 dark:border-gray-600
-                      bg-gray-50 dark:bg-gray-700
-                      text-gray-900 dark:text-white placeholder-gray-400
-                      focus:border-green-500 focus:ring-4 focus:ring-green-500/20
-                      transition-all duration-200 outline-none" />
-
-        <!-- Village -->
-        <input formControlName="village" placeholder="Village / Tehsil"
-               class="w-full px-4 py-4 text-base rounded-xl
-                      border-2 border-gray-200 dark:border-gray-600
-                      bg-gray-50 dark:bg-gray-700
-                      text-gray-900 dark:text-white placeholder-gray-400
-                      focus:border-green-500 focus:ring-4 focus:ring-green-500/20
-                      transition-all duration-200 outline-none" />
+        <!-- District & Village -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">District</label>
+            <input formControlName="district" placeholder="District"
+                   class="w-full px-4 py-3 text-sm rounded-xl
+                          border border-gray-300 dark:border-gray-700
+                          bg-gray-50/50 dark:bg-gray-900
+                          text-gray-900 dark:text-white placeholder-gray-400
+                          focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                          transition-all duration-200 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tehsil / Village</label>
+            <input formControlName="village" placeholder="Village"
+                   class="w-full px-4 py-3 text-sm rounded-xl
+                          border border-gray-300 dark:border-gray-700
+                          bg-gray-50/50 dark:bg-gray-900
+                          text-gray-900 dark:text-white placeholder-gray-400
+                          focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                          transition-all duration-200 outline-none" />
+          </div>
+        </div>
 
         <!-- Farm Area -->
-        <div class="flex gap-3">
-          <input formControlName="farmArea" type="number" placeholder="Farm Area"
-                 class="flex-1 px-4 py-4 text-base rounded-xl
-                        border-2 border-gray-200 dark:border-gray-600
-                        bg-gray-50 dark:bg-gray-700
-                        text-gray-900 dark:text-white placeholder-gray-400
-                        focus:border-green-500 focus:ring-4 focus:ring-green-500/20
-                        transition-all duration-200 outline-none" />
-          <div class="flex rounded-xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden">
-            @for (unit of ['Acres', 'Hectares']; track unit) {
-              <button type="button"
-                      (click)="form.get('farmAreaUnit')?.setValue(unit)"
-                      class="px-4 py-4 text-sm font-semibold transition-all duration-200"
-                      [class]="form.get('farmAreaUnit')?.value === unit
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-50 dark:bg-gray-700 text-gray-500 hover:bg-gray-100'">
-                {{ unit }}
-              </button>
-            }
+        <div>
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Total Land Area</label>
+          <div class="flex gap-2">
+            <input formControlName="farmArea" type="number" placeholder="Land Area"
+                   class="flex-1 px-4 py-3 text-sm rounded-xl
+                          border border-gray-300 dark:border-gray-700
+                          bg-gray-50/50 dark:bg-gray-900
+                          text-gray-900 dark:text-white placeholder-gray-400
+                          focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                          transition-all duration-200 outline-none" />
+            <div class="flex rounded-xl border border-gray-300 dark:border-gray-700 overflow-hidden bg-gray-50/50 dark:bg-gray-900 p-1 shrink-0">
+              @for (unit of ['Acres', 'Hectares']; track unit) {
+                <button type="button"
+                        (click)="form.get('farmAreaUnit')?.setValue(unit)"
+                        class="px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200"
+                        [class]="form.get('farmAreaUnit')?.value === unit
+                          ? 'bg-green-600 text-white shadow-sm'
+                          : 'text-gray-400 hover:text-gray-700 bg-gray-50/50 dark:bg-gray-900'">
+                  {{ unit }}
+                </button>
+              }
+            </div>
           </div>
         </div>
 
         <!-- Soil Type Visual Selector -->
         <div>
-          <label class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 block">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
             Soil Type
           </label>
           <div class="grid grid-cols-5 gap-2">
             @for (soil of soilTypes; track soil.value) {
               <button type="button"
                       (click)="form.get('soilType')?.setValue(soil.value)"
-                      class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl
-                             border-2 transition-all duration-200"
+                      class="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl
+                             border transition-all duration-200"
                       [class]="form.get('soilType')?.value === soil.value
-                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-md'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-green-300'">
-                <span class="text-2xl">{{ soil.icon }}</span>
-                <span class="text-[10px] font-bold leading-tight text-center"
-                      [class]="form.get('soilType')?.value === soil.value
-                        ? 'text-green-700 dark:text-green-400'
-                        : 'text-gray-500'">
+                        ? 'border-green-500 bg-green-50/50 dark:bg-green-950/20 shadow-sm text-green-700 dark:text-green-400'
+                        : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-green-300'">
+                <span class="text-xl">{{ soil.icon }}</span>
+                <span class="text-[9px] font-bold leading-none text-center">
                   {{ soil.label }}
                 </span>
               </button>
@@ -109,54 +115,46 @@ import { RegistrationData } from '../register.component';
         </div>
 
         <!-- Experience Slider -->
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Farming Experience
             </label>
-            <span class="text-sm font-bold text-green-600 dark:text-green-400">
-              {{ form.get('experience')?.value }}{{ form.get('experience')?.value === 30 ? '+' : '' }} years
+            <span class="text-xs font-extrabold text-green-600 dark:text-green-400">
+              {{ form.get('experience')?.value }}{{ form.get('experience')?.value === 30 ? '+' : '' }} Years
             </span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-xl">👨‍🌾</span>
+            <span class="text-lg">👨‍🌾</span>
             <input type="range" formControlName="experience"
                    min="0" max="30" step="1"
-                   class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full
-                          appearance-none cursor-pointer
-                          [&::-webkit-slider-thumb]:appearance-none
-                          [&::-webkit-slider-thumb]:w-6
-                          [&::-webkit-slider-thumb]:h-6
-                          [&::-webkit-slider-thumb]:bg-green-600
-                          [&::-webkit-slider-thumb]:rounded-full
-                          [&::-webkit-slider-thumb]:shadow-lg
-                          [&::-webkit-slider-thumb]:cursor-pointer
-                          accent-green-600" />
+                   class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full
+                          appearance-none cursor-pointer accent-green-600" />
           </div>
         </div>
 
         <!-- Buttons Row -->
-        <div class="flex gap-3 pt-2">
+        <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button type="button"
                   (click)="back.emit()"
-                  class="flex-1 py-4 rounded-xl text-base font-bold
-                         border-2 border-gray-200 dark:border-gray-600
-                         text-gray-600 dark:text-gray-300
-                         hover:bg-gray-100 dark:hover:bg-gray-700
+                  class="flex-1 py-3 rounded-xl text-sm font-bold
+                         border border-gray-300 dark:border-gray-700
+                         text-gray-500 dark:text-gray-400
+                         hover:bg-gray-100 dark:hover:bg-gray-800
                          transition-all duration-200"
-                  style="height: 56px;">
+                  style="height: 48px;">
             ← Back
           </button>
 
           <button type="submit"
-                  class="flex-[2] py-4 rounded-xl text-base font-bold text-white
+                  class="flex-[2] py-3 rounded-xl text-sm font-bold text-white
                          bg-gradient-to-r from-green-600 to-emerald-600
                          hover:from-green-700 hover:to-emerald-700
                          active:scale-[0.98]
-                         shadow-lg shadow-green-500/30
+                         shadow-lg shadow-green-500/10
                          transition-all duration-200"
-                  style="height: 56px;">
-            Join FarmSetu! 🎉
+                  style="height: 48px;">
+            Complete 🎉
           </button>
         </div>
       </form>

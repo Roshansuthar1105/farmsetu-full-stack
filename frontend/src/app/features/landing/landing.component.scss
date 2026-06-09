@@ -11,7 +11,7 @@
 
 .animate-fade-in-up {
   opacity: 0;
-  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animation-delay-100 {
@@ -28,4 +28,9 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+:host {
+  display: block;
+  width: 100%;
 }

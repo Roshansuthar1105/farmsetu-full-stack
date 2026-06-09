@@ -62,6 +62,18 @@ export class AuthService {
     );
   }
 
+  forgotPassword(identifier: string, type: 'phone' | 'email') {
+    const payload = type === 'phone' ? { phone: identifier } : { email: identifier };
+    return this.api.post<any>('/api/auth/forgot-password', payload);
+  }
+
+  resetPassword(identifier: string, type: 'phone' | 'email', otp: string, password: string) {
+    const payload = type === 'phone'
+      ? { phone: identifier, otp, password }
+      : { email: identifier, otp, password };
+    return this.api.post<any>('/api/auth/reset-password', payload);
+  }
+
   logout(): void {
     localStorage.removeItem('fs_access_token');
     localStorage.removeItem('fs_refresh_token');

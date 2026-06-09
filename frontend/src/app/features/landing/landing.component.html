@@ -1,26 +1,49 @@
-<div class="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary/30">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-300">
+  
+  <!-- Interactive mesh/glow background -->
+  <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-green-500/10 to-emerald-500/10 rounded-full blur-3xl opacity-75 pointer-events-none"></div>
+  <div class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 w-[700px] h-[700px] bg-gradient-to-tr from-amber-500/5 to-yellow-500/5 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
   <!-- Sticky Header -->
-  <header class="fixed top-0 w-full z-50 transition-all duration-300"
-          [ngClass]="{'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-4': isScrolled(), 'bg-transparent py-6': !isScrolled()}">
+  <header class="fixed top-0 w-full z-50 transition-all duration-300 border-b"
+          [ngClass]="{
+            'bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg shadow-sm border-gray-100 dark:border-gray-800 py-3': isScrolled(), 
+            'bg-transparent border-transparent py-5': !isScrolled()
+          }">
     <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
       <a routerLink="/" class="flex items-center group">
-        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu" class="h-10 w-auto object-contain transition-transform group-hover:scale-105">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" 
+             alt="FarmSetu" 
+             class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
       </a>
 
       <!-- Desktop Nav -->
-      <nav class="hidden md:flex items-center gap-8 font-medium">
-        <a href="#features" class="hover:text-primary transition-colors">Features</a>
-        <a href="#about" class="hover:text-primary transition-colors">About Us</a>
-        <a href="#impact" class="hover:text-primary transition-colors">Impact</a>
+      <nav class="hidden md:flex items-center gap-8 font-semibold text-sm text-gray-600 dark:text-gray-300">
+        <a href="#features" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Features</a>
+        <a href="#about" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">About Us</a>
+        <a href="#impact" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Impact</a>
       </nav>
 
-      <!-- Auth Actions -->
-      <div class="flex items-center gap-3">
-        <a routerLink="/auth/login" class="px-5 py-2 font-semibold hover:text-primary transition-colors">
+      <!-- Language + Auth Actions -->
+      <div class="flex items-center gap-4">
+        <!-- Language Switcher Dropdown -->
+        <div class="relative flex items-center">
+          <span class="material-icons text-base text-gray-400 mr-1.5 pointer-events-none">translate</span>
+          <select [value]="i18n.lang()" 
+                  (change)="i18n.setLang($any($event.target).value)"
+                  class="text-xs bg-white/60 dark:bg-gray-900/60 border border-gray-250 dark:border-gray-700 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition focus:border-green-500">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+          </select>
+        </div>
+
+        <div class="h-5 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+
+        <a routerLink="/auth/login" class="px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors">
           {{ i18n.t('auth.login') }}
         </a>
-        <a routerLink="/auth/register" class="fs-btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all hover:-translate-y-0.5">
+        <a routerLink="/auth/register" class="fs-btn-primary text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5">
           {{ i18n.t('auth.register') }}
         </a>
       </div>
@@ -28,44 +51,149 @@
   </header>
 
   <!-- Hero Section -->
-  <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-    <!-- Decorative background elements -->
-    <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-3xl"></div>
-
-    <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-8 animate-fade-in-up">
-        <svg lucideSprout size="18"></svg>
-        Empowering the Modern Farmer
-      </div>
-      <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6 animate-fade-in-up animation-delay-100">
-        The Future of <br/>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Agriculture</span> is Here
-      </h1>
-      <p class="text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-200">
-        {{ i18n.t('landing.tagline') }} Join thousands of farmers leveraging AI, marketplace insights, and community support to maximize yield.
-      </p>
+  <section class="relative pt-32 pb-16 lg:pt-44 lg:pb-28">
+    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">
       
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up animation-delay-300">
-        <a routerLink="/auth/register" class="flex items-center gap-2 fs-btn-primary text-lg px-8 py-4 w-full sm:w-auto shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all">
-          Get Started For Free
-          <svg lucideArrowRight size="20"></svg>
-        </a>
-        <a href="#features" class="fs-btn-secondary bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 text-lg px-8 py-4 w-full sm:w-auto transition-all border border-gray-200 dark:border-gray-700 hover:border-gray-300">
-          Explore Features
-        </a>
+      <!-- Hero Left: Text & CTA -->
+      <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary dark:bg-primary/20 font-bold text-xs uppercase tracking-wider animate-fade-in-up">
+          <svg lucideSprout size="14" class="animate-bounce" style="animation-duration: 2s;"></svg>
+          Empowering The Modern Farmer
+        </div>
+        
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight animate-fade-in-up animation-delay-100">
+          The Future of <br class="hidden sm:inline"/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500 dark:from-green-400 dark:to-emerald-300">Agriculture</span> is Here
+        </h1>
+        
+        <p class="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
+          {{ i18n.t('landing.tagline') }}. Join thousands of farmers leveraging AI-driven analytics, a secure community marketplace, real-time weather advice, and crop health diagnostic models to maximize yields.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 animate-fade-in-up animation-delay-300">
+          <a routerLink="/auth/register" class="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base px-8 py-4 w-full sm:w-auto rounded-xl shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all">
+            Get Started For Free
+            <svg lucideArrowRight size="18"></svg>
+          </a>
+          <a href="#features" class="flex items-center justify-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/80 font-bold text-base px-8 py-4 w-full sm:w-auto rounded-xl border border-gray-250 dark:border-gray-700 hover:border-gray-300 transition-all duration-200">
+            Explore Features
+          </a>
+        </div>
       </div>
+
+      <!-- Hero Right: Interactive SVG App Dashboard Showcase -->
+      <div class="lg:col-span-5 relative">
+        <div class="relative w-full max-w-md sm:max-w-lg mx-auto aspect-square lg:max-w-none">
+          <!-- Background Glow -->
+          <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-amber-500/10 rounded-full blur-3xl opacity-80 animate-pulse" style="animation-duration: 5s;"></div>
+          
+          <!-- Mockup SVG Dashboard Frame -->
+          <svg viewBox="0 0 500 500" class="w-full h-full relative z-10 drop-shadow-2xl animate-fade-in-up animation-delay-200">
+            <!-- Main Application Shell -->
+            <rect x="20" y="20" width="460" height="360" rx="20" fill="rgba(255, 255, 255, 0.75)" class="dark:fill-gray-900/75" stroke="rgba(255, 255, 255, 0.4)" stroke-width="2" />
+            <rect x="20" y="20" width="460" height="360" rx="20" fill="none" stroke="rgba(0, 0, 0, 0.05)" stroke-width="1" />
+            
+            <!-- Window Control dots -->
+            <circle cx="50" cy="45" r="5" fill="#ff5f56" />
+            <circle cx="66" cy="45" r="5" fill="#ffbd2e" />
+            <circle cx="82" cy="45" r="5" fill="#27c93f" />
+            <rect x="110" y="38" width="280" height="14" rx="7" fill="rgba(0, 0, 0, 0.05)" class="dark:fill-white/10" />
+            
+            <!-- Sidebar Preview -->
+            <rect x="35" y="75" width="90" height="285" rx="10" fill="rgba(255, 255, 255, 0.9)" class="dark:fill-gray-950/90" />
+            <rect x="45" y="95" width="70" height="10" rx="4" fill="#16a34a" opacity="0.8" />
+            <rect x="45" y="125" width="70" height="6" rx="3" fill="rgba(0, 0, 0, 0.1)" class="dark:fill-white/10" />
+            <rect x="45" y="150" width="70" height="6" rx="3" fill="rgba(0, 0, 0, 0.1)" class="dark:fill-white/10" />
+            <rect x="45" y="175" width="70" height="6" rx="3" fill="rgba(0, 0, 0, 0.1)" class="dark:fill-white/10" />
+            <rect x="45" y="200" width="70" height="6" rx="3" fill="rgba(0, 0, 0, 0.1)" class="dark:fill-white/10" />
+            
+            <!-- Widgets Grid -->
+            <!-- Widget 1: Soil Moisture Analytics -->
+            <rect x="140" y="75" width="155" height="135" rx="14" fill="rgba(255, 255, 255, 0.9)" class="dark:fill-gray-950/90" />
+            <text x="155" y="98" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="rgba(0, 0, 0, 0.4)" class="dark:fill-white/40">SOIL MOISTURE</text>
+            <text x="155" y="132" font-family="system-ui, sans-serif" font-size="24" font-weight="800" fill="#16a34a">68%</text>
+            <text x="155" y="152" font-family="system-ui, sans-serif" font-size="8.5" fill="rgba(0, 0, 0, 0.4)" class="dark:fill-white/30">Status: Optimal</text>
+            <rect x="155" y="172" width="125" height="6" rx="3" fill="rgba(0, 0, 0, 0.05)" class="dark:fill-white/10" />
+            <rect x="155" y="172" width="85" height="6" rx="3" fill="#16a34a" />
+            
+            <!-- Widget 2: Mandi Prices (Line Chart) -->
+            <rect x="310" y="75" width="155" height="135" rx="14" fill="rgba(255, 255, 255, 0.9)" class="dark:fill-gray-950/90" />
+            <text x="325" y="98" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="rgba(0, 0, 0, 0.4)" class="dark:fill-white/40">WHEAT MARKET</text>
+            <text x="325" y="126" font-family="system-ui, sans-serif" font-size="16" font-weight="800" fill="#f59e0b">₹2,450 / Ql</text>
+            <!-- Line graph drawing -->
+            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140 L 445 190 L 325 190 Z" fill="url(#hero-trend-gradient)" opacity="0.1" />
+            
+            <!-- Widget 3: Weather Integration -->
+            <rect x="140" y="225" width="325" height="135" rx="14" fill="rgba(255, 255, 255, 0.9)" class="dark:fill-gray-950/90" />
+            <text x="155" y="248" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="rgba(0, 0, 0, 0.4)" class="dark:fill-white/40">HYPERLOCAL WEATHER</text>
+            <text x="155" y="285" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="rgba(0, 0, 0, 0.8)" class="dark:fill-white/80">29°C</text>
+            <text x="155" y="306" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="rgba(0, 0, 0, 0.5)" class="dark:fill-white/40">Scattered showers starting 4:00 PM</text>
+            <!-- Weather SVG Icon -->
+            <g transform="translate(355, 235)">
+              <circle cx="45" cy="30" r="14" fill="#f59e0b" />
+              <path d="M 28 45 A 10 10 0 0 1 38 35 A 14 14 0 0 1 63 37 A 10 10 0 0 1 72 47 A 8 8 0 0 1 63 55 L 33 55 A 7 7 0 0 1 28 45 Z" fill="#cbd5e1" class="dark:fill-gray-600" />
+              <line x1="38" y1="60" x2="35" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+              <line x1="48" y1="60" x2="45" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+              <line x1="58" y1="60" x2="55" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+            </g>
+            
+            <!-- Nested Mobile Phone Overlay for Mockup Depth -->
+            <g transform="translate(355, 185)" class="drop-shadow-2xl">
+              <!-- Phone body -->
+              <rect x="0" y="0" width="115" height="215" rx="16" fill="rgba(255, 255, 255, 0.98)" class="dark:fill-gray-900" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" />
+              <rect x="0" y="0" width="115" height="215" rx="16" fill="none" stroke="rgba(0, 0, 0, 0.15)" stroke-width="1" />
+              <!-- Notch -->
+              <rect x="37" y="6" width="41" height="8" rx="4" fill="rgba(0, 0, 0, 0.8)" />
+              
+              <!-- Content: AI Diagnosis scanner -->
+              <rect x="10" y="24" width="95" height="82" rx="6" fill="rgba(22, 163, 74, 0.05)" />
+              <!-- Focus corners -->
+              <path d="M 15 34 L 15 29 L 20 29" fill="none" stroke="#16a34a" stroke-width="1.5" />
+              <path d="M 100 34 L 100 29 L 95 29" fill="none" stroke="#16a34a" stroke-width="1.5" />
+              <path d="M 15 96 L 15 101 L 20 101" fill="none" stroke="#16a34a" stroke-width="1.5" />
+              <path d="M 100 96 L 100 101 L 95 101" fill="none" stroke="#16a34a" stroke-width="1.5" />
+              <!-- Animated green scanner bar -->
+              <line x1="12" y1="65" x2="103" y2="65" stroke="#16a34a" stroke-width="1.5" class="animate-pulse" />
+              <!-- Leaf Shape inside phone -->
+              <path d="M 57 32 C 43 47 43 82 57 94 C 71 82 71 47 57 32 Z" fill="#4ade80" opacity="0.75" />
+              <path d="M 57 32 L 57 94" stroke="#16a34a" stroke-width="1" />
+              
+              <!-- Text -->
+              <text x="12" y="124" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="rgba(0, 0, 0, 0.4)" class="dark:fill-white/40">AI PLANT HEALTH</text>
+              <text x="12" y="139" font-family="system-ui, sans-serif" font-size="10.5" font-weight="800" fill="#16a34a">Healthy Crop</text>
+              <text x="12" y="151" font-family="system-ui, sans-serif" font-size="7.5" fill="rgba(0, 0, 0, 0.5)" class="dark:fill-white/30">Accuracy: 98.6%</text>
+              
+              <!-- CTA Button -->
+              <rect x="10" y="170" width="95" height="26" rx="8" fill="#16a34a" />
+              <text x="57" y="186" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#ffffff" text-anchor="middle">VIEW ANALYSIS</text>
+            </g>
+            
+            <defs>
+              <linearGradient id="hero-trend-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- Impact / Stats Banner -->
-  <section id="impact" class="py-16 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
+  <!-- Impact / Stats Section -->
+  <section id="impact" class="py-16 relative">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-gray-150 dark:border-gray-800 rounded-3xl p-8 lg:p-12 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-8">
         @for (stat of stats; track stat.label) {
-          <div class="p-4">
-            <div class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">{{ stat.value }}</div>
-            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">{{ stat.label }}</div>
+          <div class="text-center space-y-2 group">
+            <div class="text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-primary to-emerald-600 dark:from-green-400 dark:to-emerald-300 transition-transform duration-300 group-hover:scale-105">
+              {{ stat.value }}
+            </div>
+            <div class="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              {{ stat.label }}
+            </div>
           </div>
         }
       </div>
@@ -73,92 +201,134 @@
   </section>
 
   <!-- Features Section -->
-  <section id="features" class="py-24 relative">
+  <section id="features" class="py-20 relative">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-16">
-        <h2 class="text-3xl md:text-4xl font-bold mb-4">Everything You Need to Succeed</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400">Farmsetu brings the entire agricultural ecosystem into your pocket. From sowing to selling, we've got you covered.</p>
+      
+      <!-- Section Heading -->
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Everything You Need to Succeed</h2>
+        <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+          FarmSetu brings the entire agricultural ecosystem directly to your device. From seeding insights to competitive marketplace sales, we empower your daily operations.
+        </p>
       </div>
 
+      <!-- Features Cards Grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         @for (f of features; track f.title) {
-          <div class="fs-feature-card group bg-white/50 dark:bg-gray-800/50 backdrop-blur border border-gray-100 dark:border-gray-700 p-8 rounded-2xl hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1">
-            <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-              <svg [lucideIcon]="f.icon" class="text-primary group-hover:text-white"></svg>
+          <div class="group bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border border-gray-150 dark:border-gray-800 p-8 rounded-2xl hover:bg-white dark:hover:bg-gray-900 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+            <div class="space-y-6">
+              <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary dark:bg-primary/20 dark:text-green-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <svg [lucideIcon]="f.icon" size="24"></svg>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ f.title }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{{ f.desc }}</p>
             </div>
-            <h3 class="text-xl font-bold mb-3">{{ f.title }}</h3>
-            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ f.desc }}</p>
+            <div class="pt-6">
+              <span class="text-xs font-bold text-primary dark:text-green-400 flex items-center gap-1 cursor-pointer group-hover:gap-2 transition-all">
+                Learn more <span class="material-icons text-xs">arrow_forward</span>
+              </span>
+            </div>
           </div>
         }
       </div>
+
     </div>
   </section>
 
   <!-- About Us Section -->
-  <section id="about" class="py-24 bg-gray-50 dark:bg-gray-900/50">
-    <div class="max-w-7xl mx-auto px-6">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <div class="relative">
-          <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-amber-500/20 rounded-3xl transform -rotate-3 scale-105"></div>
-          <div class="relative bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
-            <!-- Simulated Image / Graphic -->
-            <div class="aspect-video bg-gray-100 dark:bg-gray-700 rounded-xl mb-6 flex items-center justify-center overflow-hidden">
-               <svg lucideShieldCheck size="64" class="text-gray-300 dark:text-gray-600"></svg>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">Built for Trust and Transparency</h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-6">Every transaction on Farmsetu is secured, and every expert is verified. We ensure that farmers get the best prices and buyers get the highest quality produce.</p>
-            <ul class="space-y-3">
-              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
-                <svg lucideShieldCheck class="text-primary" size="20"></svg> Verified Buyers & Sellers
-              </li>
-              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
-                <svg lucideShieldCheck class="text-primary" size="20"></svg> Secure Digital Payments
-              </li>
-              <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300 font-medium">
-                <svg lucideShieldCheck class="text-primary" size="20"></svg> Transparent Bidding System
-              </li>
-            </ul>
+  <section id="about" class="py-20 relative bg-gray-100/50 dark:bg-gray-900/30 border-y border-gray-200/50 dark:border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center">
+      
+      <!-- Visual representation on the left -->
+      <div class="lg:col-span-6 relative">
+        <div class="absolute inset-0 bg-gradient-to-tr from-primary/15 to-amber-500/15 rounded-3xl transform -rotate-2 scale-105"></div>
+        <div class="relative bg-white dark:bg-gray-950 p-6 sm:p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-850 space-y-6">
+          
+          <!-- Modern SVG Shield / Trust Badges visual -->
+          <div class="aspect-video bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center overflow-hidden relative">
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px] opacity-40"></div>
+            <svg viewBox="0 0 200 120" class="w-36 h-36 relative z-10">
+              <!-- Glow ring -->
+              <circle cx="100" cy="60" r="45" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4,4" class="animate-spin" style="animation-duration: 12s;" />
+              <!-- Outer shield -->
+              <path d="M 100 25 C 115 25 130 20 135 15 C 135 45 125 75 100 95 C 75 75 65 45 65 15 C 70 20 85 25 100 25 Z" fill="rgba(22, 163, 74, 0.08)" stroke="#16a34a" stroke-width="2" />
+              <!-- Checked Shield icon -->
+              <path d="M 88 58 L 97 67 L 115 48" fill="none" stroke="#16a34a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </div>
+
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Built for Trust and Transparency</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            Every transaction, buyer profile, and farming advisor on FarmSetu is fully verified. We guarantee secure digital Escrow pathways, genuine inputs, and transparent market pricing.
+          </p>
+
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+            <li class="flex items-center gap-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <span class="material-icons text-base text-primary">verified_user</span> Verified Buyers & Sellers
+            </li>
+            <li class="flex items-center gap-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <span class="material-icons text-base text-primary">gpp_good</span> Secure Digital Payments
+            </li>
+            <li class="flex items-center gap-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <span class="material-icons text-base text-primary">analytics</span> Transparent Bidding
+            </li>
+            <li class="flex items-center gap-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <span class="material-icons text-base text-primary">support_agent</span> 24/7 Expert Support
+            </li>
+          </ul>
         </div>
-        
-        <div>
-          <h2 class="text-3xl md:text-4xl font-bold mb-6">Our Mission</h2>
-          <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-            At Farmsetu, we believe that technology is the great equalizer. Our mission is to bridge the gap between traditional farming practices and modern digital solutions.
-          </p>
-          <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            By providing access to real-time market data, AI-driven diagnostics, and a nationwide community, we empower farmers to make informed decisions, increase their yields, and improve their livelihoods.
-          </p>
-          <a routerLink="/auth/register" class="inline-flex font-semibold text-primary items-center gap-2 hover:gap-3 transition-all">
-            Join our mission today <svg lucideArrowRight size="18"></svg>
+      </div>
+      
+      <!-- Text details on the right -->
+      <div class="lg:col-span-6 space-y-6">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Our Mission & Values</h2>
+        <p class="text-base text-gray-600 dark:text-gray-350 leading-relaxed">
+          At FarmSetu, we believe modern engineering is the key to bridging the gap between traditional agricultural workflows and dynamic digital solutions. We represent a localized, digital bridge built to empower farmers nationwide.
+        </p>
+        <p class="text-base text-gray-600 dark:text-gray-350 leading-relaxed">
+          By bringing machine learning crop scanners, localized forecasting, direct B2B buyer-seller markets, and localized support centers to rural areas, we aim to increase farming productivity, eliminate middlemen margins, and raise overall farmer income.
+        </p>
+        <div class="pt-2">
+          <a routerLink="/auth/register" class="inline-flex font-bold text-primary dark:text-green-400 items-center gap-1.5 hover:gap-3.5 transition-all">
+            Join our agricultural mission today <span class="material-icons text-sm">arrow_forward</span>
           </a>
         </div>
       </div>
+
     </div>
   </section>
 
-  <!-- CTA Banner -->
-  <section class="py-20 relative overflow-hidden bg-primary">
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-30"></div>
-    <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-      <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Ready to Transform Your Farm?</h2>
-      <p class="text-green-100 text-lg mb-10">Join Farmsetu today and unlock the full potential of your agricultural business.</p>
-      <a routerLink="/auth/register" class="inline-block bg-white text-primary font-bold text-lg px-10 py-4 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all">
-        Create Your Free Account
-      </a>
+  <!-- CTA Banner Section -->
+  <section class="py-20 relative overflow-hidden bg-gradient-to-br from-green-900 via-emerald-850 to-green-950 text-white border-t border-green-800">
+    <div class="absolute inset-0 bg-[radial-gradient(#ffffff_0.8px,transparent_0.8px)] [background-size:20px_20px] opacity-10"></div>
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-green-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+    
+    <div class="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-8">
+      <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">Ready to Transform Your Farm?</h2>
+      <p class="text-green-100 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+        Join the FarmSetu family today and unlock the full potential of your agricultural harvest with AI-guided crop models.
+      </p>
+      <div class="pt-2">
+        <a routerLink="/auth/register" class="inline-block bg-white text-green-900 hover:bg-gray-100 font-extrabold text-base px-10 py-4.5 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]">
+          Create Your Free Account
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="bg-white dark:bg-gray-950 py-12 border-t border-gray-200 dark:border-gray-800">
+  <footer class="bg-white dark:bg-gray-950 py-12 border-t border-gray-150 dark:border-gray-900 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
       <div class="flex items-center">
-        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu" class="h-8 w-auto object-contain">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" 
+             alt="FarmSetu" 
+             class="h-8 w-auto object-contain">
       </div>
-      <div class="text-gray-500 text-sm">
-        &copy; {{ currentYear || '2024' }} Farmsetu. All rights reserved.
+      <div class="text-gray-400 text-xs sm:text-sm">
+        &copy; {{ currentYear || '2026' }} FarmSetu. All rights reserved.
       </div>
-      <div class="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
+      <div class="flex gap-6 text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
         <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
         <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
         <a href="#" class="hover:text-primary transition-colors">Contact</a>
