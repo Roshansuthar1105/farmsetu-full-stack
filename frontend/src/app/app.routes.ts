@@ -110,7 +110,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    loadComponent: () => import('./features/admin/admin-layout.component').then(m => m.AdminLayoutComponent),
+    loadComponent: () => import('./shared/components/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
       {
         path: '',

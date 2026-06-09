@@ -44,6 +44,17 @@ export class MainLayoutComponent {
     { path: '/app/profile', labelKey: 'nav.profile', icon: 'person' }
   ];
 
+  readonly adminNavItems: NavItem[] = [
+    { path: '/admin', labelKey: 'nav.adminDashboard', icon: 'admin_panel_settings' },
+    { path: '/admin/users', labelKey: 'nav.adminUsers', icon: 'manage_accounts' },
+    { path: '/admin/crops', labelKey: 'nav.adminCrops', icon: 'gavel' },
+    { path: '/admin/mandis', labelKey: 'nav.adminMandis', icon: 'storefront' },
+    { path: '/admin/market-prices', labelKey: 'nav.adminMarketPrices', icon: 'upload_file' },
+    { path: '/admin/email', labelKey: 'nav.adminEmail', icon: 'forward_to_inbox' },
+    { path: '/admin/orders', labelKey: 'nav.adminOrders', icon: 'local_shipping' },
+    { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' }
+  ];
+
   readonly secondaryNavItems: NavItem[] = [
     { path: '/app/farm-dashboard', labelKey: 'nav.dashboard', icon: 'agriculture' },
     { path: '/app/market-analysis', labelKey: 'nav.market', icon: 'trending_up' },
