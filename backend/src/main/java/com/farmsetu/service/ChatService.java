@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.farmsetu.model.entity.AiChatMessage;
+import com.farmsetu.repository.AiChatMessageRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +24,31 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
-
-    @jakarta.persistence.PersistenceContext
-    private jakarta.persistence.EntityManager entityManager;
+    private final AiChatMessageRepository aiChatMessageRepository;
 
     public List<Map<String, Object>> getConversation(Long otherUserId, int page, int size) {
         Long userId = SecurityUtils.currentUserId();
+
+        // If query is for an AI bot, load from ai_chats table
+        if (otherUserId != null && otherUserId >= 9901 && otherUserId <= 9910) {
+            List<com.farmsetu.model.entity.AiChatMessage> messages = aiChatMessageRepository.findByFarmerIdAndBotIdOrderByCreatedAtDesc(
+                userId, otherUserId.intValue(), org.springframework.data.domain.PageRequest.of(page, size)
+            );
+            return messages.stream().map(msg -> {
+                Map<String, Object> map = new java.util.HashMap<>();
+                map.put("id", msg.getId());
+                map.put("senderId", msg.isFromBot() ? msg.getBotId().longValue() : msg.getFarmer().getId());
+                map.put("receiverId", msg.isFromBot() ? msg.getFarmer().getId() : msg.getBotId().longValue());
+                map.put("messageText", msg.getMessageText() != null ? msg.getMessageText() : "");
+                map.put("messageType", "TEXT");
+                map.put("mediaUrl", "");
+                map.put("read", true);
+                map.put("pinned", false);
+                map.put("createdAt", msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "");
+                return map;
+            }).collect(java.util.stream.Collectors.toList());
+        }
+
         List<com.farmsetu.model.entity.ChatMessage> messages = chatMessageRepository.findConversation(userId, otherUserId, org.springframework.data.domain.PageRequest.of(page, size));
         return messages.stream().map(msg -> {
             Map<String, Object> map = new java.util.HashMap<>();
@@ -170,28 +191,28 @@ public class ChatService {
     );
 
     private String getSystemInstructionForBot(Long botId) {
-        if (botId == null) botId = -1L;
+        if (botId == null) botId = 9901L;
         
         switch (botId.intValue()) {
-            case -1:
+            case 9901:
                 return "You are the FarmSetu AI Crop Disease & Pest Specialist. You specialize in identifying crop diseases, insect infestations, and offering organic or chemical remedies. Focus answers on plant pathology and pest management. If severe, advise a human agronomist.";
-            case -2:
+            case 9902:
                 return "You are the FarmSetu AI Soil & Nutrient Expert. You specialize in soil health cards, testing parameters, nitrogen/phosphorus/potassium ratios, micronutrients, compost, and chemical/organic fertilizer applications.";
-            case -3:
+            case 9903:
                 return "You are the FarmSetu AI Market Analyst & Pricing Advisor. You specialize in Indian mandi rates, MSP (Minimum Support Price), wholesale market trends, crop demand forecasts, and selling advice.";
-            case -4:
+            case 9904:
                 return "You are the FarmSetu AI Irrigation Specialist. You specialize in drip and sprinkler irrigation, groundwater management, rainwater harvesting, soil moisture maintenance, and water conservation technologies.";
-            case -5:
+            case 9905:
                 return "You are the FarmSetu AI Weather Advisory Specialist. You specialize in short and long-term weather forecasting advice, monsoon patterns, climate resilient crops, and frost/heatwave mitigation.";
-            case -6:
+            case 9906:
                 return "You are the FarmSetu AI Government Schemes Expert. You specialize in Indian agricultural subsidies, PM-Kisan, KCC loans, crop insurance (PMFBY), and applying for state/central government agricultural schemes.";
-            case -7:
+            case 9907:
                 return "You are the FarmSetu AI Seed Selection Expert. You specialize in high-yield seed varieties, hybrid breeding, seed treatment methods, germination tests, and matching seeds to specific soil/climatic zones.";
-            case -8:
+            case 9908:
                 return "You are the FarmSetu AI Organic Farming Consultant. You specialize in natural farming, permaculture, vermicomposting, crop rotation, green manures, and biological pest control.";
-            case -9:
+            case 9909:
                 return "You are the FarmSetu AI Livestock and Dairy Expert. You specialize in cattle health, poultry management, high-protein feed options, veterinary first-aid, and milk production enhancement.";
-            case -10:
+            case 9910:
                 return "You are the FarmSetu AI Farm Machinery & Drone Specialist. You specialize in smart tractors, drone crop spraying, seed drills, combine harvesters, and implements.";
             default:
                 return "You are FarmSetu AI Assistant, a helpful and certified agricultural assistant. Answer the farmer's question precisely, focusing on Indian agriculture context, crops, soil, pests, and market advice. If the query involves severe crop disease spreading, massive pest attack, legal disputes, bank loans/subsidies, or urgent crop failures, advise them to consult a human expert.";
@@ -344,8 +365,8 @@ public class ChatService {
         try {
             Long farmerId = SecurityUtils.currentUserId();
             if (farmerId != null && botId != null) {
-                sendMessage(farmerId, botId, message, MessageType.TEXT, null);
-                sendMessage(botId, farmerId, reply, MessageType.TEXT, null);
+                saveAiChatMessage(farmerId, botId.intValue(), message, false);
+                saveAiChatMessage(farmerId, botId.intValue(), reply, true);
             }
         } catch (Exception e) {
             System.err.println("Error saving AI chat messages to database: " + e.getMessage());
@@ -368,12 +389,12 @@ public class ChatService {
     }
 
     public Map<String, Object> aiChat(String message, Long sessionId) {
-        return aiChat(message, sessionId, -1L);
+        return aiChat(message, sessionId, 9901L);
     }
 
     // Backward-compatible overload
     public Map<String, Object> aiChat(String message) {
-        return aiChat(message, null, -1L);
+        return aiChat(message, null, 9901L);
     }
 
     private String generateAiReply(String message, Long botId) {
@@ -430,7 +451,7 @@ public class ChatService {
     }
 
     private String generateAiReply(String message) {
-        return generateAiReply(message, -1L);
+        return generateAiReply(message, 9901L);
     }
 
     private boolean detectEscalation(String message) {
@@ -439,78 +460,15 @@ public class ChatService {
         return ESCALATION_KEYWORDS.stream().anyMatch(lower::contains);
     }
 
-    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
-    @org.springframework.transaction.annotation.Transactional
-    public void initBotUsers() {
-        try {
-            String[] botNames = {
-                "Crop Disease & Pest Bot",
-                "Soil & Nutrient Bot",
-                "Market Analyst Bot",
-                "Irrigation Bot",
-                "Weather Advisor Bot",
-                "Gov Schemes Bot",
-                "Seed Selection Bot",
-                "Organic Farming Bot",
-                "Livestock & Dairy Bot",
-                "Farm Machinery Bot"
-            };
-            
-            String[] botEmails = {
-                "disease.bot@farmsetu.in",
-                "soil.bot@farmsetu.in",
-                "market.bot@farmsetu.in",
-                "irrigation.bot@farmsetu.in",
-                "weather.bot@farmsetu.in",
-                "schemes.bot@farmsetu.in",
-                "seed.bot@farmsetu.in",
-                "organic.bot@farmsetu.in",
-                "livestock.bot@farmsetu.in",
-                "machinery.bot@farmsetu.in"
-            };
-
-            String[] botPhones = {
-                "0000000001",
-                "0000000002",
-                "0000000003",
-                "0000000004",
-                "0000000005",
-                "0000000006",
-                "0000000007",
-                "0000000008",
-                "0000000009",
-                "0000000010"
-            };
-
-            // Repair any existing bot users that have NULL in boolean fields (since primitive boolean cannot accept NULL)
-            entityManager.createNativeQuery(
-                "UPDATE users SET two_factor_enabled = FALSE WHERE id < 0 AND two_factor_enabled IS NULL"
-            ).executeUpdate();
-            entityManager.createNativeQuery(
-                "UPDATE users SET is_verified = TRUE WHERE id < 0 AND is_verified IS NULL"
-            ).executeUpdate();
-            entityManager.createNativeQuery(
-                "UPDATE users SET is_active = TRUE WHERE id < 0 AND is_active IS NULL"
-            ).executeUpdate();
-
-            for (int i = 0; i < 10; i++) {
-                long botId = -(i + 1);
-                Optional<User> existing = userRepository.findById(botId);
-                if (existing.isEmpty()) {
-                    entityManager.createNativeQuery(
-                        "INSERT INTO users (id, name, email, phone, password_hash, role, is_verified, is_active, two_factor_enabled, reputation_score, created_at, updated_at) " +
-                        "VALUES (?, ?, ?, ?, 'SYSTEM_BOT', 'EXPERT', TRUE, TRUE, FALSE, 0, NOW(), NOW()) ON CONFLICT (id) DO NOTHING"
-                    )
-                    .setParameter(1, botId)
-                    .setParameter(2, botNames[i])
-                    .setParameter(3, botEmails[i])
-                    .setParameter(4, botPhones[i])
-                    .executeUpdate();
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error initializing system bot users: " + e.getMessage());
-            e.printStackTrace();
-        }
+    @Transactional
+    public void saveAiChatMessage(Long farmerId, Integer botId, String text, boolean fromBot) {
+        User farmer = userRepository.getReferenceById(farmerId);
+        AiChatMessage msg = AiChatMessage.builder()
+                .farmer(farmer)
+                .botId(botId)
+                .messageText(text)
+                .fromBot(fromBot)
+                .build();
+        aiChatMessageRepository.save(msg);
     }
 }

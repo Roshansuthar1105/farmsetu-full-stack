@@ -127,7 +127,7 @@
               </div>
               
               <p class="text-[10px] font-semibold text-gray-400 dark:text-gray-400 uppercase mb-1">
-                {{ e.id < 0 ? 'Automated Bot' : 'Certified Specialist' }}
+                {{ isAiBot(e.id) ? 'Automated Bot' : 'Certified Specialist' }}
               </p>
 
               <!-- Specialties badge list -->
@@ -213,7 +213,7 @@
 
         <div class="flex items-center gap-2">
           <!-- Talk to Expert Header Button (Farmer only, AI active only) -->
-          <button *ngIf="currentUser?.role === 'FARMER' && selectedExpert() && selectedExpert()!.id < 0 && activeSession()?.status === 'AI_ACTIVE'" 
+          <button *ngIf="currentUser?.role === 'FARMER' && selectedExpert() && isAiBot(selectedExpert()!.id) && activeSession()?.status === 'AI_ACTIVE'" 
                   (click)="escalateSession()" 
                   class="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-800 text-white text-[11px] font-bold rounded-xl transition shadow active:scale-95">
             <span class="material-icons text-xs">support_agent</span>
@@ -261,16 +261,17 @@
               </div>
             </div>
           } @else {
-            <div [class.justify-end]="msg.senderId === currentUser?.id" 
-                 [class.justify-start]="msg.senderId !== currentUser?.id"
+            <div [class.justify-end]="msg.senderId == currentUser?.id" 
+                 [class.justify-start]="msg.senderId != currentUser?.id"
                  class="flex">
               <!-- Message Bubble -->
-              <div [ngClass]="msg.senderId === currentUser?.id ? 
+              <div [ngClass]="msg.senderId == currentUser?.id ? 
                        'bg-[#d9fdd3] dark:bg-[#005c4b] text-[#111b21] dark:text-[#e9edef] rounded-2xl rounded-tr-none' : 
                        'bg-white dark:bg-[#202c33] text-[#111b21] dark:text-[#e9edef] rounded-2xl rounded-tl-none'"
                    class="max-w-[85%] md:max-w-[70%] pt-2 pb-1.5 pl-3 pr-14 shadow-sm relative group transition-all duration-205">
                 
                 <div class="text-xs md:text-sm break-words leading-relaxed pr-1">
+                  <span class="text-[9px] text-red-500 font-mono block">[{{msg.senderId}} vs {{currentUser?.id}}]</span>
                   @switch (msg.messageType) {
                     @case ('TEXT') {
                       <div [innerHTML]="renderMessageText(msg.messageText)" class="inline-block text-xs md:text-sm"></div>
@@ -320,7 +321,7 @@
                 <!-- Time / Ticks footer -->
                 <div class="absolute bottom-1 right-2 flex items-center gap-1 text-[9px] text-gray-400 dark:text-gray-400 select-none">
                   <span>{{ formatTime(msg.createdAt) }}</span>
-                  @if (msg.senderId === currentUser?.id && msg.receiverId >= 0) {
+                  @if (msg.senderId == currentUser?.id && !isAiBot(msg.receiverId)) {
                     <span class="material-icons text-xs leading-none shrink-0" 
                           [class.text-green-600]="msg.read"
                           [class.text-gray-400]="!msg.read">
@@ -396,7 +397,7 @@
         <div class="flex items-center gap-2">
           <!-- File Attach -->
           <button (click)="triggerFileUpload()" 
-                  [disabled]="isRecording() || (selectedExpert() && selectedExpert()!.id < 0)"
+                  [disabled]="isRecording() || (selectedExpert() && isAiBot(selectedExpert()!.id))"
                   type="button" 
                   class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-green-600 disabled:opacity-50 transition shrink-0">
             <span class="material-icons text-xl">add</span>
@@ -424,7 +425,7 @@
           <!-- Actions -->
           @if (!messageText.trim() && !isRecording()) {
             <button (click)="startRecording()" 
-                    [disabled]="selectedExpert() && selectedExpert()!.id < 0"
+                    [disabled]="selectedExpert() && isAiBot(selectedExpert()!.id)"
                     type="button" 
                     class="p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-500 hover:text-red-600 disabled:opacity-50 transition shrink-0">
               <span class="material-icons text-xl">mic</span>
@@ -477,7 +478,7 @@
           <div>
             <h3 class="font-extrabold text-sm text-gray-900 dark:text-white">{{ selectedExpert()?.name }}</h3>
             <span class="inline-block bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">
-              {{ selectedExpert()?.role === 'FARMER' ? 'Farmer' : (selectedExpert() && selectedExpert()!.id < 0) ? 'Bot' : 'Consultant' }}
+              {{ selectedExpert()?.role === 'FARMER' ? 'Farmer' : (selectedExpert() && isAiBot(selectedExpert()!.id)) ? 'Bot' : 'Consultant' }}
             </span>
           </div>
         </div>
@@ -519,7 +520,7 @@
           }
 
           <!-- Book a Consultation call CTA (only for Expert and non-AI bot) -->
-          @if (selectedExpert()?.role !== 'FARMER' && selectedExpert() && selectedExpert()!.id >= 0) {
+          @if (selectedExpert()?.role !== 'FARMER' && selectedExpert() && !isAiBot(selectedExpert()!.id)) {
             <div class="pt-2">
               <button (click)="bookVideoCall()" 
                       type="button" 

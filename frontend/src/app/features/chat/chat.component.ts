@@ -145,12 +145,12 @@ export class ChatComponent implements OnInit, OnDestroy {
               } else if (active.status === 'WAITING_FOR_EXPERT') {
                 this.updateQueuePosition(active.id);
                 setTimeout(() => {
-                  const aiBot = this.experts().find(e => e.id === -1);
+                  const aiBot = this.experts().find(e => e.id === 9901);
                   if (aiBot) this.selectedExpert.set(aiBot);
                 }, 200);
               } else if (active.status === 'AI_ACTIVE') {
                 setTimeout(() => {
-                  const aiBot = this.experts().find(e => e.id === -1);
+                  const aiBot = this.experts().find(e => e.id === 9901);
                   if (aiBot) this.selectExpert(aiBot);
                 }, 200);
               }
@@ -172,7 +172,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Define 10 distinct agricultural AI experts trained for specific roles
     const aiBots: Expert[] = [
       {
-        id: -1,
+        id: 9901,
         name: 'Crop Disease & Pest Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Disease+Bot&background=10b981&color=fff&bold=true&rounded=true',
@@ -182,7 +182,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -2,
+        id: 9902,
         name: 'Soil & Nutrient Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Soil+Bot&background=8b5cf6&color=fff&bold=true&rounded=true',
@@ -192,7 +192,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -3,
+        id: 9903,
         name: 'Market Analyst Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Market+Bot&background=f59e0b&color=fff&bold=true&rounded=true',
@@ -202,7 +202,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -4,
+        id: 9904,
         name: 'Irrigation Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Irrigation+Bot&background=3b82f6&color=fff&bold=true&rounded=true',
@@ -212,7 +212,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -5,
+        id: 9905,
         name: 'Weather Advisor Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Weather+Bot&background=06b6d4&color=fff&bold=true&rounded=true',
@@ -222,7 +222,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -6,
+        id: 9906,
         name: 'Gov Schemes Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Schemes+Bot&background=ec4899&color=fff&bold=true&rounded=true',
@@ -232,7 +232,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -7,
+        id: 9907,
         name: 'Seed Selection Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Seed+Bot&background=0284c7&color=fff&bold=true&rounded=true',
@@ -242,7 +242,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -8,
+        id: 9908,
         name: 'Organic Farming Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Organic+Bot&background=16a34a&color=fff&bold=true&rounded=true',
@@ -252,7 +252,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -9,
+        id: 9909,
         name: 'Livestock & Dairy Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Livestock+Bot&background=e11d48&color=fff&bold=true&rounded=true',
@@ -262,7 +262,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         unreadCount: 0
       },
       {
-        id: -10,
+        id: 9910,
         name: 'Farm Machinery Bot',
         role: 'EXPERT',
         profilePhoto: 'https://ui-avatars.com/api/?name=Machinery+Bot&background=4b5563&color=fff&bold=true&rounded=true',
@@ -275,7 +275,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.api.get<any[]>('/api/users').subscribe({
       next: (users) => {
-        const expertsOnly = users.filter(u => u.role === 'EXPERT' && u.id !== this.currentUser?.id && u.id >= 0);
+        const expertsOnly = users.filter(u => u.role === 'EXPERT' && u.id !== this.currentUser?.id && !this.isAiBot(u.id));
         const mapped = expertsOnly.map(u => {
           let specialties = ['General Agronomy'];
           let rating = 4.8;
@@ -325,7 +325,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages.set([]);
     this.escalationSuggested.set(false);
 
-    if (expert.id < 0) {
+    if (this.isAiBot(expert.id)) {
       this.api.post<any>('/api/expert-chat/sessions', {}).subscribe({
         next: (session) => {
           this.activeSession.set(session);
@@ -436,7 +436,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messageText = '';
 
     const selectedBot = this.selectedExpert();
-    if (selectedBot && selectedBot.id < 0) {
+    if (selectedBot && this.isAiBot(selectedBot.id)) {
       const userMsg = {
         id: Date.now(),
         senderId: this.currentUser.id,
@@ -552,7 +552,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const msg = payload as ChatMessage;
       const activeExpert = this.selectedExpert();
 
-      if (activeExpert && (msg.senderId === activeExpert.id || msg.senderId === this.currentUser?.id)) {
+      if (activeExpert && (msg.senderId == activeExpert.id || msg.senderId == this.currentUser?.id)) {
         this.messages.update(list => {
           if (!list.some(m => m.id === msg.id)) {
             return [...list, msg];
@@ -560,7 +560,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           return list;
         });
 
-        if (msg.senderId === activeExpert.id) {
+        if (msg.senderId == activeExpert.id) {
           this.api.put(`/api/chats/${msg.id}/read`, {}).subscribe();
         }
       }
@@ -695,12 +695,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.api.post<any>('/api/expert-chat/sessions', {}).subscribe({
       next: (session) => {
         this.activeSession.set(session);
-        const currentBot = this.selectedExpert() && this.selectedExpert()!.id < 0 ? this.selectedExpert() : this.experts().find(e => e.id === -1);
+        const currentBot = this.selectedExpert() && this.isAiBot(this.selectedExpert()!.id) ? this.selectedExpert() : this.experts().find(e => e.id === 9901);
         this.selectedExpert.set(currentBot || null);
         this.messages.set([
           {
             id: 0,
-            senderId: currentBot ? currentBot.id : -1,
+            senderId: currentBot ? currentBot.id : 9901,
             receiverId: this.currentUser?.id || 0,
             messageText: currentBot ? `Hello! I am your ${currentBot.name}. ${currentBot.bio}` : 'Hello! I am your FarmSetu AI Agricultural Assistant.',
             messageType: 'TEXT',
@@ -727,8 +727,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
+  isAiBot(id: number | undefined): boolean {
+    return id !== undefined && id >= 9901 && id <= 9910;
+  }
+
   isOnline(userId: number): boolean {
-    if (userId < 0) return true; // AI is always online
+    if (this.isAiBot(userId)) return true; // AI is always online
     return this.onlineUserIds().has(userId);
   }
 
@@ -747,7 +751,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!file || !this.selectedExpert() || !this.currentUser) return;
 
     // AI doesn't support attachments in mock
-    if (this.selectedExpert() && this.selectedExpert()!.id < 0) {
+    if (this.selectedExpert() && this.isAiBot(this.selectedExpert()!.id)) {
       alert('AI Assistant currently only supports text queries.');
       return;
     }
@@ -777,7 +781,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   startRecording(): void {
     if (this.isRecording()) return;
 
-    if (this.selectedExpert() && this.selectedExpert()!.id < 0) {
+    if (this.selectedExpert() && this.isAiBot(this.selectedExpert()!.id)) {
       alert('AI Assistant currently only supports text queries.');
       return;
     }
