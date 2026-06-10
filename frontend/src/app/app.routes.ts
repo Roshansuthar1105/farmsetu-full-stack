@@ -94,6 +94,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/financial/financial.component').then(m => m.FinancialComponent)
       },
       {
+        path: 'labor-booking',
+        loadComponent: () => import('./features/labor-booking/labor-booking.component').then(m => m.LaborBookingComponent)
+      },
+      {
+        path: 'labor-booking/manage/:jobId',
+        loadComponent: () => import('./features/labor-booking/manage-applicants/manage-applicants.component').then(m => m.ManageApplicantsComponent)
+      },
+      {
+        path: 'machinery',
+        loadComponent: () => import('./features/machinery/machinery.component').then(m => m.MachineryDashboardComponent)
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent)
       },

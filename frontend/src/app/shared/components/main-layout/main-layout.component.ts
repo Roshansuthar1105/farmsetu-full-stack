@@ -68,6 +68,8 @@ export class MainLayoutComponent {
     { path: '/app/disease-detection', labelKey: 'nav.disease', icon: 'biotech' },
     { path: '/app/mandi-finder', labelKey: 'nav.mandi', icon: 'map' },
     { path: '/app/water-queue', labelKey: 'nav.waterQueue', icon: 'water_drop' },
+    { path: '/app/labor-booking', labelKey: 'nav.laborBooking', icon: 'engineering' },
+    { path: '/app/machinery', labelKey: 'nav.machinery', icon: 'agriculture' },
     { path: '/app/financial', labelKey: 'nav.finance', icon: 'payments' },
     { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' }
   ];

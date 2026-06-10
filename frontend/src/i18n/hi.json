@@ -73,6 +73,8 @@
   "mandiFinder.operatingHours": "कार्य समय",
   "mandiFinder.contact": "संपर्क फोन",
   "nav.waterQueue": "पानी की बारी (बारी)",
+  "nav.laborBooking": "मज़दूर बुकिंग",
+  "nav.machinery": "मशीनरी रेंटल",
   "waterQueue.title": "पानी की बारी (बारी) शेड्यूलर",
   "waterQueue.subtitle": "वास्तविक समय एआई मौसम सलाहकार के साथ डिजिटल जल स्लॉट बुकिंग",
   "waterQueue.bookSlot": "जल स्लॉट बुक करें",

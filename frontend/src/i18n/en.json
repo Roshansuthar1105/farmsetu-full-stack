@@ -73,6 +73,8 @@
   "mandiFinder.operatingHours": "Operating Hours",
   "mandiFinder.contact": "Contact Phone",
   "nav.waterQueue": "Water Queue (Baari)",
+  "nav.laborBooking": "Labor Booking",
+  "nav.machinery": "Machinery Rental",
   "waterQueue.title": "Water Queue (Baari) Scheduler",
   "waterQueue.subtitle": "Digitized water slot booking with real-time AI weather advisor",
   "waterQueue.bookSlot": "Book Water Slot",
