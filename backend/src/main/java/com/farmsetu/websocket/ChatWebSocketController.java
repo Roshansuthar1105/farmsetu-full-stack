@@ -20,9 +20,20 @@ public class ChatWebSocketController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final com.farmsetu.service.ExpertChatSessionService expertChatSessionService;
 
     private static final Map<String, Long> sessionToUserMap = new ConcurrentHashMap<>();
     private static final Set<Long> onlineUsers = ConcurrentHashMap.newKeySet();
+
+    @MessageMapping("/expert-queue.update")
+    public void handleQueueUpdate() {
+        java.util.List<Map<String, Object>> queue = expertChatSessionService.getQueue();
+        Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("type", "QUEUE_UPDATE");
+        payload.put("queue", queue);
+        payload.put("count", queue.size());
+        messagingTemplate.convertAndSend("/topic/expert-queue", payload);
+    }
 
     public static Set<Long> getOnlineUserIds() {
         return onlineUsers;

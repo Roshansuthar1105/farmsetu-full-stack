@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,9 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
 
     public List<Map<String, Object>> getConversation(Long otherUserId, int page, int size) {
         Long userId = SecurityUtils.currentUserId();
@@ -86,11 +90,427 @@ public class ChatService {
         });
     }
 
-    public Map<String, String> aiChat(String message) {
-        return Map.of(
-                "reply",
-                "FarmSetu AI: Connect OpenAI in your configuration. Your question was received: " + message
-        );
+    private final ExpertChatSessionService expertChatSessionService;
+
+    @org.springframework.beans.factory.annotation.Value("${ai.provider:gemini}")
+    private String aiProvider;
+
+    @org.springframework.beans.factory.annotation.Value("${gemini.api.key:}")
+    private String geminiApiKey;
+
+    @org.springframework.beans.factory.annotation.Value("${gemini.model:gemini-3.5-flash}")
+    private String geminiModel;
+
+    @org.springframework.beans.factory.annotation.Value("${gemini.base-url:https://generativelanguage.googleapis.com}")
+    private String geminiBaseUrl;
+
+    @org.springframework.beans.factory.annotation.Value("${openai.api.key:}")
+    private String openaiApiKey;
+
+    @org.springframework.beans.factory.annotation.Value("${openai.model:gpt-4o-mini}")
+    private String openaiModel;
+
+    @org.springframework.beans.factory.annotation.Value("${openai.base-url:https://api.openai.com}")
+    private String openaiBaseUrl;
+
+    private final org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
+
+    private org.springframework.web.client.RestTemplate createRestTemplate() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        
+        String proxyHost = System.getProperty("https.proxyHost");
+        String proxyPortStr = System.getProperty("https.proxyPort");
+        
+        if (proxyHost == null || proxyHost.isBlank()) {
+            String httpsProxy = System.getenv("HTTPS_PROXY");
+            if (httpsProxy == null || httpsProxy.isBlank()) {
+                httpsProxy = System.getenv("http_proxy");
+            }
+            if (httpsProxy == null || httpsProxy.isBlank()) {
+                httpsProxy = System.getenv("https_proxy");
+            }
+            if (httpsProxy != null && !httpsProxy.isBlank()) {
+                try {
+                    java.net.URI uri = new java.net.URI(httpsProxy);
+                    proxyHost = uri.getHost();
+                    int port = uri.getPort();
+                    proxyPortStr = String.valueOf(port == -1 ? 443 : port);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+        
+        if (proxyHost != null && !proxyHost.isBlank()) {
+            int port = 443;
+            if (proxyPortStr != null && !proxyPortStr.isBlank()) {
+                try {
+                    port = Integer.parseInt(proxyPortStr);
+                } catch (NumberFormatException e) {
+                    // Ignore
+                }
+            }
+            java.net.Proxy proxy = new java.net.Proxy(java.net.Proxy.Type.HTTP, new java.net.InetSocketAddress(proxyHost, port));
+            factory.setProxy(proxy);
+        }
+        
+        factory.setConnectTimeout(15000);
+        factory.setReadTimeout(30000);
+        return new org.springframework.web.client.RestTemplate(factory);
+    }
+
+    // Keywords that suggest the farmer needs a human expert
+    private static final java.util.Set<String> ESCALATION_KEYWORDS = java.util.Set.of(
+            "expert", "human", "person", "specialist", "doctor", "agronomist",
+            "emergency", "urgent", "critical", "dying", "spreading fast",
+            "disease", "infection", "pest attack", "crop failure", "wilting",
+            "loan", "insurance", "subsidy", "legal", "dispute", "compensation",
+            "soil test", "lab report", "chemical analysis",
+            "not working", "nothing helps", "tried everything"
+    );
+
+    private String getSystemInstructionForBot(Long botId) {
+        if (botId == null) botId = -1L;
+        
+        switch (botId.intValue()) {
+            case -1:
+                return "You are the FarmSetu AI Crop Disease & Pest Specialist. You specialize in identifying crop diseases, insect infestations, and offering organic or chemical remedies. Focus answers on plant pathology and pest management. If severe, advise a human agronomist.";
+            case -2:
+                return "You are the FarmSetu AI Soil & Nutrient Expert. You specialize in soil health cards, testing parameters, nitrogen/phosphorus/potassium ratios, micronutrients, compost, and chemical/organic fertilizer applications.";
+            case -3:
+                return "You are the FarmSetu AI Market Analyst & Pricing Advisor. You specialize in Indian mandi rates, MSP (Minimum Support Price), wholesale market trends, crop demand forecasts, and selling advice.";
+            case -4:
+                return "You are the FarmSetu AI Irrigation Specialist. You specialize in drip and sprinkler irrigation, groundwater management, rainwater harvesting, soil moisture maintenance, and water conservation technologies.";
+            case -5:
+                return "You are the FarmSetu AI Weather Advisory Specialist. You specialize in short and long-term weather forecasting advice, monsoon patterns, climate resilient crops, and frost/heatwave mitigation.";
+            case -6:
+                return "You are the FarmSetu AI Government Schemes Expert. You specialize in Indian agricultural subsidies, PM-Kisan, KCC loans, crop insurance (PMFBY), and applying for state/central government agricultural schemes.";
+            case -7:
+                return "You are the FarmSetu AI Seed Selection Expert. You specialize in high-yield seed varieties, hybrid breeding, seed treatment methods, germination tests, and matching seeds to specific soil/climatic zones.";
+            case -8:
+                return "You are the FarmSetu AI Organic Farming Consultant. You specialize in natural farming, permaculture, vermicomposting, crop rotation, green manures, and biological pest control.";
+            case -9:
+                return "You are the FarmSetu AI Livestock and Dairy Expert. You specialize in cattle health, poultry management, high-protein feed options, veterinary first-aid, and milk production enhancement.";
+            case -10:
+                return "You are the FarmSetu AI Farm Machinery & Drone Specialist. You specialize in smart tractors, drone crop spraying, seed drills, combine harvesters, and implements.";
+            default:
+                return "You are FarmSetu AI Assistant, a helpful and certified agricultural assistant. Answer the farmer's question precisely, focusing on Indian agriculture context, crops, soil, pests, and market advice. If the query involves severe crop disease spreading, massive pest attack, legal disputes, bank loans/subsidies, or urgent crop failures, advise them to consult a human expert.";
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String callGemini(String prompt, Long botId) {
+        if (geminiApiKey == null || geminiApiKey.isBlank() || geminiApiKey.contains("key-here")) {
+            return null; // Fallback to local stub instantly
+        }
+        
+        String key = geminiApiKey.trim();
+        if (key.startsWith("GEMINI_API_KEY=")) {
+            key = key.substring("GEMINI_API_KEY=".length()).trim();
+        }
+
+        if (key.length() < 10) {
+            return null; // Fallback to local stub instantly
+        }
+
+        try {
+            String baseUrl = geminiBaseUrl != null && !geminiBaseUrl.isBlank() ? geminiBaseUrl : "https://generativelanguage.googleapis.com";
+            String url = baseUrl + "/v1beta/models/" + geminiModel + ":generateContent?key=" + key;
+
+            String systemInstruction = getSystemInstructionForBot(botId);
+
+            Map<String, Object> requestBody = new java.util.HashMap<>();
+            
+            java.util.List<Map<String, Object>> contents = new java.util.ArrayList<>();
+            Map<String, Object> contentMap = new java.util.HashMap<>();
+            contentMap.put("role", "user");
+            
+            java.util.List<Map<String, Object>> parts = new java.util.ArrayList<>();
+            Map<String, Object> partMap = new java.util.HashMap<>();
+            partMap.put("text", prompt);
+            parts.add(partMap);
+            contentMap.put("parts", parts);
+            contents.add(contentMap);
+            requestBody.put("contents", contents);
+
+            Map<String, Object> systemInstructionMap = new java.util.HashMap<>();
+            java.util.List<Map<String, Object>> sysParts = new java.util.ArrayList<>();
+            Map<String, Object> sysPartMap = new java.util.HashMap<>();
+            sysPartMap.put("text", systemInstruction);
+            sysParts.add(sysPartMap);
+            systemInstructionMap.put("parts", sysParts);
+            requestBody.put("systemInstruction", systemInstructionMap);
+
+            Map<String, Object> generationConfig = new java.util.HashMap<>();
+            generationConfig.put("temperature", 0.7);
+            requestBody.put("generationConfig", generationConfig);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+
+            org.springframework.http.HttpEntity<Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(requestBody, headers);
+
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+            if (response != null && response.containsKey("candidates")) {
+                java.util.List<Map<String, Object>> candidates = (java.util.List<Map<String, Object>>) response.get("candidates");
+                if (candidates != null && !candidates.isEmpty()) {
+                    Map<String, Object> candidate = candidates.get(0);
+                    Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+                    if (content != null && content.containsKey("parts")) {
+                        java.util.List<Map<String, Object>> respParts = (java.util.List<Map<String, Object>>) content.get("parts");
+                        if (respParts != null && !respParts.isEmpty()) {
+                            return (String) respParts.get(0).get("text");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error calling Gemini API: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String callOpenAi(String prompt, Long botId) {
+        if (openaiApiKey == null || openaiApiKey.isBlank() || openaiApiKey.contains("key-here")) {
+            return null;
+        }
+        try {
+            String baseUrl = openaiBaseUrl != null && !openaiBaseUrl.isBlank() ? openaiBaseUrl.trim() : "https://api.openai.com";
+            String url = baseUrl;
+            if (!url.endsWith("/v1/chat/completions") && !url.endsWith("/v1/chat/completions/")) {
+                if (url.endsWith("/")) {
+                    url = url + "v1/chat/completions";
+                } else {
+                    url = url + "/v1/chat/completions";
+                }
+            }
+
+            String systemInstruction = getSystemInstructionForBot(botId);
+
+            Map<String, Object> requestBody = new java.util.HashMap<>();
+            requestBody.put("model", openaiModel != null ? openaiModel.trim() : "gpt-4o-mini");
+            
+            java.util.List<Map<String, Object>> messages = new java.util.ArrayList<>();
+            
+            Map<String, Object> systemMessage = new java.util.HashMap<>();
+            systemMessage.put("role", "system");
+            systemMessage.put("content", systemInstruction);
+            messages.add(systemMessage);
+            
+            Map<String, Object> userMessage = new java.util.HashMap<>();
+            userMessage.put("role", "user");
+            userMessage.put("content", prompt);
+            messages.add(userMessage);
+            
+            requestBody.put("messages", messages);
+            requestBody.put("temperature", 0.7);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            
+            String key = openaiApiKey.trim();
+            if (key.startsWith("OPENAI_API_KEY=")) {
+                key = key.substring("OPENAI_API_KEY=".length()).trim();
+            }
+            headers.set("Authorization", "Bearer " + key);
+
+            org.springframework.http.HttpEntity<Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(requestBody, headers);
+
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+            if (response != null && response.containsKey("choices")) {
+                java.util.List<Map<String, Object>> choices = (java.util.List<Map<String, Object>>) response.get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    Map<String, Object> choice = choices.get(0);
+                    Map<String, Object> msg = (Map<String, Object>) choice.get("message");
+                    if (msg != null && msg.containsKey("content")) {
+                        return (String) msg.get("content");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error calling OpenAI API: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Map<String, Object> aiChat(String message, Long sessionId, Long botId) {
+        String reply = generateAiReply(message, botId);
+        boolean escalationSuggested = detectEscalation(message) || detectEscalation(reply);
+
+        // Save conversation history to database
+        try {
+            Long farmerId = SecurityUtils.currentUserId();
+            if (farmerId != null && botId != null) {
+                sendMessage(farmerId, botId, message, MessageType.TEXT, null);
+                sendMessage(botId, farmerId, reply, MessageType.TEXT, null);
+            }
+        } catch (Exception e) {
+            System.err.println("Error saving AI chat messages to database: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Record interaction in session if sessionId provided
+        if (sessionId != null) {
+            try {
+                expertChatSessionService.recordAiInteraction(sessionId, message, reply);
+            } catch (Exception e) {
+                // Don't fail the chat if session recording fails
+            }
+        }
+
+        Map<String, Object> response = new java.util.HashMap<>();
+        response.put("reply", reply);
+        response.put("escalationSuggested", escalationSuggested);
+        return response;
+    }
+
+    public Map<String, Object> aiChat(String message, Long sessionId) {
+        return aiChat(message, sessionId, -1L);
+    }
+
+    // Backward-compatible overload
+    public Map<String, Object> aiChat(String message) {
+        return aiChat(message, null, -1L);
+    }
+
+    private String generateAiReply(String message, Long botId) {
+        if (message == null || message.isBlank()) {
+            return "Please describe your agricultural question so I can assist you better.";
+        }
+
+        String provider = aiProvider != null ? aiProvider.trim().toLowerCase() : "gemini";
+        
+        // Route request based on provider setting
+        if ("openai".equals(provider)) {
+            String openAiReply = callOpenAi(message, botId);
+            if (openAiReply != null) return openAiReply;
+            // Fallback to Gemini if OpenAI failed
+            String geminiReply = callGemini(message, botId);
+            if (geminiReply != null) return geminiReply;
+        } else {
+            String geminiReply = callGemini(message, botId);
+            if (geminiReply != null) return geminiReply;
+            // Fallback to OpenAI if Gemini failed
+            String openAiReply = callOpenAi(message, botId);
+            if (openAiReply != null) return openAiReply;
+        }
+
+        String lower = message.toLowerCase();
+
+        // Simple keyword-based responses (stub — replace with real AI later)
+        if (lower.contains("weather") || lower.contains("rain") || lower.contains("forecast")) {
+            return "🌦️ For accurate weather forecasts for your area, please check the Weather section in your FarmSetu dashboard. I can help with general crop advisory based on seasonal patterns. What crop are you growing?";
+        }
+        if (lower.contains("price") || lower.contains("mandi") || lower.contains("rate") || lower.contains("market")) {
+            return "📊 Current market prices vary by mandi and commodity. Use the Mandi Finder in your dashboard for real-time prices. Which commodity are you looking to sell?";
+        }
+        if (lower.contains("disease") || lower.contains("pest") || lower.contains("infection") || lower.contains("spots")) {
+            return "🔬 Crop diseases require careful diagnosis. You can upload a photo of the affected plant in the Disease Detection section for AI-based identification. However, for severe or spreading infections, I recommend consulting with a certified agronomist. Would you like me to connect you with a human expert?";
+        }
+        if (lower.contains("fertilizer") || lower.contains("urea") || lower.contains("dap") || lower.contains("npk")) {
+            return "🌱 Fertilizer recommendations depend on your soil type, crop, and growth stage. General guideline: For most Kharif crops, apply NPK 12:32:16 at sowing and top-dress with Urea at 30-35 days. Would you like specific advice for your crop?";
+        }
+        if (lower.contains("seed") || lower.contains("variety") || lower.contains("hybrid")) {
+            return "🌾 Seed selection depends on your region, soil, and water availability. Popular high-yield varieties include HD-2967 (Wheat), Pusa Basmati 1121 (Rice), and NK-6240 (Maize). What crop and region are you planning for?";
+        }
+        if (lower.contains("irrigation") || lower.contains("water") || lower.contains("drip")) {
+            return "💧 Water management is crucial. Drip irrigation saves 30-50% water compared to flood irrigation. For most crops, maintain 60-80% field capacity. What's your current water source and crop?";
+        }
+        if (lower.contains("loan") || lower.contains("credit") || lower.contains("kcc") || lower.contains("insurance")) {
+            return "💰 For agricultural loans, Kisan Credit Card (KCC) offers credit at 4% interest (with timely repayment). PM Fasal Bima Yojana covers crop insurance. These are complex topics — I recommend speaking with a financial expert for personalized guidance. Shall I connect you?";
+        }
+        if (lower.contains("scheme") || lower.contains("government") || lower.contains("subsidy") || lower.contains("pm kisan")) {
+            return "🏛️ Key government schemes: PM-KISAN (₹6000/year), PM Fasal Bima Yojana (crop insurance), Soil Health Card Scheme. Check the Govt Schemes section in your dashboard for eligibility and application details.";
+        }
+
+        return "🌾 Thank you for your question! I'm your FarmSetu AI assistant. I can help with basic queries about crops, weather, market prices, and farming techniques. Your question: \"" + message + "\" — Could you provide more details so I can give you a precise answer?";
+    }
+
+    private String generateAiReply(String message) {
+        return generateAiReply(message, -1L);
+    }
+
+    private boolean detectEscalation(String message) {
+        if (message == null) return false;
+        String lower = message.toLowerCase();
+        return ESCALATION_KEYWORDS.stream().anyMatch(lower::contains);
+    }
+
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    @org.springframework.transaction.annotation.Transactional
+    public void initBotUsers() {
+        try {
+            String[] botNames = {
+                "Crop Disease & Pest Bot",
+                "Soil & Nutrient Bot",
+                "Market Analyst Bot",
+                "Irrigation Bot",
+                "Weather Advisor Bot",
+                "Gov Schemes Bot",
+                "Seed Selection Bot",
+                "Organic Farming Bot",
+                "Livestock & Dairy Bot",
+                "Farm Machinery Bot"
+            };
+            
+            String[] botEmails = {
+                "disease.bot@farmsetu.in",
+                "soil.bot@farmsetu.in",
+                "market.bot@farmsetu.in",
+                "irrigation.bot@farmsetu.in",
+                "weather.bot@farmsetu.in",
+                "schemes.bot@farmsetu.in",
+                "seed.bot@farmsetu.in",
+                "organic.bot@farmsetu.in",
+                "livestock.bot@farmsetu.in",
+                "machinery.bot@farmsetu.in"
+            };
+
+            String[] botPhones = {
+                "0000000001",
+                "0000000002",
+                "0000000003",
+                "0000000004",
+                "0000000005",
+                "0000000006",
+                "0000000007",
+                "0000000008",
+                "0000000009",
+                "0000000010"
+            };
+
+            // Repair any existing bot users that have NULL in boolean fields (since primitive boolean cannot accept NULL)
+            entityManager.createNativeQuery(
+                "UPDATE users SET two_factor_enabled = FALSE WHERE id < 0 AND two_factor_enabled IS NULL"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                "UPDATE users SET is_verified = TRUE WHERE id < 0 AND is_verified IS NULL"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                "UPDATE users SET is_active = TRUE WHERE id < 0 AND is_active IS NULL"
+            ).executeUpdate();
+
+            for (int i = 0; i < 10; i++) {
+                long botId = -(i + 1);
+                Optional<User> existing = userRepository.findById(botId);
+                if (existing.isEmpty()) {
+                    entityManager.createNativeQuery(
+                        "INSERT INTO users (id, name, email, phone, password_hash, role, is_verified, is_active, two_factor_enabled, reputation_score, created_at, updated_at) " +
+                        "VALUES (?, ?, ?, ?, 'SYSTEM_BOT', 'EXPERT', TRUE, TRUE, FALSE, 0, NOW(), NOW()) ON CONFLICT (id) DO NOTHING"
+                    )
+                    .setParameter(1, botId)
+                    .setParameter(2, botNames[i])
+                    .setParameter(3, botEmails[i])
+                    .setParameter(4, botPhones[i])
+                    .executeUpdate();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error initializing system bot users: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
-

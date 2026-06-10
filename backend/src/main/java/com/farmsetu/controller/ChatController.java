@@ -28,19 +28,19 @@ public class ChatController {
     private final CloudinaryService cloudinaryService;
     private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
-    @GetMapping("/chats/{userId:\\d+}")
+    @GetMapping("/chats/{userId:-?\\d+}")
     public ApiResponse<java.util.List<java.util.Map<String, Object>>> conversation(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+        @PathVariable Long userId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(chatService.getConversation(userId, page, size));
     }
 
-    @GetMapping("/chats/history/{userId:\\d+}")
+    @GetMapping("/chats/history/{userId:-?\\d+}")
     public ApiResponse<java.util.List<java.util.Map<String, Object>>> history(
-            @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+        @PathVariable Long userId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok(chatService.getConversation(userId, page, size));
     }
 
@@ -98,7 +98,10 @@ public class ChatController {
     }
 
     @PostMapping("/ai/chat")
-    public ApiResponse<Map<String, String>> aiChat(@RequestBody Map<String, String> body) {
-        return ApiResponse.ok(chatService.aiChat(body.get("message")));
+    public ApiResponse<Map<String, Object>> aiChat(@RequestBody Map<String, Object> body) {
+        String message = body.get("message") != null ? body.get("message").toString() : "";
+        Long sessionId = body.get("sessionId") != null ? Long.valueOf(body.get("sessionId").toString()) : null;
+        Long botId = body.get("botId") != null ? Long.valueOf(body.get("botId").toString()) : -1L;
+        return ApiResponse.ok(chatService.aiChat(message, sessionId, botId));
     }
 }
