@@ -3,7 +3,7 @@
   <!-- Page Header -->
   <div>
     <fs-page-header title="Console Alerts" />
-    <p class="text-xs text-gray-550 dark:text-gray-400 font-display -mt-2">
+    <p class="text-xs text-slate-500 dark:text-slate-400 font-display -mt-2">
       Access system logs, crop schedules, weather notices, and marketplace updates.
     </p>
   </div>
@@ -13,8 +13,8 @@
     
     <!-- Left Panel: Channels Sidebar Navigation -->
     <div class="w-full lg:w-1/4 shrink-0">
-      <div class="fs-glass-card p-4 space-y-4 h-full border border-gray-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/20 backdrop-blur-xl">
-        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-2 font-display">
+      <div class="fs-glass-card p-4 space-y-4 h-full border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/20 backdrop-blur-xl">
+        <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 font-display">
           Alert Channels
         </div>
         
@@ -24,7 +24,7 @@
           <button (click)="setChannel('all')"
                   [class]="activeChannel() === 'all'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideBell size="14"></svg>
@@ -43,7 +43,7 @@
           <button (click)="setChannel('weather')"
                   [class]="activeChannel() === 'weather'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideCloudRain size="14"></svg>
@@ -58,7 +58,7 @@
           <button (click)="setChannel('market')"
                   [class]="activeChannel() === 'market'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideTrendingUp size="14"></svg>
@@ -73,7 +73,7 @@
           <button (click)="setChannel('task')"
                   [class]="activeChannel() === 'task'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideSprout size="14"></svg>
@@ -88,7 +88,7 @@
           <button (click)="setChannel('marketplace')"
                   [class]="activeChannel() === 'marketplace'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideBriefcase size="14"></svg>
@@ -103,7 +103,7 @@
           <button (click)="setChannel('system')"
                   [class]="activeChannel() === 'system'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideInfo size="14"></svg>
@@ -114,13 +114,13 @@
             </span>
           </button>
 
-          <div class="h-px bg-gray-150 dark:bg-slate-800 my-4 mx-2"></div>
+          <div class="h-px bg-slate-200 dark:bg-slate-800 my-4 mx-2"></div>
 
           <!-- Preferences -->
           <button (click)="setChannel('preferences')"
                   [class]="activeChannel() === 'preferences'
                     ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs transition-all text-left focus:outline-none'
-                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
+                    : 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900/50 font-semibold text-xs transition-all text-left focus:outline-none'"
           >
             <span class="flex items-center gap-2.5">
               <svg lucideSettings size="14"></svg>
@@ -138,11 +138,11 @@
       <div [ngSwitch]="activeChannel()" class="h-full">
         
         <!-- Case 1: Preferences Panel -->
-        <div *ngSwitchCase="'preferences'" class="fs-glass-card h-full border border-gray-200 dark:border-slate-800 space-y-8 flex flex-col justify-between p-6 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xl">
+        <div *ngSwitchCase="'preferences'" class="fs-glass-card h-full border border-slate-200 dark:border-slate-800 space-y-8 flex flex-col justify-between p-6 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xl">
           <div class="space-y-6">
             <div>
-              <h3 class="text-base font-extrabold text-gray-900 dark:text-white font-display">Configure Alerts Preferences</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400 font-display">Control what agricultural notifications are dispatched to your profiles.</p>
+              <h3 class="text-base font-extrabold text-slate-900 dark:text-white font-display">Configure Alerts Preferences</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-display">Control what agricultural notifications are dispatched to your profiles.</p>
             </div>
 
             <!-- Settings groups -->
@@ -150,18 +150,18 @@
               
               <!-- Channels -->
               <div class="space-y-4">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider font-display border-b border-gray-100 dark:border-slate-850 pb-2">Delivery Channels</h4>
+                <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-display border-b border-slate-100 dark:border-slate-800 pb-2">Delivery Channels</h4>
                 
                 <!-- Email Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">Email Broadcaster</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Weekly reports and news digests.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">Email Broadcaster</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Weekly reports and news digests.</p>
                   </div>
                   <button (click)="togglePref('emailAlerts')"
                           [class]="preferences().emailAlerts 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().emailAlerts 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -173,13 +173,13 @@
                 <!-- SMS Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">SMS Text Alerts</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Critical weather warnings and emergency advisories.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">SMS Text Alerts</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Critical weather warnings and emergency advisories.</p>
                   </div>
                   <button (click)="togglePref('smsAlerts')"
                           [class]="preferences().smsAlerts 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().smsAlerts 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -191,13 +191,13 @@
                 <!-- WhatsApp Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">WhatsApp Message</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Market price watchlists spikes directly on mobile.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">WhatsApp Message</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Market price watchlists spikes directly on mobile.</p>
                   </div>
                   <button (click)="togglePref('whatsappAlerts')"
                           [class]="preferences().whatsappAlerts 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().whatsappAlerts 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -209,18 +209,18 @@
 
               <!-- Topics -->
               <div class="space-y-4">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider font-display border-b border-gray-100 dark:border-slate-850 pb-2">Topic Subscriptions</h4>
+                <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-display border-b border-slate-100 dark:border-slate-800 pb-2">Topic Subscriptions</h4>
                 
                 <!-- Weather Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">Weather warnings</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Early heavy rainfall or frost warnings.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">Weather warnings</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Early heavy rainfall or frost warnings.</p>
                   </div>
                   <button (click)="togglePref('weatherWarnings')"
                           [class]="preferences().weatherWarnings 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().weatherWarnings 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -232,13 +232,13 @@
                 <!-- Price Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">Mandi Price spikes</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Spikes on watchlisted items rates.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">Mandi Price spikes</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Spikes on watchlisted items rates.</p>
                   </div>
                   <button (click)="togglePref('priceSurges')"
                           [class]="preferences().priceSurges 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().priceSurges 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -250,13 +250,13 @@
                 <!-- Task Switch -->
                 <div class="flex items-center justify-between">
                   <div class="space-y-0.5">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200 font-display">Calendar Reminders</span>
-                    <p class="text-[10px] text-gray-400 font-display font-medium">Irrigation, fertilizing, and crop tasks checkmarks.</p>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200 font-display">Calendar Reminders</span>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-display font-medium">Irrigation, fertilizing, and crop tasks checkmarks.</p>
                   </div>
                   <button (click)="togglePref('taskReminders')"
                           [class]="preferences().taskReminders 
                             ? 'w-10 h-6 bg-emerald-500 rounded-full relative transition-colors duration-200 focus:outline-none' 
-                            : 'w-10 h-6 bg-gray-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
+                            : 'w-10 h-6 bg-slate-300 dark:bg-slate-800 rounded-full relative transition-colors duration-200 focus:outline-none'"
                   >
                     <span [class]="preferences().taskReminders 
                       ? 'absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 translate-x-0 shadow-sm' 
@@ -269,7 +269,7 @@
             </div>
           </div>
 
-          <div class="pt-6 border-t border-gray-200 dark:border-slate-800 flex justify-end">
+          <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end">
             <button (click)="savePrefs()" class="fs-btn-glow bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/15 transition-all font-display">
               Save Settings
             </button>
@@ -280,17 +280,17 @@
         <div *ngSwitchDefault class="flex flex-col gap-4 h-full">
           
           <!-- Search & Filter Header Row inside content Area -->
-          <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white/70 dark:bg-slate-900/30 border border-gray-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm backdrop-blur-md">
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white/70 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-sm backdrop-blur-md">
             <!-- Search bar -->
             <div class="relative w-full sm:max-w-xs flex items-center">
-              <span class="absolute left-3.5 text-gray-400 pointer-events-none">
+              <span class="absolute left-3.5 text-slate-400 pointer-events-none">
                 <svg lucideSearch size="14"></svg>
               </span>
               <input type="text" 
                      [value]="searchQuery()"
                      (input)="updateSearch($event)"
                      placeholder="Filter by keyword..."
-                     class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-850 bg-gray-50/50 dark:bg-slate-950/70 text-gray-900 dark:text-white placeholder-gray-400 focus:border-emerald-500 outline-none transition-colors font-display"
+                     class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/70 text-slate-900 dark:text-white placeholder-slate-400 focus:border-emerald-500 outline-none transition-colors font-display"
               />
             </div>
 
@@ -318,7 +318,7 @@
                        'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]': item.notificationType === 'PRICE',
                        'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]': item.notificationType === 'TASK',
                        'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.4)]': item.notificationType === 'MARKETPLACE',
-                       'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.4)]': item.notificationType === 'COMMUNITY',
+                       'bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.4)]': item.notificationType === 'COMMUNITY',
                        'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]': item.notificationType === 'SYSTEM'
                      }"
                 ></div>
@@ -347,17 +347,17 @@
                   <!-- Text details -->
                   <div class="space-y-0.5">
                     <div class="flex items-center flex-wrap gap-2">
-                      <span class="text-xs font-extrabold text-gray-800 dark:text-gray-100 font-display leading-tight">{{ item.title }}</span>
+                      <span class="text-xs font-extrabold text-slate-800 dark:text-slate-150 font-display leading-tight">{{ item.title }}</span>
                       
                       <!-- Category tag -->
                       <span class="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold tracking-wider"
                             [ngClass]="{
-                              'bg-sky-500/10 text-sky-600 dark:text-sky-400': item.notificationType === 'WEATHER',
+                              'bg-sky-500/10 text-sky-650 dark:text-sky-400': item.notificationType === 'WEATHER',
                               'bg-amber-500/10 text-amber-600 dark:text-amber-400': item.notificationType === 'PRICE',
-                              'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400': item.notificationType === 'TASK',
-                              'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400': item.notificationType === 'MARKETPLACE',
-                              'bg-purple-500/10 text-purple-600 dark:text-purple-400': item.notificationType === 'COMMUNITY',
-                              'bg-blue-500/10 text-blue-600 dark:text-blue-400': item.notificationType === 'SYSTEM'
+                              'bg-emerald-500/10 text-emerald-650 dark:text-emerald-400': item.notificationType === 'TASK',
+                              'bg-indigo-500/10 text-indigo-650 dark:text-indigo-400': item.notificationType === 'MARKETPLACE',
+                              'bg-purple-500/10 text-purple-650 dark:text-purple-400': item.notificationType === 'COMMUNITY',
+                              'bg-blue-500/10 text-blue-650 dark:text-blue-400': item.notificationType === 'SYSTEM'
                             }"
                       >
                         {{ item.notificationType }}
@@ -367,9 +367,9 @@
                       <span *ngIf="!item.read" class="px-1.5 py-0.5 rounded-md bg-emerald-500 text-white text-[8px] font-bold tracking-wider font-mono shadow-[0_0_8px_rgba(16,185,129,0.3)]">NEW</span>
                       
                       <!-- Timestamp -->
-                      <span class="text-[9px] text-gray-400 font-mono">{{ item.timeAgo }}</span>
+                      <span class="text-[9px] text-slate-400 dark:text-slate-500 font-mono">{{ item.timeAgo }}</span>
                     </div>
-                    <p class="text-xs text-gray-550 dark:text-gray-450 leading-relaxed font-display pr-4 mt-0.5">
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-display pr-4 mt-0.5">
                       {{ item.message }}
                     </p>
                   </div>
@@ -379,13 +379,13 @@
                 <div class="flex items-center gap-1.5 shrink-0">
                   <button *ngIf="!item.read"
                           (click)="markRead(item.id); $event.stopPropagation();"
-                          class="w-7 h-7 rounded-lg bg-gray-50 hover:bg-emerald-500/10 text-gray-400 hover:text-emerald-500 border border-gray-150 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                          class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-500 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-center transition-all cursor-pointer active:scale-90"
                           title="Mark as read"
                   >
                     <svg lucideCheckCircle2 size="12"></svg>
                   </button>
                   <button (click)="deleteNotification(item.id, $event)"
-                          class="w-7 h-7 rounded-lg bg-gray-50 hover:bg-red-500/10 text-gray-400 hover:text-red-500 border border-gray-150 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                          class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-red-500/10 text-slate-400 hover:text-red-500 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-center transition-all cursor-pointer active:scale-90"
                           title="Delete notification"
                   >
                     <svg lucideTrash2 size="12"></svg>
@@ -396,13 +396,13 @@
             }
 
             <!-- Empty state illustration -->
-            <div *ngIf="filteredItems().length === 0" class="fs-glass-card border border-gray-200 dark:border-slate-800 text-center py-16 space-y-6">
-              <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-900/50 flex items-center justify-center text-gray-450 dark:text-gray-500 mx-auto border border-gray-200 dark:border-slate-850">
+            <div *ngIf="filteredItems().length === 0" class="fs-glass-card border border-slate-200 dark:border-slate-800 text-center py-16 space-y-6">
+              <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-900/50 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto border border-slate-200 dark:border-slate-800">
                 <svg lucideBell size="28" class="animate-bounce" style="animation-duration: 4s;"></svg>
               </div>
               <div class="space-y-1.5 max-w-sm mx-auto">
-                <h4 class="text-base font-extrabold text-gray-900 dark:text-white font-display">No Notifications Found</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-display">
+                <h4 class="text-base font-extrabold text-slate-900 dark:text-white font-display">No Notifications Found</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-display">
                   There are no updates in this channel. Notifications triggered by rain forecasts or price spikes will display here.
                 </p>
               </div>

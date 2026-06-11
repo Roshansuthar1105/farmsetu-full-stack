@@ -1,0 +1,591 @@
+<fs-page-header title="My Profile & Farm Hub" subtitle="Manage your farmer identity, upload profile photo, customize soil profiles, and manage active farms" />
+
+<div class="w-full pb-16 flex flex-col flex-1 min-h-[calc(100vh-200px)]">
+  <!-- Split Layout Structure -->
+  <div class="flex flex-col lg:flex-row gap-6 items-stretch flex-1">
+    
+    <!-- Left Column: Farmer Identity Card -->
+    <div class="w-full lg:w-80 xl:w-96 shrink-0 flex flex-col gap-6">
+      @if (user(); as u) {
+        <!-- Identity Summary Card -->
+        <div class="profile-hero p-6 relative overflow-hidden rounded-3xl flex flex-col items-center text-center gap-4">
+          <!-- Ambient Glow decoration -->
+          <div class="absolute right-0 top-0 translate-x-1/3 -translate-y-1/3 w-36 h-36 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          
+          <!-- Avatar Upload Option -->
+          <div class="group relative w-24 h-24 rounded-2xl overflow-hidden bg-white/20 dark:bg-slate-900/40 flex items-center justify-center border-2 border-white/40 dark:border-emerald-500/30 shadow-lg cursor-pointer active:scale-95 transition"
+               (click)="fileInput.click()"
+               title="Click to update photo"
+          >
+            <img *ngIf="u.profilePhoto" [src]="u.profilePhoto" alt="Profile" class="w-full h-full object-cover" />
+            <div *ngIf="!u.profilePhoto" class="text-white text-4xl font-black font-display">
+              {{ u.name ? u.name.charAt(0).toUpperCase() : 'F' }}
+            </div>
+            
+            <!-- Hover Overlay -->
+            <div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+              <svg lucideCamera size="18" class="text-white stroke-[2.25]"></svg>
+              <span class="text-[8px] text-white/90 font-black uppercase tracking-wider mt-1 font-mono">Upload</span>
+            </div>
+
+            <!-- Uploading state indicator -->
+            <div *ngIf="uploadingPhoto()" class="absolute inset-0 bg-slate-900/80 flex items-center justify-center">
+              <svg lucideSettings size="18" class="text-white animate-spin"></svg>
+            </div>
+          </div>
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" />
+
+          <!-- Name & Role -->
+          <div class="space-y-1">
+            <h2 class="text-xl font-black font-display tracking-tight">{{ u.name }}</h2>
+            <div class="flex flex-col gap-1 items-center">
+              <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-950 bg-emerald-100 rounded-full dark:bg-emerald-500/20 dark:text-emerald-300">
+                {{ u.role }}
+              </span>
+              <span *ngIf="u.verified" class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-blue-900 bg-blue-100 rounded-full dark:bg-blue-500/20 dark:text-blue-300 flex items-center gap-1">
+                <svg lucideShieldCheck size="10" class="stroke-[2.5]"></svg> 
+                Verified Expert
+              </span>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <p class="text-xs text-emerald-100 dark:text-emerald-400 flex items-center justify-center gap-1 font-bold font-display">
+            <svg lucideMapPin size="11" class="stroke-[2.5]"></svg>
+            {{ u.village || 'Village' }}, {{ u.district || 'District' }}, {{ u.state || 'State' }}
+          </p>
+
+          <!-- Divider line -->
+          <div class="w-full h-px bg-white/10 dark:bg-slate-800"></div>
+
+          <!-- Bio -->
+          <p class="text-white/80 dark:text-slate-400 text-xs italic font-semibold leading-relaxed px-1">
+            "{{ u.bio || 'No bio added yet. Tell us about your farming journey!' }}"
+          </p>
+
+          <!-- Edit Profile button inside left card -->
+          <button (click)="openEdit()" class="w-full mt-2 px-4 py-2.5 text-xs font-black text-emerald-700 bg-white hover:bg-emerald-50 rounded-xl transition shadow-md active:scale-[0.98] font-display flex items-center justify-center gap-1.5 border-0">
+            <svg lucideEdit3 size="12" class="stroke-[2.5]"></svg>
+            Edit Profile details
+          </button>
+        </div>
+
+        <!-- Telemetry Stats Panel -->
+        <div class="profile-card p-5 space-y-4 flex flex-col">
+          <div class="text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider font-display">
+            Farmer Dashboard Metrics
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Stat 1 -->
+            <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl text-center flex flex-col justify-center">
+              <span class="block text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">{{ u.reputationScore ?? 0 }}</span>
+              <span class="text-[8px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider mt-0.5 leading-none">Reputation</span>
+            </div>
+            <!-- Stat 2 -->
+            <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl text-center flex flex-col justify-center">
+              <span class="block text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">{{ u.preferredLanguage | uppercase }}</span>
+              <span class="text-[8px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider mt-0.5 leading-none">Lang</span>
+            </div>
+            <!-- Stat 3 -->
+            <div class="p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl text-center flex flex-col justify-center">
+              <span class="block text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">{{ farms().length }}</span>
+              <span class="text-[8px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider mt-0.5 leading-none">Farms</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right Column: Interactive Tabs Deck (2/3 Width) -->
+    <div class="flex-1 flex flex-col gap-6">
+      
+      <!-- TABS SWITCHER -->
+      <div class="tab-container w-full">
+        <button (click)="activeTab.set('info')"
+                [class.active]="activeTab() === 'info'"
+                class="tab-btn focus:outline-none"
+        >
+          <svg lucideUser size="13" class="stroke-[2.25]"></svg>
+          Personal Info
+        </button>
+        <button (click)="activeTab.set('farmer')"
+                [class.active]="activeTab() === 'farmer'"
+                class="tab-btn focus:outline-none"
+        >
+          <svg lucideSprout size="13" class="stroke-[2.25]"></svg>
+          Farming Profile
+        </button>
+        <button (click)="activeTab.set('farms')"
+                [class.active]="activeTab() === 'farms'"
+                class="tab-btn focus:outline-none"
+        >
+          <svg lucideGrid size="13" class="stroke-[2.25]"></svg>
+          My Lands & Farms
+        </button>
+        <button (click)="activeTab.set('badges')"
+                [class.active]="activeTab() === 'badges'"
+                class="tab-btn focus:outline-none"
+        >
+          <svg lucideAward size="13" class="stroke-[2.25]"></svg>
+          Badges
+        </button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="flex-1">
+        <!-- TAB 1: PERSONAL INFO DETAILS -->
+        <div *ngIf="activeTab() === 'info'" class="profile-card animate-slide-up space-y-6 h-full">
+          <h3 class="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 font-display">
+            <svg lucideUser size="14" class="text-emerald-500 stroke-[2.5]"></svg>
+            Personal & Account Information
+          </h3>
+          
+          @if (user(); as u) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-display">
+              <div class="info-cell space-y-1">
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Full Name</span>
+                <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ u.name }}</p>
+              </div>
+              
+              <div class="info-cell space-y-1">
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">User Role</span>
+                <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ u.role }}</p>
+              </div>
+              
+              <div class="info-cell space-y-1">
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Email Address</span>
+                <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ u.email || 'No Email Added' }}</p>
+              </div>
+              
+              <div class="info-cell space-y-1">
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Phone Number</span>
+                <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ u.phone || 'No Phone Registered' }}</p>
+              </div>
+
+              <div class="info-cell space-y-1 sm:col-span-2">
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Registered Address Details</span>
+                <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
+                  🏡 {{ u.village || 'N/A' }} (Village) &bull; {{ u.district || 'N/A' }} (District) &bull; {{ u.state || 'N/A' }} (State)
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- TAB 2: FARMING PROFILE DETAILS -->
+        <div *ngIf="activeTab() === 'farmer'" class="profile-card animate-slide-up space-y-6 h-full">
+          <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h3 class="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 font-display">
+              <svg lucideSprout size="14" class="text-emerald-500 stroke-[2.5]"></svg>
+              Farmer Profile & Agricultural Settings
+            </h3>
+            <button (click)="openEditFarmer()" class="px-4 py-2 border border-emerald-250 hover:bg-emerald-500/5 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 font-extrabold rounded-xl text-xs active:scale-95 transition font-display flex items-center gap-1">
+              <svg lucideEdit3 size="12" class="stroke-[2.5]"></svg>
+              Edit Info
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-display">
+            <div class="info-cell space-y-1">
+              <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Farming Experience</span>
+              <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ farmProfile()?.farmingExperience ?? 0 }} Years</p>
+            </div>
+
+            <div class="info-cell space-y-1">
+              <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Farming Method</span>
+              <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ farmProfile()?.farmingType || 'ORGANIC' }}</p>
+            </div>
+
+            <div class="info-cell space-y-1">
+              <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Primary Soil Type</span>
+              <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ farmProfile()?.soilType || 'Loamy' | titlecase }}</p>
+            </div>
+
+            <div class="info-cell space-y-1">
+              <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Primary Water Source</span>
+              <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{{ farmProfile()?.waterSource || 'Borewell' | titlecase }}</p>
+            </div>
+
+            <div class="info-cell space-y-1 sm:col-span-2">
+              <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Current Crops</span>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span *ngFor="let crop of farmProfile()?.currentCrops" class="px-2.5 py-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 border border-emerald-500/20 rounded-lg flex items-center gap-1 shadow-sm">
+                  <svg lucideSprout size="10" class="stroke-[2.5]"></svg>
+                  {{ crop }}
+                </span>
+                <p *ngIf="!farmProfile()?.currentCrops?.length" class="text-slate-400 font-bold">No crops pinned yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: LANDS & FARMS -->
+        <div *ngIf="activeTab() === 'farms'" class="animate-slide-up space-y-6">
+          <div class="flex justify-between items-center">
+            <h3 class="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 font-display">
+              <svg lucideGrid size="14" class="text-emerald-500 stroke-[2.5]"></svg>
+              Registered Lands & Farms Registry
+            </h3>
+            <button (click)="openAddFarm()" class="px-4.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl text-xs active:scale-95 transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/15 font-display border-0">
+              <svg lucidePlus size="13" class="stroke-[2.5]"></svg> Register New Farm
+            </button>
+          </div>
+
+          <div *ngIf="farms().length === 0" class="profile-card text-center py-12 space-y-3">
+            <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto border border-emerald-500/20 shadow-inner">
+              <svg lucideSprout size="20" class="stroke-[2.25]"></svg>
+            </div>
+            <p class="text-xs text-slate-400 dark:text-slate-500 font-extrabold font-display">No farms registered. Click 'Register New Farm' to get started!</p>
+          </div>
+
+          <div *ngIf="farms().length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div *ngFor="let farm of farms()" class="farm-card shadow-sm hover:shadow-lg">
+              <!-- Accent indicator -->
+              <div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-emerald-500 dark:bg-emerald-400"></div>
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-start gap-2 pl-2">
+                  <div>
+                    <h4 class="font-black text-slate-900 dark:text-white text-base font-display">🚜 {{ farm.name }}</h4>
+                    <p class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 dark:text-slate-500 mt-0.5 font-mono">
+                      Soil Profile: {{ farm.soilType }} (pH {{ farm.soilPh }} &bull; {{ farm.soilPh < 7 ? 'Acidic' : (farm.soilPh > 7 ? 'Alkaline' : 'Neutral') }})
+                    </p>
+                  </div>
+                  
+                  <span class="px-2.5 py-0.5 text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-500/15 font-mono">
+                    {{ farm.farmingType }}
+                  </span>
+                </div>
+
+                <!-- Farm Metrics Grid -->
+                <div class="grid grid-cols-2 gap-3.5 text-xs pl-2 font-display">
+                  <div class="p-3 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 rounded-xl space-y-0.5">
+                    <span class="text-slate-400 dark:text-slate-550 text-[9px] uppercase font-bold tracking-wider font-mono">Acreage Area</span>
+                    <p class="font-extrabold text-slate-900 dark:text-white text-sm">{{ farm.farmArea }} Acres</p>
+                  </div>
+                  <div class="p-3 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 rounded-xl space-y-0.5">
+                    <span class="text-slate-400 dark:text-slate-550 text-[9px] uppercase font-bold tracking-wider font-mono">Water Source</span>
+                    <p class="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-1">
+                      <svg lucideDroplet size="11" class="text-sky-500 stroke-[2.5]"></svg>
+                      {{ farm.waterSource | titlecase }}
+                    </p>
+                  </div>
+                  
+                  <div class="p-3 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 rounded-xl space-y-2 col-span-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-slate-400 dark:text-slate-500 text-[9px] uppercase font-bold tracking-wider font-mono">NPK Ratio (Nitrogen / Phosphorus / Potassium)</span>
+                      <span class="text-[9px] font-mono font-bold text-slate-500 dark:text-slate-400">N:{{ farm.nitrogen ?? 0 }}% P:{{ farm.phosphorus ?? 0 }}% K:{{ farm.potassium ?? 0 }}%</span>
+                    </div>
+                    
+                    <!-- NPK Visualization bars -->
+                    <div class="space-y-1.5 font-mono text-[9px]">
+                      <div class="npk-progress">
+                        <div class="flex justify-between text-slate-400 dark:text-slate-500">
+                          <span>Nitrogen (N)</span>
+                          <span>{{ farm.nitrogen ?? 0 }}%</span>
+                        </div>
+                        <div class="npk-bar-container">
+                          <div class="npk-fill-n" [style.width]="(farm.nitrogen ?? 0) + '%'"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="npk-progress">
+                        <div class="flex justify-between text-slate-400 dark:text-slate-500">
+                          <span>Phosphorus (P)</span>
+                          <span>{{ farm.phosphorus ?? 0 }}%</span>
+                        </div>
+                        <div class="npk-bar-container">
+                          <div class="npk-fill-p" [style.width]="(farm.phosphorus ?? 0) + '%'"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="npk-progress">
+                        <div class="flex justify-between text-slate-400 dark:text-slate-500">
+                          <span>Potassium (K)</span>
+                          <span>{{ farm.potassium ?? 0 }}%</span>
+                        </div>
+                        <div class="npk-bar-container">
+                          <div class="npk-fill-k" [style.width]="(farm.potassium ?? 0) + '%'"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="farm.latitude && farm.longitude" class="p-3 bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 rounded-xl space-y-0.5 col-span-2 font-mono text-[10px] flex items-center justify-between">
+                    <span class="text-slate-400 dark:text-slate-550 text-[9px] uppercase font-bold tracking-wider font-sans">Geotag Coordinates</span>
+                    <span class="text-slate-600 dark:text-slate-300 font-extrabold flex items-center gap-1 font-mono">
+                      <svg lucideCompass size="11" class="text-emerald-500 stroke-[2.25]"></svg>
+                      Lat: {{ farm.latitude }} &bull; Lng: {{ farm.longitude }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/60 mt-4">
+                <button (click)="openEditFarm(farm)" class="px-3.5 py-2 border border-blue-250 hover:bg-blue-500/5 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-xs active:scale-95 transition flex items-center gap-1 font-display">
+                  <svg lucideEdit3 size="12" class="stroke-[2.5]"></svg> Edit Field
+                </button>
+                <button (click)="onDeleteFarm(farm.id)" class="px-3.5 py-2 border border-rose-250 hover:bg-rose-500/5 dark:border-rose-900/40 text-rose-600 dark:text-rose-450 font-bold rounded-xl text-xs active:scale-95 transition flex items-center gap-1 font-display">
+                  <svg lucideTrash2 size="12" class="stroke-[2.5]"></svg> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: ACHIEVEMENTS & BADGES -->
+        <div *ngIf="activeTab() === 'badges'" class="animate-slide-up space-y-5 h-full">
+          <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 font-display">
+            <svg lucideAward size="14" class="text-emerald-500 stroke-[2.5]"></svg>
+            <span>Achievements & Gamification Badges</span>
+            <span class="text-xs font-semibold text-slate-400 font-mono">({{ badges().length }} earned)</span>
+          </h3>
+          
+          @if (badges().length) {
+            <div class="grid sm:grid-cols-2 gap-4">
+              @for (ub of badges(); track ub.id) {
+                <div class="badge-card flex items-start gap-4">
+                  <div class="w-12 h-12 bg-amber-500/10 text-amber-550 rounded-xl border border-amber-500/20 flex items-center justify-center text-2xl shrink-0 shadow-sm animate-pulse" style="animation-duration: 3s;">
+                    🏆
+                  </div>
+                  <div class="space-y-1 font-display">
+                    <h4 class="font-extrabold text-slate-950 dark:text-white text-xs">{{ ub.badge?.name }}</h4>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed font-semibold">{{ ub.badge?.description }}</p>
+                    <span class="inline-block text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/15 px-2.5 py-0.5 rounded-full mt-1.5 font-mono uppercase tracking-wider">
+                      {{ ub.badge?.badgeType || 'STANDARD' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="profile-card border-dashed text-center text-slate-500 dark:text-slate-400 py-12 space-y-3">
+              <span class="text-3xl block animate-bounce" style="animation-duration: 4s;">⭐</span>
+              <p class="text-xs font-black font-display max-w-xs mx-auto">Complete calendar tasks, list lease equipment, and verify expert advisory status to unlock farmer badges!</p>
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL 1: EDIT PERSONAL PROFILE INFO -->
+@if (showEditModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card animate-scale-up">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
+        <h3 class="text-base font-black text-slate-900 dark:text-white font-display">Edit Profile Details</h3>
+        <button (click)="showEditModal.set(false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition flex items-center">
+          <svg lucideX size="16" class="stroke-[2.5]"></svg>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="saveProfile()" class="p-6 space-y-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-display">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Full Name</label>
+          <input type="text" [(ngModel)]="editForm.name" name="name" required class="modal-input" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Bio (Farming Journey)</label>
+          <textarea [(ngModel)]="editForm.bio" name="bio" rows="3" class="modal-input resize-none" placeholder="Tell us about your soil experience and crops..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">State</label>
+            <input type="text" [(ngModel)]="editForm.state" name="state" class="modal-input" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">District</label>
+            <input type="text" [(ngModel)]="editForm.district" name="district" class="modal-input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Village</label>
+            <input type="text" [(ngModel)]="editForm.village" name="village" class="modal-input" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Language</label>
+            <div class="relative">
+              <select [(ngModel)]="editForm.preferredLanguage" name="preferredLanguage" class="modal-input cursor-pointer appearance-none">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+              </select>
+              <span class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none flex items-center">
+                <svg lucideLanguages size="12" class="stroke-[2.5]"></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2.5">
+          <button type="button" (click)="showEditModal.set(false)" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold shadow-md shadow-emerald-500/10 transition active:scale-[0.98]">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL 2: EDIT AGRICULTURAL INFO -->
+@if (showFarmerProfileModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card animate-scale-up">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
+        <h3 class="text-base font-black text-slate-900 dark:text-white font-display">Edit Agricultural Info</h3>
+        <button (click)="showFarmerProfileModal.set(false)" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition flex items-center">
+          <svg lucideX size="16" class="stroke-[2.5]"></svg>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="saveFarmerProfile()" class="p-6 space-y-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-display">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Farming Experience (Years)</label>
+            <input type="number" min="0" [(ngModel)]="editFarmerForm.farmingExperience" name="farmingExperience" required class="modal-input" />
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Farming Method</label>
+            <div class="relative">
+              <select [(ngModel)]="editFarmerForm.farmingType" name="farmingType" class="modal-input cursor-pointer appearance-none">
+                <option value="ORGANIC">ORGANIC</option>
+                <option value="CHEMICAL">CHEMICAL</option>
+                <option value="MIXED">MIXED</option>
+              </select>
+              <span class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none flex items-center">
+                <svg lucideSprout size="12" class="stroke-[2.5]"></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Soil Type</label>
+            <input type="text" [(ngModel)]="editFarmerForm.soilType" name="soilType" required class="modal-input" placeholder="e.g. loamy, sandy, clay" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Soil pH Level</label>
+            <input type="number" step="0.1" min="0" max="14" [(ngModel)]="editFarmerForm.soilPh" name="soilPh" required class="modal-input" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Primary Water Source</label>
+          <input type="text" [(ngModel)]="editFarmerForm.waterSource" name="waterSource" required class="modal-input" placeholder="e.g. borewell, canal, rainwater" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Current Crops (Comma separated list)</label>
+          <input type="text" [(ngModel)]="editFarmerForm.currentCrops" name="currentCrops" class="modal-input" placeholder="e.g. Cotton, Wheat, Mustard" />
+          <p class="text-[9px] text-slate-450 mt-1 font-semibold leading-relaxed">Separate crops with a comma. These are saved to your crop advisory settings.</p>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2.5">
+          <button type="button" (click)="showFarmerProfileModal.set(false)" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold shadow-md shadow-emerald-500/10 transition active:scale-[0.98]">Save Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL 3: ADD/EDIT LAND/FARM -->
+@if (showFarmModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card animate-scale-up">
+      <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30">
+        <h3 class="text-base font-black text-slate-900 dark:text-white font-display">{{ isAddingNewFarm() ? 'Register New Farm Land' : 'Edit Farm Land Details' }}</h3>
+        <button (click)="showFarmModal.set(false)" class="text-slate-400 hover:text-slate-650 dark:hover:text-slate-250 transition flex items-center">
+          <svg lucideX size="16" class="stroke-[2.5]"></svg>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="saveFarm()" class="p-6 space-y-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-display">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Farm Name</label>
+            <input type="text" [(ngModel)]="editFarmForm.name" name="name" required class="modal-input" placeholder="e.g. East Boundary field" />
+          </div>
+          
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Size (Acres)</label>
+            <input type="number" min="0.1" step="0.1" [(ngModel)]="editFarmForm.farmArea" name="farmArea" required class="modal-input" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Soil Type</label>
+            <input type="text" [(ngModel)]="editFarmForm.soilType" name="soilType" required class="modal-input" placeholder="loamy" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Soil pH</label>
+            <input type="number" min="0" max="14" step="0.1" [(ngModel)]="editFarmForm.soilPh" name="soilPh" required class="modal-input" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Farming Type</label>
+            <div class="relative">
+              <select [(ngModel)]="editFarmForm.farmingType" name="farmingType" class="modal-input cursor-pointer appearance-none">
+                <option value="ORGANIC">ORGANIC</option>
+                <option value="CHEMICAL">CHEMICAL</option>
+                <option value="MIXED">MIXED</option>
+              </select>
+              <span class="absolute right-3 top-3.5 text-slate-400 pointer-events-none flex items-center">
+                <svg lucideSprout size="11" class="stroke-[2.5]"></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Water Source</label>
+            <input type="text" [(ngModel)]="editFarmForm.waterSource" name="waterSource" required class="modal-input" placeholder="borewell" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-wider mb-1.5 font-mono">Coordinates (Latitude, Longitude)</label>
+            <div class="flex gap-2">
+              <input type="number" step="0.0001" [(ngModel)]="editFarmForm.latitude" name="latitude" required class="modal-input w-1/2" placeholder="Lat" />
+              <input type="number" step="0.0001" [(ngModel)]="editFarmForm.longitude" name="longitude" required class="modal-input w-1/2" placeholder="Lng" />
+            </div>
+          </div>
+        </div>
+
+        <!-- NPK Inputs -->
+        <div class="p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-150 dark:border-slate-800/80 space-y-3">
+          <span class="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-black tracking-wider font-mono">NPK Nutrient Percentages</span>
+          <div class="grid grid-cols-3 gap-3 font-mono text-[10px]">
+            <div>
+              <label class="block text-[9px] font-bold text-slate-450 uppercase mb-1 font-sans">Nitrogen (N)</label>
+              <input type="number" min="0" max="100" [(ngModel)]="editFarmForm.nitrogen" name="nitrogen" class="modal-input" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-slate-450 uppercase mb-1 font-sans">Phosphorus (P)</label>
+              <input type="number" min="0" max="100" [(ngModel)]="editFarmForm.phosphorus" name="phosphorus" class="modal-input" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-slate-450 uppercase mb-1 font-sans">Potassium (K)</label>
+              <input type="number" min="0" max="100" [(ngModel)]="editFarmForm.potassium" name="potassium" class="modal-input" />
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2.5">
+          <button type="button" (click)="showFarmModal.set(false)" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-extrabold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold shadow-md shadow-emerald-500/10 transition active:scale-[0.98]">Save Farm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,292 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Profile Hero Card */
+.profile-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  color: white;
+  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.2);
+
+  :host-context(.dark) & {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(4, 120, 87, 0.04) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Tabs styles */
+.tab-container {
+  display: flex;
+  padding: 0.25rem;
+  background: rgba(241, 245, 249, 0.85);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 1rem;
+  
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.45);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.725rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  color: #64748b;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+
+  &:hover {
+    color: #10b981;
+    background: rgba(255, 255, 255, 0.5);
+    
+    :host-context(.dark) & {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  }
+
+  &.active {
+    color: #047857;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    font-weight: 850;
+
+    :host-context(.dark) & {
+      color: #34d399;
+      background: rgba(30, 41, 59, 0.85);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+/* Cards & Layout Grid */
+.profile-card {
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.01);
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.info-cell {
+  padding: 1rem;
+  background: rgba(248, 250, 252, 0.85);
+  border: 1px solid rgba(241, 245, 249, 0.9);
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: white;
+    border-color: rgba(16, 185, 129, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.25);
+    border-color: rgba(255, 255, 255, 0.02);
+    
+    &:hover {
+      background: rgba(15, 23, 42, 0.5);
+      border-color: rgba(16, 185, 129, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+/* Farm Lands cards */
+.farm-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 12px 25px -10px rgba(0, 0, 0, 0.04);
+
+    :host-context(.dark) & {
+      border-color: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.35);
+    border-color: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* NPK visualize progress bars */
+.npk-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.npk-bar-container {
+  height: 6px;
+  background: rgba(226, 232, 240, 1);
+  border-radius: 9999px;
+  overflow: hidden;
+
+  :host-context(.dark) & {
+    background: rgba(30, 41, 59, 0.5);
+  }
+}
+
+.npk-fill-n {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 9999px;
+}
+
+.npk-fill-p {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #4f46e5);
+  border-radius: 9999px;
+}
+
+.npk-fill-k {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 9999px;
+}
+
+/* Achievement Badges styles */
+.badge-card {
+  border-radius: 1.25rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 20px -5px rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+
+  :host-context(.dark) & {
+    background: rgba(15, 23, 42, 0.35);
+    border-color: rgba(255, 255, 255, 0.04);
+    
+    &:hover {
+      box-shadow: 0 8px 24px -5px rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+  }
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 32rem;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+
+  :host-context(.dark) & {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 1);
+  background: rgba(248, 250, 252, 0.85);
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #10b981;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  }
+
+  :host-context(.dark) & {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.6);
+    color: white;
+    
+    &:focus {
+      background: rgba(15, 23, 42, 0.8);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    }
+  }
+}
