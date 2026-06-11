@@ -19,11 +19,11 @@
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.25);
+    background: rgba(156, 163, 175, 0.15);
     border-radius: 99px;
   }
   &:hover::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.45);
+    background: rgba(156, 163, 175, 0.35);
   }
 }
 
@@ -38,16 +38,16 @@
 /* Headings toggling */
 .nav-header {
   opacity: 1;
-  max-height: 30px;
+  max-height: 20px;
   overflow: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .nav-divider {
   opacity: 0;
   max-height: 0;
   margin: 0;
   overflow: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom premium navigation link styling */
@@ -58,24 +58,11 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
-  justify-content: flex-start;
-  padding-left: 14px;
-  padding-right: 14px;
-
-  /* Left vertical active bar indicator */
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 20%;
-    height: 60%;
-    width: 3px;
-    background-color: #16a34a; /* emerald / green-600 */
-    border-radius: 0 4px 4px 0;
-    transform: scaleY(0);
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  border-radius: 12px;
+  margin: 2px 14px;
+  height: 40px;
+  color: #64748b; /* slate-500 */
+  border: 1px solid transparent;
 
   .nav-icon {
     display: inline-flex;
@@ -87,14 +74,17 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     
     ::ng-deep svg {
-      stroke-width: 2px;
+      stroke-width: 1.75px;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
   .nav-label {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
     opacity: 1;
-    max-width: 200px;
+    max-width: 180px;
     transform: translateX(0);
     transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
@@ -104,13 +94,9 @@
 
   /* Active router link state */
   &.active-nav-link {
-    background-color: rgba(22, 163, 74, 0.06) !important;
+    background-color: rgba(22, 163, 74, 0.08) !important;
     color: #15803d !important; /* green-700 */
-    font-weight: 700;
-
-    &::before {
-      transform: scaleY(1);
-    }
+    font-weight: 600;
 
     .nav-icon {
       color: #16a34a !important; /* green-600 */
@@ -124,9 +110,8 @@
 
     .nav-icon {
       color: #16a34a;
-      
       ::ng-deep svg {
-        transform: scale(1.06);
+        transform: scale(1.05);
       }
     }
   }
@@ -141,7 +126,7 @@ aside.w-20 {
   /* On hover, expand the collapsed sidebar to full width */
   &:hover {
     width: 16rem !important; /* expands to w-64 */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
     .logo-full {
       display: block;
@@ -152,7 +137,7 @@ aside.w-20 {
 
     .nav-header {
       opacity: 1;
-      max-height: 30px;
+      max-height: 20px;
       margin-top: 8px;
     }
     .nav-divider {
@@ -163,13 +148,16 @@ aside.w-20 {
 
     .nav-link {
       justify-content: flex-start;
-      padding-left: 14px;
-      padding-right: 14px;
+      margin: 2px 14px;
+      padding-left: 12px;
+      padding-right: 12px;
       gap: 12px;
+      width: auto;
+      border-radius: 12px;
 
       .nav-label {
         opacity: 1;
-        max-width: 200px;
+        max-width: 180px;
         transform: translateX(0);
       }
     }
@@ -180,13 +168,15 @@ aside.w-20 {
       
       button {
         justify-content: flex-start;
-        padding-left: 14px;
-        padding-right: 14px;
+        padding-left: 12px;
+        padding-right: 12px;
         gap: 12px;
+        width: 100%;
+        border-radius: 12px;
 
         .nav-label {
           opacity: 1;
-          max-width: 200px;
+          max-width: 180px;
           transform: translateX(0);
         }
       }
@@ -215,9 +205,12 @@ aside.w-20 {
 
     .nav-link {
       justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
+      width: 40px;
+      height: 40px;
+      margin: 4px auto;
+      padding: 0;
       gap: 0;
+      border-radius: 12px;
 
       .nav-label {
         opacity: 0;
@@ -229,13 +222,19 @@ aside.w-20 {
 
     /* Footer collapsed padding & centered items */
     .p-4.border-t {
-      padding: 12px 8px;
+      padding: 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
       button {
         justify-content: center;
-        padding-left: 0;
-        padding-right: 0;
+        width: 40px;
+        height: 40px;
+        margin: 0 auto;
+        padding: 0;
         gap: 0;
+        border-radius: 12px;
 
         .nav-label {
           opacity: 0;
@@ -250,24 +249,13 @@ aside.w-20 {
 
 /* Dark mode styling context */
 :host-context(.dark) {
-  .bg-white\/80 {
-    background-color: rgba(15, 23, 42, 0.75) !important;
-  }
-  .bg-white\/90 {
-    background-color: rgba(15, 23, 42, 0.85) !important;
-  }
-  .bg-white\/95 {
-    background-color: rgba(15, 23, 42, 0.9) !important;
-  }
-  
   .nav-link {
-    &::before {
-      background-color: #22c55e; /* green-500 */
-    }
+    color: #94a3b8; /* slate-400 */
 
     &.active-nav-link {
       background-color: rgba(34, 197, 94, 0.08) !important;
       color: #4be277 !important; /* glowing light emerald text */
+      border-color: rgba(34, 197, 94, 0.15);
 
       .nav-icon {
         color: #22c55e !important;
@@ -277,10 +265,19 @@ aside.w-20 {
     &:hover:not(.active-nav-link) {
       color: #ffffff !important;
       background-color: rgba(30, 41, 59, 0.45);
+      border-color: rgba(255, 255, 255, 0.04);
 
       .nav-icon {
         color: #22c55e;
       }
+    }
+  }
+  
+  /* Collapsed active link border in dark mode */
+  aside.w-20:not(:hover) {
+    .nav-link.active-nav-link {
+      background-color: rgba(34, 197, 94, 0.12) !important;
+      border-color: rgba(34, 197, 94, 0.25);
     }
   }
 }
