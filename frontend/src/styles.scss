@@ -112,5 +112,84 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #ffffff !important;
 }
 
+/* Redesign Fonts & Heading Overrides */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Glassmorphism Cards */
+.fs-glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  @apply shadow-sm rounded-2xl p-6 transition-all duration-300;
+}
+
+.dark .fs-glass-card {
+  background: rgba(15, 19, 38, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.fs-glass-card-hover {
+  @apply hover:scale-[1.01] hover:border-primary-glowing/25 transition-all duration-300;
+  &:hover {
+    box-shadow: 0 12px 40px -10px rgba(34, 197, 94, 0.15);
+  }
+}
+
+/* Glowing buttons */
+.fs-btn-glow {
+  @apply relative overflow-hidden transition-all duration-300;
+  &::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 bg-white/20 transition-opacity duration-300 pointer-events-none;
+  }
+  &:hover::after {
+    @apply opacity-100;
+  }
+}
+
+/* Telemetry Font */
+.telemetry-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: "tnum";
+}
+
+/* Animations */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s infinite ease-in-out;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  &:hover {
+    animation-play-state: paused;
+  }
+}
+
+
 
 
