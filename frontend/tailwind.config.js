@@ -22,6 +22,12 @@ module.exports = {
           container: '#171f33',
           high: '#222a3d',
           highest: '#2d3449'
+        },
+        slate: {
+          950: '#0f172a', // Lighter body dark background (standard slate-900)
+          900: '#1e293b', // Lighter card/sidebar dark background (standard slate-800)
+          850: '#2d3748', // Soft intermediate dark shade
+          800: '#334155', // Lighter border/panel dark detail (standard slate-700)
         }
       },
       fontFamily: {
