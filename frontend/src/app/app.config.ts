@@ -30,8 +30,10 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAnimationsAsync(),
     provideToastr({
-      positionClass: 'toast-bottom-right',
+      positionClass: 'toast-top-center',
       preventDuplicates: true,
+      timeOut: 3000,
+      easeTime: 250
     }),
     provideStore({ auth: authReducer }),
     provideEffects([AuthEffects]),
