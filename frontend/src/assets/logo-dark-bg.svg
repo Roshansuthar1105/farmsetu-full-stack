@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="100%" height="100%">
+  <defs>
+    <!-- Google Fonts import -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&amp;family=Hind:wght@700&amp;display=swap');
+      .text-farm {
+        font-family: 'Comfortaa', 'Outfit', sans-serif;
+        font-size: 44px;
+        font-weight: 700;
+        fill: #ffffff; /* White "Farm" */
+      }
+      .text-setu {
+        font-family: 'Hind', 'Noto Sans Devanagari', sans-serif;
+        font-size: 46px;
+        font-weight: 700;
+        fill: #22c55e; /* Glowing Emerald "सेतु" */
+      }
+    </style>
+    
+    <!-- Gradients for the Agricultural Emblem -->
+    <linearGradient id="sunGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9"/>
+    </linearGradient>
+    
+    <linearGradient id="fieldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+    
+    <linearGradient id="fieldGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+
+    <linearGradient id="sproutGradLeft" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+
+    <linearGradient id="sproutGradRight" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- AGRICULTURAL TECH EMBLEM (Left side) -->
+  <g transform="translate(5, 0)">
+    <!-- Glowing Sun -->
+    <circle cx="38" cy="36" r="16" fill="url(#sunGrad)"/>
+
+    <!-- Curved Field Rows -->
+    <path d="M 14,56 C 26,45 50,45 62,56 L 62,64 C 50,53 26,53 14,64 Z" fill="url(#fieldGrad1)"/>
+    <path d="M 8,64 C 23,52 53,52 68,64 L 68,72 C 53,60 23,60 8,72 Z" fill="url(#fieldGrad2)"/>
+
+    <!-- Seedling Sprout growing in the center -->
+    <!-- Left Leaf -->
+    <path d="M 38,48 C 24,42 26,26 38,20 C 40,30 35,43 38,48 Z" fill="url(#sproutGradLeft)"/>
+    <!-- Right Leaf -->
+    <path d="M 38,48 C 52,42 50,26 38,20 C 36,30 41,43 38,48 Z" fill="url(#sproutGradRight)"/>
+    <!-- Center Stem line -->
+    <path d="M 38,48 L 38,22" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Sleek Tech Bridge arching over the Sprout -->
+    <path d="M 12,46 C 25,20 51,20 64,46" stroke="#35a5db" stroke-width="3" fill="none" stroke-linecap="round"/>
+    
+    <!-- Bridge Hangers / Connectors -->
+    <line x1="23" y1="36" x2="23" y2="47" stroke="#35a5db" stroke-width="1.2"/>
+    <line x1="38" y1="30" x2="38" y2="20" stroke="#35a5db" stroke-width="1.2" opacity="0.5"/>
+    <line x1="53" y1="36" x2="53" y2="47" stroke="#35a5db" stroke-width="1.2"/>
+  </g>
+
+  <!-- CREATIVE TYPOGRAPHY & BRIDGE CONNECTING LINK -->
+  
+  <!-- "Farm" Text (White) -->
+  <text x="80" y="58" class="text-farm">Farm</text>
+
+  <!-- "Setu" (सेतु) Text (Green) -->
+  <text x="205" y="58" class="text-setu">सेतु</text>
+
+  <!-- The "Bridge" Connection joining English and Hindi words -->
+  <!-- A path that starts from under "Farm", curves gracefully up-right and integrates with "सेतु" top-bar -->
+  <path d="M 82,64 C 125,64 165,58 202,35 L 205,35" stroke="#35a5db" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 82,64 C 125,64 165,58 202,35 L 205,35" stroke="#22c55e" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+</svg>

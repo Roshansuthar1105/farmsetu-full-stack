@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <!-- Leaf Gradient -->
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6ba239"/>
+      <stop offset="60%" stop-color="#8cc63f"/>
+      <stop offset="100%" stop-color="#a2d450"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Blue Letter F -->
+  <path d="M 22,142 L 84,142 C 84,142 80,141 78,138 C 76,135 76,130 76,120 L 76,82 L 105,82 C 112,82 114,84 116,88 C 117,91 117,94 117,94 L 122,94 L 122,58 L 117,58 C 117,58 117,61 116,63 C 114,67 112,69 105,69 L 76,69 L 76,46 C 76,38 77,36 82,34 C 84,33 89,33 92,33 L 134,33 C 137,33 138,34 139,37 C 140,39 141,45 141,45 L 146,45 L 146,18 L 22,18 L 22,23 C 22,23 27,24 29,26 C 31,29 31,34 31,44 L 31,116 C 31,126 31,131 29,134 C 27,137 22,137 22,137 Z" fill="#35a5db"/>
+
+  <!-- Circuit Tracks on Stem (Green) -->
+  <path d="M 50,125 L 50,95 L 42,85" stroke="#7dbb42" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 50,110 L 58,110 L 62,106 L 62,98" stroke="#7dbb42" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 50,95 L 50,60" stroke="#7dbb42" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 50,75 L 58,75 L 68,65" stroke="#7dbb42" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Circuit Nodes (Circles) -->
+  <circle cx="50" cy="125" r="4" fill="#35a5db" stroke="#7dbb42" stroke-width="2.5"/>
+  <circle cx="42" cy="85" r="4" fill="#35a5db" stroke="#7dbb42" stroke-width="2.5"/>
+  <circle cx="62" cy="98" r="4" fill="#35a5db" stroke="#7dbb42" stroke-width="2.5"/>
+  <circle cx="50" cy="60" r="4" fill="#35a5db" stroke="#7dbb42" stroke-width="2.5"/>
+  <circle cx="68" cy="65" r="4" fill="#35a5db" stroke="#7dbb42" stroke-width="2.5"/>
+
+  <!-- Green Leaf with White Outline and Veins -->
+  <path d="M 68,76 C 58,58 70,40 85,28 C 102,10 132,6 142,6 C 142,6 140,32 128,54 C 115,76 96,82 78,82 C 70,82 68,76 68,76 Z" fill="url(#leafGrad)" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Central Leaf Vein -->
+  <path d="M 72,72 C 85,60 102,40 138,8" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  
+  <!-- Side Leaf Veins -->
+  <path d="M 88,58 C 82,50 82,45 82,45" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M 98,48 C 94,38 95,33 95,33" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M 112,34 C 108,24 109,20 109,20" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M 98,48 C 106,48 112,50 112,50" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M 112,34 C 122,34 126,38 126,38" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Circuit Node on Leaf -->
+  <circle cx="118" cy="46" r="4" fill="#ffffff"/>
+  <circle cx="118" cy="46" r="1.5" fill="#8cc63f"/>
+</svg>
