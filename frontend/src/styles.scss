@@ -289,8 +289,14 @@ h1, h2, h3, h4, h5, h6 {
   content: "info_outline" !important;
   background-color: #3b82f6 !important;
 }
+/* Glowing Shimmer Effect */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
 
-
-
-
+.animate-shimmer {
+  animation: shimmer 1.8s infinite;
+}
 
