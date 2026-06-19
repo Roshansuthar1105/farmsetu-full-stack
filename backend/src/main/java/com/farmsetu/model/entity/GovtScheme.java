@@ -44,7 +44,7 @@ public class GovtScheme extends BaseEntity {
     @Column(name = "application_process", columnDefinition = "TEXT")
     private String applicationProcess;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "scheme_documents", joinColumns = @JoinColumn(name = "scheme_id"))
     @Column(name = "document_name")
     @Builder.Default

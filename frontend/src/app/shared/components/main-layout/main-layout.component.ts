@@ -129,7 +129,8 @@ export class MainLayoutComponent {
     { path: '/admin/market-prices', labelKey: 'nav.adminMarketPrices', icon: 'upload_file' },
     { path: '/admin/email', labelKey: 'nav.adminEmail', icon: 'forward_to_inbox' },
     { path: '/admin/orders', labelKey: 'nav.adminOrders', icon: 'local_shipping' },
-    { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' }
+    { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' },
+    { path: '/admin/schemes', labelKey: 'nav.adminSchemes', icon: 'account_balance' }
   ];
 
   readonly secondaryNavItems: NavItem[] = [

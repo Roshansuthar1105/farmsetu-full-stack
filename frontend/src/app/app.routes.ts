@@ -155,6 +155,10 @@ export const routes: Routes = [
       {
         path: 'water-queue',
         loadComponent: () => import('./features/admin/water-queue/admin-water-queue.component').then(m => m.AdminWaterQueueComponent)
+      },
+      {
+        path: 'schemes',
+        loadComponent: () => import('./features/admin/schemes/admin-schemes.component').then(m => m.AdminSchemesComponent)
       }
       // ,
       // {
