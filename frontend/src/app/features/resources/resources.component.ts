@@ -20,7 +20,10 @@ import {
   LucideGlobe,
   LucideTrophy,
   LucideSprout,
-  LucideChevronDown
+  LucideChevronDown,
+  LucidePlusCircle,
+  LucideLink,
+  LucideImage
 } from '@lucide/angular';
 
 export interface ResourceItem {
@@ -61,7 +64,10 @@ export interface ResourceItem {
     LucideGlobe,
     LucideTrophy,
     LucideSprout,
-    LucideChevronDown
+    LucideChevronDown,
+    LucidePlusCircle,
+    LucideLink,
+    LucideImage
   ],
   templateUrl: './resources.component.html'
 })
@@ -74,6 +80,22 @@ export class ResourcesComponent implements OnInit {
   readonly completingId = signal<number | null>(null);
   readonly selectedResource = signal<ResourceItem | null>(null);
   readonly activeTab = signal<'all' | 'completed'>('all');
+
+  // Create resource modal
+  readonly showCreateModal = signal(false);
+  readonly creating = signal(false);
+  readonly createError = signal('');
+  readonly createForm = signal({
+    title: '',
+    description: '',
+    contentType: 'VIDEO' as 'VIDEO' | 'PDF' | 'ARTICLE' | 'WEBINAR',
+    contentUrl: '',
+    cropType: '',
+    topic: '',
+    difficultyLevel: 'BEGINNER' as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
+    language: 'English',
+    thumbnailUrl: ''
+  });
 
   // Filter state
   readonly searchQuery = signal('');
@@ -219,5 +241,48 @@ export class ResourcesComponent implements OnInit {
       this.filterDifficulty() !== 'ALL' ||
       this.filterCrop() !== 'ALL' ||
       this.filterLanguage() !== 'ALL';
+  }
+
+  openCreateModal(): void {
+    this.createForm.set({
+      title: '', description: '', contentType: 'VIDEO', contentUrl: '',
+      cropType: '', topic: '', difficultyLevel: 'BEGINNER',
+      language: 'English', thumbnailUrl: ''
+    });
+    this.createError.set('');
+    this.showCreateModal.set(true);
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+  }
+
+  updateForm(field: string, value: string): void {
+    this.createForm.update(f => ({ ...f, [field]: value }));
+  }
+
+  submitCreate(): void {
+    const form = this.createForm();
+    if (!form.title.trim()) {
+      this.createError.set('Title is required.');
+      return;
+    }
+    if (!form.contentUrl.trim()) {
+      this.createError.set('Content URL is required.');
+      return;
+    }
+    this.creating.set(true);
+    this.createError.set('');
+    this.api.post<ResourceItem>('/api/resources', form).subscribe({
+      next: (created) => {
+        this.resources.update(list => [created, ...list]);
+        this.creating.set(false);
+        this.showCreateModal.set(false);
+      },
+      error: (err) => {
+        this.createError.set(err?.error?.message || 'Failed to create resource. Please try again.');
+        this.creating.set(false);
+      }
+    });
   }
 }
