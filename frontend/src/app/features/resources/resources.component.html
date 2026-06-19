@@ -1,0 +1,432 @@
+<fs-page-header
+  title="Learning Resources"
+  subtitle="Videos, PDFs, Articles & Webinars to help you farm smarter" />
+
+<!-- Stats Banner -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/40 flex items-center justify-center">
+      <svg lucideVideo class="w-5 h-5 text-red-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Videos</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">{{ videoCount() }}</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
+      <svg lucideFileText class="w-5 h-5 text-amber-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Total Resources</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">{{ resources().length }}</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+      <svg lucideCheckCircle class="w-5 h-5 text-emerald-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Completed</p>
+      <p class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{{ totalCompleted() }}</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center">
+      <svg lucideGraduationCap class="w-5 h-5 text-purple-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Topics</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">{{ cropTypes().length - 1 }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="flex gap-2 mb-5">
+  <button (click)="activeTab.set('all')"
+    class="px-5 py-2 rounded-xl text-xs font-bold transition"
+    [ngClass]="activeTab() === 'all'
+      ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
+      : 'bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 text-gray-600 dark:text-gray-300 hover:bg-gray-50'">
+    All Resources
+  </button>
+  <button (click)="activeTab.set('completed')"
+    class="px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+    [ngClass]="activeTab() === 'completed'
+      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+      : 'bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 text-gray-600 dark:text-gray-300 hover:bg-gray-50'">
+    <svg lucideCheckCircle class="w-3.5 h-3.5"></svg>
+    Completed ({{ totalCompleted() }})
+  </button>
+</div>
+
+<!-- Search & Filters -->
+<div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-5 shadow-sm mb-6 space-y-4">
+  <div class="flex flex-col md:flex-row gap-3">
+    <!-- Search -->
+    <div class="relative flex-1">
+      <svg lucideSearch class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></svg>
+      <input type="text" placeholder="Search resources by title, topic, crop..."
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+        class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl pl-10 pr-4 py-2.5 outline-none text-sm focus:border-green-500 dark:focus:border-green-600 transition text-gray-800 dark:text-gray-200" />
+    </div>
+    <!-- Clear filters button -->
+    @if (hasActiveFilters) {
+    <button (click)="clearFilters()"
+      class="flex items-center gap-1.5 px-4 py-2.5 bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/30 rounded-2xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-100 transition">
+      <svg lucideX class="w-3.5 h-3.5"></svg>
+      Clear Filters
+    </button>
+    }
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <!-- Content Type -->
+    <div class="space-y-1">
+      <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Type</label>
+      <select [ngModel]="filterType()" (ngModelChange)="filterType.set($event)"
+        class="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 dark:bg-slate-950 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-green-500 transition">
+        @for (type of contentTypes; track type) {
+        <option [value]="type">{{ type === 'ALL' ? 'All Types' : type }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="space-y-1">
+      <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Difficulty</label>
+      <select [ngModel]="filterDifficulty()" (ngModelChange)="filterDifficulty.set($event)"
+        class="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 dark:bg-slate-950 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-green-500 transition">
+        @for (level of difficultyLevels; track level) {
+        <option [value]="level">{{ level === 'ALL' ? 'All Levels' : level }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Crop Type -->
+    <div class="space-y-1">
+      <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Crop</label>
+      <select [ngModel]="filterCrop()" (ngModelChange)="filterCrop.set($event)"
+        class="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 dark:bg-slate-950 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-green-500 transition">
+        @for (crop of cropTypes(); track crop) {
+        <option [value]="crop">{{ crop === 'ALL' ? 'All Crops' : crop }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Language -->
+    <div class="space-y-1">
+      <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Language</label>
+      <select [ngModel]="filterLanguage()" (ngModelChange)="filterLanguage.set($event)"
+        class="w-full border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 dark:bg-slate-950 text-xs text-gray-700 dark:text-gray-300 outline-none focus:border-green-500 transition">
+        @for (lang of languages(); track lang) {
+        <option [value]="lang">{{ lang === 'ALL' ? 'All Languages' : lang }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Results Count -->
+<div class="flex items-center justify-between mb-4">
+  <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+    <span class="font-bold text-gray-900 dark:text-white">{{ filteredResources().length }}</span>
+    resource{{ filteredResources().length === 1 ? '' : 's' }} found
+  </p>
+</div>
+
+<!-- Content Grid -->
+@if (loading()) {
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+  @for (i of [1,2,3,4,5,6]; track i) {
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-3xl overflow-hidden animate-pulse">
+    <div class="h-44 bg-gray-200 dark:bg-slate-800"></div>
+    <div class="p-5 space-y-3">
+      <div class="h-3 bg-gray-200 dark:bg-slate-800 rounded-full w-3/4"></div>
+      <div class="h-2.5 bg-gray-200 dark:bg-slate-800 rounded-full w-full"></div>
+      <div class="h-2.5 bg-gray-200 dark:bg-slate-800 rounded-full w-5/6"></div>
+    </div>
+  </div>
+  }
+</div>
+} @else if (filteredResources().length === 0) {
+<div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-dashed border-gray-200 dark:border-slate-800/60 rounded-3xl p-16 text-center flex flex-col items-center justify-center">
+  <svg lucideSprout class="w-14 h-14 text-slate-300 dark:text-slate-600 mb-4"></svg>
+  <p class="text-base font-bold text-gray-700 dark:text-gray-300">No resources found</p>
+  <p class="text-sm text-gray-400 mt-1.5">Try adjusting your search filters, or check back later for new content.</p>
+  @if (hasActiveFilters) {
+  <button (click)="clearFilters()"
+    class="mt-5 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition">
+    Clear All Filters
+  </button>
+  }
+</div>
+} @else {
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+  @for (resource of filteredResources(); track resource.id) {
+  <article
+    class="group bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border dark:border-slate-800/40 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer"
+    [ngClass]="isCompleted(resource.id) ? 'border-emerald-200 dark:border-emerald-900/40' : 'border-gray-100/80'"
+    (click)="openResource(resource)">
+
+    <!-- Thumbnail -->
+    <div class="relative h-44 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden flex-shrink-0">
+      @if (resource.thumbnailUrl) {
+      <img [src]="resource.thumbnailUrl" [alt]="resource.title"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      } @else {
+      <!-- Default thumbnail with content type icon -->
+      <div class="w-full h-full flex items-center justify-center">
+        @if (resource.contentType === 'VIDEO') {
+        <svg lucidePlay class="w-14 h-14 text-green-300 dark:text-green-700"></svg>
+        } @else if (resource.contentType === 'PDF') {
+        <svg lucideFileText class="w-14 h-14 text-amber-300 dark:text-amber-700"></svg>
+        } @else if (resource.contentType === 'WEBINAR') {
+        <svg lucideGraduationCap class="w-14 h-14 text-purple-300 dark:text-purple-700"></svg>
+        } @else {
+        <svg lucideBookOpen class="w-14 h-14 text-blue-300 dark:text-blue-700"></svg>
+        }
+      </div>
+      }
+
+      <!-- Overlay gradient -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+
+      <!-- Type Badge (top-left) -->
+      <div class="absolute top-3 left-3">
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border backdrop-blur-sm"
+          [ngClass]="getContentTypeColor(resource.contentType)">
+          @if (resource.contentType === 'VIDEO') { <svg lucidePlay class="w-2.5 h-2.5"></svg> }
+          @else if (resource.contentType === 'PDF') { <svg lucideFileText class="w-2.5 h-2.5"></svg> }
+          @else if (resource.contentType === 'WEBINAR') { <svg lucideGraduationCap class="w-2.5 h-2.5"></svg> }
+          @else { <svg lucideBookOpen class="w-2.5 h-2.5"></svg> }
+          {{ resource.contentType }}
+        </span>
+      </div>
+
+      <!-- Completed Badge (top-right) -->
+      @if (isCompleted(resource.id)) {
+      <div class="absolute top-3 right-3">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-500 text-white">
+          <svg lucideCheckCircle class="w-2.5 h-2.5"></svg>
+          Done
+        </span>
+      </div>
+      }
+
+      <!-- Views bottom -->
+      <div class="absolute bottom-3 right-3 flex items-center gap-1 text-white/80 text-[10px]">
+        <svg lucideEye class="w-3 h-3"></svg>
+        {{ resource.viewsCount || 0 }}
+      </div>
+    </div>
+
+    <!-- Card Body -->
+    <div class="p-5 flex flex-col flex-1 space-y-3">
+      <!-- Title -->
+      <h3 class="font-bold text-gray-900 dark:text-white text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition">
+        {{ resource.title }}
+      </h3>
+
+      <!-- Description -->
+      @if (resource.description) {
+      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+        {{ resource.description }}
+      </p>
+      }
+
+      <!-- Tags row -->
+      <div class="flex flex-wrap gap-1.5">
+        @if (resource.difficultyLevel) {
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+          [ngClass]="getDifficultyColor(resource.difficultyLevel)">
+          {{ resource.difficultyLevel }}
+        </span>
+        }
+        @if (resource.cropType) {
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700">
+          {{ resource.cropType }}
+        </span>
+        }
+        @if (resource.language) {
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/30">
+          {{ resource.language }}
+        </span>
+        }
+      </div>
+
+      <!-- Footer actions -->
+      <div class="pt-2 border-t border-gray-100/70 dark:border-slate-800/50 mt-auto flex items-center justify-between">
+        <span class="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+          <svg lucideTrophy class="w-3 h-3 text-amber-400"></svg>
+          {{ resource.completionCount || 0 }} completed
+        </span>
+
+        @if (!isCompleted(resource.id)) {
+        <button
+          (click)="$event.stopPropagation(); markCompleted(resource)"
+          [disabled]="completingId() === resource.id"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300 rounded-xl text-[10px] font-bold transition disabled:opacity-50">
+          @if (completingId() === resource.id) {
+          <span class="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+          } @else {
+          <svg lucideCheckCircle class="w-3 h-3"></svg>
+          }
+          {{ completingId() === resource.id ? 'Saving...' : 'Mark Done' }}
+        </button>
+        } @else {
+        <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+          <svg lucideCheckCircle class="w-3.5 h-3.5"></svg>
+          Completed
+        </span>
+        }
+      </div>
+    </div>
+  </article>
+  }
+</div>
+}
+
+<!-- Resource Detail Modal -->
+@if (selectedResource()) {
+@let resource = selectedResource()!;
+<div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" (click)="closeDetail()">
+  <div
+    class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100 dark:border-slate-800 shadow-2xl relative animate-in fade-in zoom-in duration-200"
+    (click)="$event.stopPropagation()">
+
+    <!-- Close Button -->
+    <button (click)="closeDetail()"
+      class="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-white bg-white/80 dark:bg-slate-900/80 rounded-full p-1.5 backdrop-blur-sm transition">
+      <svg lucideX class="w-5 h-5"></svg>
+    </button>
+
+    <!-- Media / Thumbnail Header -->
+    <div class="h-56 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden relative rounded-t-3xl">
+      @if (resource.thumbnailUrl) {
+      <img [src]="resource.thumbnailUrl" [alt]="resource.title" class="w-full h-full object-cover" />
+      } @else {
+      <div class="w-full h-full flex items-center justify-center">
+        @if (resource.contentType === 'VIDEO') {
+        <svg lucidePlay class="w-20 h-20 text-green-200 dark:text-green-800"></svg>
+        } @else if (resource.contentType === 'PDF') {
+        <svg lucideFileText class="w-20 h-20 text-amber-200 dark:text-amber-800"></svg>
+        } @else if (resource.contentType === 'WEBINAR') {
+        <svg lucideGraduationCap class="w-20 h-20 text-purple-200 dark:text-purple-800"></svg>
+        } @else {
+        <svg lucideBookOpen class="w-20 h-20 text-blue-200 dark:text-blue-800"></svg>
+        }
+      </div>
+      }
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+
+      <!-- Type badge overlay -->
+      <div class="absolute bottom-4 left-5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-sm border"
+          [ngClass]="getContentTypeColor(resource.contentType)">
+          {{ resource.contentType }}
+        </span>
+      </div>
+
+      <!-- Completed badge overlay -->
+      @if (isCompleted(resource.id)) {
+      <div class="absolute bottom-4 right-5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500 text-white">
+          <svg lucideCheckCircle class="w-3.5 h-3.5"></svg>
+          Completed
+        </span>
+      </div>
+      }
+    </div>
+
+    <!-- Detail Body -->
+    <div class="p-6 space-y-5">
+      <div>
+        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white leading-snug">{{ resource.title }}</h2>
+        @if (resource.topic) {
+        <p class="text-xs text-green-600 dark:text-green-400 font-semibold mt-1 flex items-center gap-1">
+          <svg lucideTag class="w-3 h-3"></svg>
+          {{ resource.topic }}
+        </p>
+        }
+      </div>
+
+      <!-- Meta grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        @if (resource.difficultyLevel) {
+        <div class="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl p-3 text-center">
+          <p class="text-[9px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold mb-1">Level</p>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full"
+            [ngClass]="getDifficultyColor(resource.difficultyLevel)">
+            {{ resource.difficultyLevel }}
+          </span>
+        </div>
+        }
+        @if (resource.cropType) {
+        <div class="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl p-3 text-center">
+          <p class="text-[9px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold mb-1">Crop</p>
+          <p class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ resource.cropType }}</p>
+        </div>
+        }
+        @if (resource.language) {
+        <div class="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl p-3 text-center">
+          <p class="text-[9px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold mb-1">Language</p>
+          <p class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ resource.language }}</p>
+        </div>
+        }
+        <div class="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl p-3 text-center">
+          <p class="text-[9px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold mb-1">Views</p>
+          <p class="text-xs font-bold text-gray-800 dark:text-gray-200">{{ resource.viewsCount || 0 }}</p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      @if (resource.description) {
+      <div class="bg-gray-50/50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/40 rounded-2xl p-4">
+        <h4 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">About this Resource</h4>
+        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ resource.description }}</p>
+      </div>
+      }
+
+      <!-- Action buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-1">
+        @if (resource.contentUrl) {
+        <a [href]="resource.contentUrl" target="_blank" rel="noopener noreferrer"
+          class="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition duration-200 text-sm">
+          @if (resource.contentType === 'VIDEO') {
+          <svg lucidePlay class="w-4 h-4"></svg> Watch Video
+          } @else if (resource.contentType === 'PDF') {
+          <svg lucideFileText class="w-4 h-4"></svg> Open PDF
+          } @else if (resource.contentType === 'WEBINAR') {
+          <svg lucideGraduationCap class="w-4 h-4"></svg> Join Webinar
+          } @else {
+          <svg lucideExternalLink class="w-4 h-4"></svg> Read Article
+          }
+        </a>
+        }
+
+        @if (!isCompleted(resource.id)) {
+        <button
+          (click)="markCompleted(resource)"
+          [disabled]="completingId() === resource.id"
+          class="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl text-sm transition disabled:opacity-50">
+          @if (completingId() === resource.id) {
+          <span class="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+          Saving...
+          } @else {
+          <svg lucideCheckCircle class="w-4 h-4"></svg>
+          Mark as Completed
+          }
+        </button>
+        } @else {
+        <div class="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-emerald-500/10 border border-emerald-300/40 dark:border-emerald-700/30 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl text-sm">
+          <svg lucideCheckCircle class="w-4 h-4"></svg>
+          Already Completed
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+}
