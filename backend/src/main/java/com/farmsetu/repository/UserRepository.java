@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     List<User> findByRole(UserRole role);
 
+    List<User> findTop5ByOrderByReputationScoreDesc();
+
     @Query("SELECT u FROM User u WHERE u.email = :identifier OR u.phone = :identifier")
     List<User> findByIdentifierNative(@Param("identifier") String identifier);
     

@@ -1,0 +1,501 @@
+<fs-page-header title="Kheti Chaupal"
+  subtitle="Share farming tips, ask expert questions, and discuss prices with other farmers" />
+
+<!-- Stories Carousel Bar -->
+<div class="mb-8 bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/60">
+  <h3
+    class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 px-1 flex items-center gap-1.5">
+    <span>🌱</span> Daily Farm Stories
+  </h3>
+
+  <div class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar select-none">
+    <!-- Add Story Card -->
+    <div class="flex flex-col items-center flex-shrink-0 cursor-pointer" (click)="openCreateStoryModal()">
+      <div
+        class="w-14 h-14 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center text-gray-500 hover:text-green-600 hover:border-green-500 transition duration-200 bg-gray-50 dark:bg-gray-900/40">
+        <svg lucidePlus class="w-5 h-5"></svg>
+      </div>
+      <span class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mt-1.5">Add Story</span>
+    </div>
+
+    <!-- Story Circles -->
+    @for (group of groupedStories(); track group.authorId; let idx = $index) {
+    <div class="flex flex-col items-center flex-shrink-0 cursor-pointer group" (click)="viewStory(idx)">
+      <div
+        class="p-[2.5px] bg-gradient-to-tr from-amber-400 via-emerald-500 to-green-600 rounded-full group-hover:scale-105 transition duration-200">
+        <div
+          class="w-12 h-12 rounded-full overflow-hidden bg-white dark:bg-gray-900 flex items-center justify-center border-2 border-white dark:border-gray-800">
+          @if (group.authorProfilePhoto) {
+          <img [src]="group.authorProfilePhoto" class="w-full h-full object-cover" />
+          } @else {
+          <div
+            class="w-full h-full bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 flex items-center justify-center font-bold text-sm">
+            {{ (group.authorName || 'Farmer').charAt(0) }}
+          </div>
+          }
+        </div>
+      </div>
+      <span class="text-[10px] font-semibold text-gray-600 dark:text-gray-300 mt-1.5 truncate max-w-[65px]">
+        {{ group.authorName || 'Farmer' }}
+      </span>
+    </div>
+    } @empty {
+    <!-- Empty Stories Prompt -->
+    <div class="flex items-center text-gray-400 dark:text-gray-500 text-xs py-3 pl-2">
+      <span>No active stories. Share a photo of your crops today!</span>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+  <!-- Feed & Controls (2/3 width) -->
+  <div class="lg:col-span-8 space-y-6">
+
+    <!-- Filter and Search Row -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-gray-700/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex flex-wrap gap-2">
+        @for (cat of categories; track cat) {
+        <button (click)="setCategory(cat)"
+          [class]="activeCategory() === cat 
+              ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-green-600 text-white shadow-md shadow-green-600/25 transition' 
+              : 'px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition'">
+          {{ cat }}
+        </button>
+        }
+      </div>
+
+      <div class="relative min-w-[200px]">
+        <input type="text" placeholder="Search conversations..." (input)="onSearchInput($event)"
+          class="w-full bg-gray-50 dark:bg-gray-900/30 border border-gray-200/80 dark:border-gray-700 rounded-full pl-9 pr-4 py-1.5 outline-none text-xs focus:border-green-500 dark:focus:border-green-600 focus:bg-white dark:focus:bg-gray-900 transition text-gray-800 dark:text-gray-200" />
+        <svg lucideSearch class="w-3.5 h-3.5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></svg>
+      </div>
+    </div>
+
+    <!-- New Post Form Card -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-gray-100/60 dark:border-gray-700/60 space-y-4">
+      <h3 class="font-extrabold text-gray-900 dark:text-white flex items-center gap-2 text-base">
+        <span class="text-green-600">✍️</span> Post a discussion
+      </h3>
+
+      <form (ngSubmit)="createPost()" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" [(ngModel)]="newPost.title" name="title" placeholder="Title / What is the topic?" required
+            class="border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 dark:bg-gray-700/50 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-sm text-gray-800 dark:text-gray-100" />
+          <select [(ngModel)]="newPost.category" name="category"
+            class="border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 dark:bg-gray-700/50 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-sm text-gray-700 dark:text-gray-300">
+            <option value="General">General Talk</option>
+            <option value="Crop Protection">Crop Protection</option>
+            <option value="Mandi Prices">Mandi Prices</option>
+            <option value="Weather Alerts">Weather Alerts</option>
+          </select>
+        </div>
+
+        <textarea [(ngModel)]="newPost.content" name="content" rows="3"
+          placeholder="Share farm updates, questions, or mandi reports with the community..." required
+          class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 dark:bg-gray-700/50 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-sm text-gray-800 dark:text-gray-100"></textarea>
+
+        <!-- Collapsible Extras: Media URL and Location -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          <div class="relative">
+            <input type="text" [(ngModel)]="newPost.mediaUrl" name="mediaUrl" placeholder="Image URL (Optional)"
+              class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl pl-10 pr-4 py-2.5 dark:bg-gray-700/50 outline-none focus:border-green-500 transition text-xs text-gray-800 dark:text-gray-200" />
+            <svg lucideImage class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></svg>
+          </div>
+          <div class="relative">
+            <input type="text" [(ngModel)]="newPost.location" name="location"
+              placeholder="Location (Optional, e.g. Khanna, Punjab)"
+              class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl pl-10 pr-4 py-2.5 dark:bg-gray-700/50 outline-none focus:border-green-500 transition text-xs text-gray-800 dark:text-gray-200" />
+            <svg lucideMapPin class="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"></svg>
+          </div>
+        </div>
+
+        <!-- Media Preview -->
+        @if (newPost.mediaUrl) {
+        <div
+          class="relative w-36 h-24 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 mt-2 bg-gray-50 dark:bg-gray-900">
+          <img [src]="newPost.mediaUrl" class="w-full h-full object-cover" (error)="onMediaPreviewError()" />
+          <button type="button" (click)="newPost.mediaUrl = ''"
+            class="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-black transition">
+            <svg lucideX class="w-3 h-3"></svg>
+          </button>
+        </div>
+        }
+
+        <div class="flex justify-end pt-2">
+          <button type="submit"
+            class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition duration-200 text-sm flex items-center gap-2">
+            <svg lucideSend class="w-3.5 h-3.5"></svg> Publish Post
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Posts List -->
+    @if (loading()) {
+    <fs-loading-skeleton [count]="3" />
+    } @else {
+    <div class="space-y-5">
+      @for (post of filteredPosts(); track post.id) {
+      <article
+        class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-3xl p-6 shadow-sm hover:shadow-md transition duration-300 space-y-4">
+
+        <!-- Author and Category -->
+        <div class="flex justify-between items-start">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-11 h-11 rounded-full bg-green-50 dark:bg-green-950/40 flex items-center justify-center text-green-700 dark:text-green-300 font-bold border border-green-100/50 dark:border-green-900/30 text-base shadow-sm">
+              {{ (post.authorName || 'Farmer').charAt(0) }}
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h4
+                  class="font-bold text-gray-900 dark:text-white text-sm hover:text-green-600 cursor-pointer transition">
+                  {{ post.authorName || 'Farmer' }}
+                </h4>
+                <!-- Active Contributor reputation badge -->
+                <span *ngIf="(post.likesCount || 0) > 4"
+                  class="px-1.5 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 rounded"
+                  title="Highly Rated Contributor">
+                  🔥 Pro
+                </span>
+              </div>
+
+              <!-- Meta Details (Location + Time) -->
+              <div class="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5">
+                <span class="flex items-center gap-1" *ngIf="post.location">
+                  <svg lucideMapPin class="w-2.5 h-2.5"></svg> {{ post.location }}
+                </span>
+                <span *ngIf="post.location" class="text-gray-300">•</span>
+                <span class="flex items-center gap-1">
+                  <svg lucideClock class="w-2.5 h-2.5"></svg> {{ formatTime(post.createdAt) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <span [class]="getCategoryBadgeClass(post.category)">
+            {{ post.category || 'General' }}
+          </span>
+        </div>
+
+        <!-- Post Content -->
+        <div class="space-y-2.5">
+          <h3 class="font-bold text-gray-900 dark:text-white text-base leading-snug">
+            {{ post.title }}
+          </h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed break-words whitespace-pre-line">
+            {{ post.content }}
+          </p>
+        </div>
+
+        <!-- Post Media Image if attached -->
+        @if (post.mediaUrls && post.mediaUrls.length > 0 && post.mediaUrls[0]) {
+        <div
+          class="w-full max-h-96 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700/50 shadow-sm mt-3 bg-gray-50 dark:bg-gray-900">
+          <img [src]="post.mediaUrls[0]" class="w-full h-full object-cover" />
+        </div>
+        }
+
+        <!-- Post Actions Toolbar -->
+        <div
+          class="flex items-center gap-5 border-t border-gray-50 dark:border-gray-700/20 pt-3.5 text-xs font-semibold">
+          <button (click)="likePost(post)"
+            class="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-full transition-all active:scale-90"
+            [ngClass]="post.hasLiked 
+              ? 'text-red-500 bg-red-50 dark:bg-red-950/20' 
+              : 'bg-gray-50 dark:bg-gray-900/30 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20'">
+            <svg lucideHeart class="w-4 h-4 text-red-500" [class.fill-red-500]="post.hasLiked"></svg>
+            <span>{{ post.likesCount || 0 }} Likes</span>
+          </button>
+
+          <button (click)="toggleComments(post.id)"
+            class="flex items-center gap-1.5 font-bold px-3 py-1.5 rounded-full bg-gray-50 dark:bg-gray-900/30 text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all">
+            <svg lucideMessageSquare class="w-4 h-4 text-green-600"></svg>
+            <span>{{ post.commentsCount || 0 }} Comments</span>
+          </button>
+        </div>
+
+        <!-- Comments Accordion Section -->
+        @if (isCommentsExpanded(post.id)) {
+        <div
+          class="border-t border-gray-100 dark:border-gray-700/40 pt-4 space-y-4 mt-1 bg-gray-50/40 dark:bg-gray-900/10 rounded-2xl p-4">
+
+          <!-- Write Comment Inline Form -->
+          <div class="flex gap-2">
+            <input type="text" [(ngModel)]="newCommentText[post.id]" placeholder="Type a helpful response..."
+              (keyup.enter)="addComment(post.id)"
+              class="flex-1 border border-gray-200/80 dark:border-gray-700 rounded-xl px-4 py-2.5 dark:bg-gray-700/40 outline-none text-xs focus:border-green-500 dark:focus:border-green-600 text-gray-800 dark:text-gray-100" />
+            <button (click)="addComment(post.id)"
+              class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-xs transition duration-150 flex items-center gap-1">
+              Reply
+            </button>
+          </div>
+
+          <!-- Comments List Scroll Area -->
+          <div class="space-y-3 max-h-72 overflow-y-auto pr-1.5 custom-scrollbar">
+            @for (c of comments()[post.id] || []; track c.id) {
+            <div
+              class="bg-gray-50 dark:bg-gray-900/20 p-3.5 rounded-2xl text-xs border border-gray-100/50 dark:border-gray-700/30 space-y-1.5">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-1.5">
+                  <span
+                    class="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 text-[10px] font-bold text-green-800 dark:text-green-300 flex items-center justify-center">
+                    {{ (c.authorName || 'User').charAt(0) }}
+                  </span>
+                  <span class="font-extrabold text-gray-800 dark:text-gray-200">{{ c.authorName || 'User' }}</span>
+                </div>
+                <span class="text-[9px] text-gray-400 flex items-center gap-1">
+                  <svg lucideClock class="w-2.5 h-2.5"></svg> {{ formatTime(c.createdAt) }}
+                </span>
+              </div>
+              <p class="text-gray-600 dark:text-gray-300 leading-relaxed pl-6">{{ c.content }}</p>
+            </div>
+            } @empty {
+            <div class="text-center py-4 text-gray-400 dark:text-gray-500 text-[11px]">
+              💬 Be the first to share a comment on this post!
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+      </article>
+      } @empty {
+      <div
+        class="bg-white dark:bg-gray-800 rounded-3xl p-12 border border-dashed border-gray-200 dark:border-gray-700 text-center text-gray-500 shadow-sm">
+        <span class="text-5xl block mb-3">🌾</span>
+        <p class="text-sm font-bold text-gray-800 dark:text-gray-200">No discussions match your filter.</p>
+        <p class="text-xs text-gray-400 mt-1.5">Start a conversation by posting a topic above!</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Sidebar (1/3 width) -->
+  <div class="lg:col-span-4 space-y-6">
+
+    <!-- Leaderboard Card -->
+    <div
+      class="bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-800/80 rounded-3xl p-6 shadow-md border border-gray-100 dark:border-gray-700/60">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="font-extrabold text-gray-900 dark:text-white flex items-center gap-2 text-base">
+          <svg lucideTrophy class="w-5 h-5 text-amber-500"></svg> Top Contributors
+        </h3>
+        <span
+          class="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
+          Reputation
+        </span>
+      </div>
+
+      <div class="space-y-3.5">
+        @for (user of leaderboard(); track user.id; let idx = $index) {
+        <div
+          class="flex items-center justify-between p-2.5 rounded-2xl bg-white dark:bg-gray-900/35 border border-gray-100/60 dark:border-gray-800/30 hover:shadow-sm transition-all duration-200">
+          <div class="flex items-center gap-3">
+            <!-- Rank Badge -->
+            <div [class]="getRankBadgeClass(idx)">
+              {{ idx + 1 }}
+            </div>
+
+            <div
+              class="w-8 h-8 rounded-full overflow-hidden bg-green-50 dark:bg-green-950/40 flex items-center justify-center text-green-700 dark:text-green-300 font-bold border border-green-100 dark:border-green-900 text-xs">
+              @if (user.profilePhoto) {
+              <img [src]="user.profilePhoto" class="w-full h-full object-cover" />
+              } @else {
+              {{ (user.name || 'F').charAt(0) }}
+              }
+            </div>
+
+            <div>
+              <h4 class="font-bold text-gray-850 dark:text-gray-200 text-xs truncate max-w-[120px]">
+                {{ user.name || 'Farmer' }}
+              </h4>
+              <p class="text-[9px] text-gray-400 font-medium">Verified Farmer</p>
+            </div>
+          </div>
+
+          <span
+            class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 px-2.5 py-1 rounded-xl">
+            {{ user.reputationScore }} XP
+          </span>
+        </div>
+        } @empty {
+        <div class="text-center py-6 text-gray-400 dark:text-gray-500 text-xs">
+          No active leaderboard stats.
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Community Guidelines Info Box -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-150 dark:border-gray-700/60 space-y-4">
+      <h4 class="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wider text-gray-400">
+        📢 Community Rules
+      </h4>
+      <ul class="space-y-3.5 text-xs text-gray-600 dark:text-gray-300">
+        <li class="flex gap-2.5">
+          <span class="text-green-600 font-bold mt-0.5">✓</span>
+          <span>Keep discussions relevant to farming, mandi pricing, machinery, and weather alerts.</span>
+        </li>
+        <li class="flex gap-2.5">
+          <span class="text-green-600 font-bold mt-0.5">✓</span>
+          <span>Be supportive and respectful. Helpful answers boost your XP Reputation score.</span>
+        </li>
+        <li class="flex gap-2.5">
+          <span class="text-green-600 font-bold mt-0.5">✓</span>
+          <span>Report misleading marketplace offers or harmful advice to help maintain quality.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- Create Story Modal (Overlay Dialog) -->
+@if (showCreateStoryModal()) {
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div
+    class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md p-6 border border-gray-100 dark:border-gray-700 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+    <button (click)="closeCreateStoryModal()"
+      class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition">
+      <svg lucideX class="w-5 h-5"></svg>
+    </button>
+
+    <h3 class="text-lg font-extrabold text-gray-950 dark:text-white mb-4 flex items-center gap-2">
+      <span>📸</span> Add a Daily Farm Story
+    </h3>
+
+    <form (ngSubmit)="createStory()" class="space-y-4">
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Story Image</label>
+        
+        <!-- File picker hidden element -->
+        <input type="file" #storyFileInput (change)="onStoryFileSelected($event)" accept="image/*" class="hidden" />
+        
+        <div class="flex gap-2 items-center">
+          <button type="button" (click)="storyFileInput.click()" [disabled]="uploadingStoryImg()"
+            class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-xs font-bold text-gray-750 dark:text-gray-200 transition duration-150 flex-1 disabled:opacity-50">
+            <svg lucideImage class="w-4 h-4 text-green-600"></svg>
+            <span>{{ uploadingStoryImg() ? 'Uploading...' : 'Choose File' }}</span>
+          </button>
+          
+          <div class="flex items-center text-xs text-gray-400 font-semibold px-1">or</div>
+          
+          <div class="relative flex-[2]">
+            <input type="text" [(ngModel)]="newStory.mediaUrl" name="storyMediaUrl"
+              placeholder="Paste Image URL"
+              class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 dark:bg-gray-700/50 outline-none focus:border-green-500 transition text-xs text-gray-800 dark:text-gray-200" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick preset option to auto-fill a beautiful default photo -->
+      <div class="flex items-center justify-between text-[11px] text-gray-500">
+        <span>Don't have a photo? Use sample:</span>
+        <button type="button"
+          (click)="newStory.mediaUrl = 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800'"
+          class="text-green-600 font-bold hover:underline">
+          Farm Preset 🌾
+        </button>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Caption
+          (Optional)</label>
+        <textarea [(ngModel)]="newStory.caption" name="storyCaption" rows="2"
+          placeholder="What is happening in this photo?"
+          class="w-full border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 dark:bg-gray-700/50 outline-none focus:border-green-500 transition text-xs text-gray-800 dark:text-gray-200"></textarea>
+      </div>
+
+      <!-- Pre-viewing Story Content -->
+      @if (newStory.mediaUrl) {
+      <div
+        class="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 mt-2">
+        <img [src]="newStory.mediaUrl" class="w-full h-full object-cover" />
+      </div>
+      }
+
+      <button type="submit" [disabled]="uploadingStoryImg() || !newStory.mediaUrl"
+        class="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-md transition duration-200 text-xs flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+        Share to Stories
+      </button>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Story Viewer Modal (Popup Overlay) -->
+@if (activeUserStoryIndex() >= 0) {
+@let activeGroup = groupedStories()[activeUserStoryIndex()];
+@let activeSlide = activeGroup.stories[activeSlideIndex()];
+<div class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center select-none"
+  (click)="closeStoryViewer()">
+  <div
+    class="relative w-full max-w-lg h-full max-h-[85vh] md:rounded-3xl overflow-hidden flex flex-col justify-between p-4 bg-gray-900/90 shadow-2xl"
+    (click)="$event.stopPropagation()">
+
+    <!-- Story Header -->
+    <div class="absolute top-4 left-4 right-4 z-20 space-y-3">
+      <!-- Progress Bar row for the active user's stories -->
+      <div class="flex gap-1.5 w-full">
+        @for (st of activeGroup.stories; track st.id; let idx = $index) {
+        <div class="h-[3px] flex-1 bg-white/20 rounded-full overflow-hidden">
+          <div class="h-full bg-white transition-all duration-100 ease-linear"
+            [style.width.%]="idx < activeSlideIndex() ? 100 : (idx === activeSlideIndex() ? storyProgress() : 0)"></div>
+        </div>
+        }
+      </div>
+
+      <!-- User and Time ago -->
+      <div class="flex justify-between items-center text-white">
+        <div class="flex items-center gap-2">
+          @if (activeGroup.authorProfilePhoto) {
+          <img [src]="activeGroup.authorProfilePhoto" class="w-8 h-8 rounded-full object-cover" />
+          } @else {
+          <div class="w-8 h-8 rounded-full bg-green-700 text-white text-xs font-bold flex items-center justify-center">
+            {{ (activeGroup.authorName || 'Farmer').charAt(0) }}
+          </div>
+          }
+          <div>
+            <h4 class="text-xs font-bold">{{ activeGroup.authorName }}</h4>
+            <span class="text-[9px] text-gray-300">{{ formatTime(activeSlide.createdAt) }}</span>
+          </div>
+        </div>
+
+        <button (click)="closeStoryViewer()"
+          class="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-full transition">
+          <svg lucideX class="w-5 h-5"></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Story Media Content -->
+    <div class="flex-1 flex items-center justify-center p-2 relative">
+      <img [src]="activeSlide.mediaUrl"
+        class="max-w-full max-h-[60vh] object-contain rounded-2xl shadow-lg border border-white/5" />
+
+      <!-- Tap areas for Next/Prev stories -->
+      <div class="absolute left-0 top-0 bottom-0 w-1/4 cursor-w-resize" (click)="prevStory()"></div>
+      <div class="absolute right-0 top-0 bottom-0 w-1/4 cursor-e-resize" (click)="nextStory()"></div>
+    </div>
+
+    <!-- Story Footer Caption Container -->
+    @if (activeSlide.caption) {
+    <div
+      class="p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 z-10 text-center text-white">
+      <p class="text-sm font-semibold leading-relaxed drop-shadow-md">
+        {{ activeSlide.caption }}
+      </p>
+    </div>
+    }
+
+  </div>
+</div>
+}

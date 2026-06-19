@@ -46,6 +46,7 @@ DROP TABLE IF EXISTS farmer_profile_crops CASCADE;
 DROP TABLE IF EXISTS product_images CASCADE;
 DROP TABLE IF EXISTS post_media CASCADE;
 DROP TABLE IF EXISTS post_tags CASCADE;
+DROP TABLE IF EXISTS post_likes CASCADE;
 DROP TABLE IF EXISTS crop_soil_types CASCADE;
 DROP TABLE IF EXISTS mandi_crops_traded CASCADE;
 DROP TABLE IF EXISTS mandi_facilities CASCADE;
@@ -219,6 +220,12 @@ CREATE TABLE post_media (
     post_id     BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
     media_url   VARCHAR(1000) NOT NULL,
     PRIMARY KEY (post_id, media_url)
+);
+
+CREATE TABLE post_likes (
+    post_id     BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, user_id)
 );
 
 CREATE TABLE post_tags (

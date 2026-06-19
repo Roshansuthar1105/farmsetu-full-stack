@@ -97,7 +97,7 @@ public class CommunityController {
     }
 
     @GetMapping("/stories")
-    public ApiResponse<List<Story>> stories() {
+    public ApiResponse<List<Map<String, Object>>> stories() {
         return ApiResponse.ok(communityService.activeStories());
     }
 
@@ -105,5 +105,10 @@ public class CommunityController {
     public ApiResponse<Void> deleteStory(@PathVariable Long id) {
         communityService.deleteStory(id);
         return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/leaderboard")
+    public ApiResponse<List<Map<String, Object>>> leaderboard() {
+        return ApiResponse.ok(communityService.getLeaderboard());
     }
 }
