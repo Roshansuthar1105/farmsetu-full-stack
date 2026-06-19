@@ -14,7 +14,11 @@ import {
   LucideHeart,
   LucideMessageSquare,
   LucideTrophy,
-  LucideX
+  LucideX,
+  LucideSprout,
+  LucideBookOpen,
+  LucidePenTool,
+  LucideFlame
 } from '@lucide/angular';
 
 @Component({
@@ -34,7 +38,11 @@ import {
     LucideHeart,
     LucideMessageSquare,
     LucideTrophy,
-    LucideX
+    LucideX,
+    LucideSprout,
+    LucideBookOpen,
+    LucidePenTool,
+    LucideFlame
   ],
   templateUrl: './community.component.html'
 })
@@ -59,6 +67,10 @@ export class CommunityComponent implements OnInit {
   readonly storyProgress = signal<number>(0);
   readonly uploadingStoryImg = signal<boolean>(false);
   private activeStoryTimer: any = null;
+
+  // New layout and modal signals
+  readonly showCreatePostModal = signal<boolean>(false);
+  readonly showLeaderboardModal = signal<boolean>(false);
 
   // Constants
   readonly categories = ['All', 'General', 'Crop Protection', 'Mandi Prices', 'Weather Alerts'];
@@ -169,6 +181,7 @@ export class CommunityComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.newPost = { title: '', content: '', category: 'General', mediaUrl: '', location: '' };
+        this.showCreatePostModal.set(false);
         this.loadPosts();
         this.loadLeaderboard(); // Update leaderboard for reputation points update
       }
@@ -252,6 +265,25 @@ export class CommunityComponent implements OnInit {
   onSearchInput(event: Event): void {
     const query = (event.target as HTMLInputElement).value;
     this.searchQuery.set(query);
+  }
+
+  // Create Post Modal Logic
+  openCreatePostModal(): void {
+    this.showCreatePostModal.set(true);
+  }
+
+  closeCreatePostModal(): void {
+    this.showCreatePostModal.set(false);
+    this.newPost = { title: '', content: '', category: 'General', mediaUrl: '', location: '' };
+  }
+
+  // Mobile Leaderboard Logic
+  openLeaderboardModal(): void {
+    this.showLeaderboardModal.set(true);
+  }
+
+  closeLeaderboardModal(): void {
+    this.showLeaderboardModal.set(false);
   }
 
   // Stories Logic
