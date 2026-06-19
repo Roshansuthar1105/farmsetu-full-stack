@@ -159,6 +159,10 @@ export const routes: Routes = [
       {
         path: 'schemes',
         loadComponent: () => import('./features/admin/schemes/admin-schemes.component').then(m => m.AdminSchemesComponent)
+      },
+      {
+        path: 'insurance',
+        loadComponent: () => import('./features/admin/insurance/admin-insurance.component').then(m => m.AdminInsuranceComponent)
       }
       // ,
       // {

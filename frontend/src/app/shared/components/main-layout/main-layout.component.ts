@@ -130,7 +130,8 @@ export class MainLayoutComponent {
     { path: '/admin/email', labelKey: 'nav.adminEmail', icon: 'forward_to_inbox' },
     { path: '/admin/orders', labelKey: 'nav.adminOrders', icon: 'local_shipping' },
     { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' },
-    { path: '/admin/schemes', labelKey: 'nav.adminSchemes', icon: 'account_balance' }
+    { path: '/admin/schemes', labelKey: 'nav.adminSchemes', icon: 'account_balance' },
+    { path: '/admin/insurance', labelKey: 'nav.adminInsurance', icon: 'health_and_safety' }
   ];
 
   readonly secondaryNavItems: NavItem[] = [
