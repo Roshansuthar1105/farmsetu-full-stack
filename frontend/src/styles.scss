@@ -300,3 +300,15 @@ h1, h2, h3, h4, h5, h6 {
   animation: shimmer 1.8s infinite;
 }
 
+/* Generalized Scroll Locking when Modals are Open */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+}
+
+html.modal-open main,
+body.modal-open main {
+  overflow: hidden !important;
+}
+
+
