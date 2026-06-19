@@ -1,7 +1,8 @@
 <!-- Live Mandi Prices Banner Ticker -->
 <div class="w-full bg-gray-950 text-white py-2 overflow-hidden border-b border-gray-900 relative z-[60] text-xs">
   <div class="max-w-7xl mx-auto px-6 flex items-center">
-    <span class="font-extrabold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0 mr-4 font-display">
+    <span
+      class="font-extrabold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0 mr-4 font-display">
       <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
       Mandi Feed:
     </span>
@@ -11,7 +12,8 @@
           <span class="font-bold text-gray-100">{{ item.name }}</span>
           <span class="text-gray-500">({{ item.location }})</span>
           <span class="font-bold telemetry-val text-emerald-300">{{ item.price }}</span>
-          <span [class]="item.up ? 'text-emerald-400 font-bold flex items-center' : 'text-red-400 font-bold flex items-center'">
+          <span
+            [class]="item.up ? 'text-emerald-400 font-bold flex items-center' : 'text-red-400 font-bold flex items-center'">
             {{ item.up ? '▲' : '▼' }} {{ item.change }}
           </span>
         </span>
@@ -20,7 +22,8 @@
           <span class="font-bold text-gray-100">{{ item.name }}</span>
           <span class="text-gray-500">({{ item.location }})</span>
           <span class="font-bold telemetry-val text-emerald-300">{{ item.price }}</span>
-          <span [class]="item.up ? 'text-emerald-400 font-bold flex items-center' : 'text-red-400 font-bold flex items-center'">
+          <span
+            [class]="item.up ? 'text-emerald-400 font-bold flex items-center' : 'text-red-400 font-bold flex items-center'">
             {{ item.up ? '▲' : '▼' }} {{ item.change }}
           </span>
         </span>
@@ -29,32 +32,43 @@
   </div>
 </div>
 
-<div class="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-300">
-  
+<div
+  class="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-primary/30 relative overflow-hidden transition-colors duration-300">
+
   <!-- Interactive mesh/glow background -->
-  <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] opacity-50 pointer-events-none"></div>
-  <div class="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 w-[700px] h-[700px] bg-gradient-to-tr from-emerald-500/10 to-primary/10 rounded-full blur-3xl opacity-75 pointer-events-none"></div>
-  <div class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 w-[800px] h-[800px] bg-gradient-to-tr from-amber-500/5 to-yellow-500/5 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+  <div
+    class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] opacity-50 pointer-events-none">
+  </div>
+  <div
+    class="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 w-[700px] h-[700px] bg-gradient-to-tr from-emerald-500/10 to-primary/10 rounded-full blur-3xl opacity-75 pointer-events-none">
+  </div>
+  <div
+    class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/4 w-[800px] h-[800px] bg-gradient-to-tr from-amber-500/5 to-yellow-500/5 rounded-full blur-3xl opacity-50 pointer-events-none">
+  </div>
 
   <!-- Sticky Header -->
-  <header class="fixed top-9 w-full z-50 transition-all duration-300 border-b"
-          [ngClass]="{
+  <header class="fixed top-9 w-full z-50 transition-all duration-300 border-b" [ngClass]="{
             'bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg shadow-md border-gray-200 dark:border-slate-800 py-3': isScrolled(), 
             'bg-transparent border-transparent py-5': !isScrolled()
           }">
     <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
       <a routerLink="/" class="flex items-center group">
-        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" 
-             alt="FarmSetu" 
-             class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu"
+          class="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
       </a>
 
       <!-- Desktop Nav -->
       <nav class="hidden md:flex items-center gap-8 font-semibold text-sm text-gray-600 dark:text-gray-300">
-        <a href="#features" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Features</a>
-        <a href="#calculator" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">ROI Calculator</a>
-        <a href="#about" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">About Us</a>
-        <a href="#impact" class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Impact</a>
+        <a href="#features"
+          class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Features</a>
+        <a href="#calculator"
+          class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">ROI
+          Calculator</a>
+        <a href="#about"
+          class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">About
+          Us</a>
+        <a href="#impact"
+          class="hover:text-primary transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full">Impact</a>
       </nav>
 
       <!-- Language + Auth Actions -->
@@ -62,9 +76,8 @@
         <!-- Language Switcher Dropdown -->
         <div class="relative flex items-center">
           <span class="material-icons text-base text-gray-400 mr-1.5 pointer-events-none">translate</span>
-          <select [value]="i18n.lang()" 
-                  (change)="i18n.setLang($any($event.target).value)"
-                  class="text-xs bg-white/60 dark:bg-slate-900/60 border border-gray-250 dark:border-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-gray-400 dark:hover:border-slate-700 transition focus:border-emerald-500">
+          <select [value]="i18n.lang()" (change)="i18n.setLang($any($event.target).value)"
+            class="text-xs bg-white/60 dark:bg-slate-900/60 border border-gray-250 dark:border-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-gray-400 dark:hover:border-slate-700 transition focus:border-emerald-500">
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
           </select>
@@ -72,17 +85,19 @@
 
         <!-- Theme Toggle Controller -->
         <button (click)="theme.toggleDark()"
-                class="w-9 h-9 rounded-xl bg-white/60 dark:bg-slate-900/60 border border-gray-250 dark:border-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-450 hover:text-gray-900 dark:hover:text-white transition active:scale-95 focus:outline-none"
-                [title]="theme.darkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+          class="w-9 h-9 rounded-xl bg-white/60 dark:bg-slate-900/60 border border-gray-250 dark:border-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-450 hover:text-gray-900 dark:hover:text-white transition active:scale-95 focus:outline-none"
+          [title]="theme.darkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
           <span class="material-icons text-lg">{{ theme.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
         </button>
 
         <div class="h-5 w-px bg-gray-250 dark:bg-slate-800 hidden sm:block"></div>
 
-        <a routerLink="/auth/login" class="px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors">
+        <a routerLink="/auth/login"
+          class="px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors">
           {{ i18n.t('auth.login') }}
         </a>
-        <a routerLink="/auth/register" class="fs-btn-glow bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all duration-300">
+        <a routerLink="/auth/register"
+          class="fs-btn-glow bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all duration-300">
           {{ i18n.t('auth.register') }}
         </a>
       </div>
@@ -92,29 +107,38 @@
   <!-- Hero Section -->
   <section class="relative pt-40 pb-16 lg:pt-52 lg:pb-28">
     <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">
-      
+
       <!-- Hero Left: Text & CTA -->
       <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 font-extrabold text-xs uppercase tracking-wider animate-fade-in-up font-display">
+        <div
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 font-extrabold text-xs uppercase tracking-wider animate-fade-in-up font-display">
           <svg lucideSprout size="14" class="animate-bounce" style="animation-duration: 2s;"></svg>
           Empowering The Modern Farmer
         </div>
-        
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight animate-fade-in-up animation-delay-100 font-display">
-          The Future of <br class="hidden sm:inline"/>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-primary to-green-600 dark:from-green-400 dark:via-emerald-300 dark:to-emerald-500">Agriculture</span> is Here
+
+        <h1
+          class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight animate-fade-in-up animation-delay-100 font-display">
+          The Future of <br class="hidden sm:inline" />
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-primary to-green-600 dark:from-green-400 dark:via-emerald-300 dark:to-emerald-500">Agriculture</span>
+          is Here
         </h1>
-        
-        <p class="text-base sm:text-lg text-gray-600 dark:text-gray-350 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
-          {{ i18n.t('landing.tagline') }}. Join thousands of farmers leveraging AI-driven analytics, a secure community marketplace, real-time weather advice, and crop health diagnostic models to maximize yields.
+
+        <p
+          class="text-base sm:text-lg text-gray-600 dark:text-gray-350 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
+          {{ i18n.t('landing.tagline') }}. Join thousands of farmers leveraging AI-driven analytics, a secure community
+          marketplace, real-time weather advice, and crop health diagnostic models to maximize yields.
         </p>
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 animate-fade-in-up animation-delay-300">
-          <a routerLink="/auth/register" class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-base px-8 py-4 w-full sm:w-auto rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all">
+
+        <div
+          class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 animate-fade-in-up animation-delay-300">
+          <a routerLink="/auth/register"
+            class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-base px-8 py-4 w-full sm:w-auto rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all">
             Get Started For Free
             <svg lucideArrowRight size="18"></svg>
           </a>
-          <a href="#features" class="flex items-center justify-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-800 font-bold text-base px-8 py-4 w-full sm:w-auto rounded-xl border border-gray-250 dark:border-slate-850 hover:border-gray-300 transition-all duration-200">
+          <a href="#features"
+            class="flex items-center justify-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-800 font-bold text-base px-8 py-4 w-full sm:w-auto rounded-xl border border-gray-250 dark:border-slate-850 hover:border-gray-300 transition-all duration-200">
             Explore Features
           </a>
         </div>
@@ -124,20 +148,25 @@
       <div class="lg:col-span-5 relative">
         <div class="relative w-full max-w-md sm:max-w-lg mx-auto aspect-square lg:max-w-none">
           <!-- Background Glow -->
-          <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/15 to-amber-500/10 rounded-full blur-3xl opacity-80 animate-pulse" style="animation-duration: 5s;"></div>
-          
+          <div
+            class="absolute inset-0 bg-gradient-to-tr from-emerald-500/15 to-amber-500/10 rounded-full blur-3xl opacity-80 animate-pulse"
+            style="animation-duration: 5s;"></div>
+
           <!-- Mockup SVG Dashboard Frame -->
-          <svg viewBox="0 0 500 500" class="w-full h-full relative z-10 drop-shadow-2xl animate-fade-in-up animation-delay-200">
+          <svg viewBox="0 0 500 500"
+            class="w-full h-full relative z-10 drop-shadow-2xl animate-fade-in-up animation-delay-200">
             <!-- Main Application Shell -->
-            <rect x="20" y="20" width="460" height="360" rx="20" fill="rgba(15, 23, 42, 0.95)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
-            <rect x="20" y="20" width="460" height="360" rx="20" fill="none" stroke="rgba(0, 0, 0, 0.2)" stroke-width="1" />
-            
+            <rect x="20" y="20" width="460" height="360" rx="20" fill="rgba(15, 23, 42, 0.95)"
+              stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+            <rect x="20" y="20" width="460" height="360" rx="20" fill="none" stroke="rgba(0, 0, 0, 0.2)"
+              stroke-width="1" />
+
             <!-- Window Control dots -->
             <circle cx="50" cy="45" r="5" fill="#ff5f56" />
             <circle cx="66" cy="45" r="5" fill="#ffbd2e" />
             <circle cx="82" cy="45" r="5" fill="#27c93f" />
             <rect x="110" y="38" width="280" height="14" rx="7" fill="rgba(255, 255, 255, 0.08)" />
-            
+
             <!-- Sidebar Preview -->
             <rect x="35" y="75" width="90" height="285" rx="10" fill="rgba(10, 15, 30, 0.95)" />
             <rect x="45" y="95" width="70" height="10" rx="4" fill="#22C55E" opacity="0.95" />
@@ -145,45 +174,61 @@
             <rect x="45" y="150" width="70" height="6" rx="3" fill="rgba(255, 255, 255, 0.08)" />
             <rect x="45" y="175" width="70" height="6" rx="3" fill="rgba(255, 255, 255, 0.08)" />
             <rect x="45" y="200" width="70" height="6" rx="3" fill="rgba(255, 255, 255, 0.08)" />
-            
+
             <!-- Widgets Grid -->
             <!-- Widget 1: Soil Moisture Analytics -->
-            <rect x="140" y="75" width="155" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)" stroke="rgba(255,255,255,0.05)" />
-            <text x="155" y="98" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" fill="rgba(255, 255, 255, 0.4)">SOIL MOISTURE</text>
-            <text x="155" y="132" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="800" fill="#22C55E">68%</text>
-            <text x="155" y="152" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5" fill="rgba(255, 255, 255, 0.3)">Status: Optimal</text>
+            <rect x="140" y="75" width="155" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)"
+              stroke="rgba(255,255,255,0.05)" />
+            <text x="155" y="98" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700"
+              fill="rgba(255, 255, 255, 0.4)">SOIL MOISTURE</text>
+            <text x="155" y="132" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="800"
+              fill="#22C55E">68%</text>
+            <text x="155" y="152" font-family="'Plus Jakarta Sans', sans-serif" font-size="8.5"
+              fill="rgba(255, 255, 255, 0.3)">Status: Optimal</text>
             <rect x="155" y="172" width="125" height="6" rx="3" fill="rgba(255, 255, 255, 0.08)" />
             <rect x="155" y="172" width="85" height="6" rx="3" fill="#22C55E" />
-            
+
             <!-- Widget 2: Mandi Prices (Line Chart) -->
-            <rect x="310" y="75" width="155" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)" stroke="rgba(255,255,255,0.05)" />
-            <text x="325" y="98" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" fill="rgba(255, 255, 255, 0.4)">WHEAT MARKET</text>
-            <text x="325" y="126" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="800" fill="#F59E0B">₹2,450 / Ql</text>
+            <rect x="310" y="75" width="155" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)"
+              stroke="rgba(255,255,255,0.05)" />
+            <text x="325" y="98" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700"
+              fill="rgba(255, 255, 255, 0.4)">WHEAT MARKET</text>
+            <text x="325" y="126" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="800"
+              fill="#F59E0B">₹2,450 / Ql</text>
             <!-- Line graph drawing -->
-            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" />
-            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140 L 445 190 L 325 190 Z" fill="url(#hero-trend-gradient)" opacity="0.15" />
-            
+            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140" fill="none" stroke="#F59E0B"
+              stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 325 180 L 345 162 L 365 170 L 385 145 L 405 158 L 425 130 L 445 140 L 445 190 L 325 190 Z"
+              fill="url(#hero-trend-gradient)" opacity="0.15" />
+
             <!-- Widget 3: Weather Integration -->
-            <rect x="140" y="225" width="325" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)" stroke="rgba(255,255,255,0.05)" />
-            <text x="155" y="248" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" fill="rgba(255, 255, 255, 0.4)">HYPERLOCAL WEATHER</text>
-            <text x="155" y="285" font-family="'JetBrains Mono', monospace" font-size="28" font-weight="800" fill="rgba(255, 255, 255, 0.8)">29°C</text>
-            <text x="155" y="306" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="650" fill="rgba(255, 255, 255, 0.4)">Scattered showers starting 4:00 PM</text>
+            <rect x="140" y="225" width="325" height="135" rx="14" fill="rgba(10, 15, 30, 0.95)"
+              stroke="rgba(255,255,255,0.05)" />
+            <text x="155" y="248" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700"
+              fill="rgba(255, 255, 255, 0.4)">HYPERLOCAL WEATHER</text>
+            <text x="155" y="285" font-family="'JetBrains Mono', monospace" font-size="28" font-weight="800"
+              fill="rgba(255, 255, 255, 0.8)">29°C</text>
+            <text x="155" y="306" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" font-weight="650"
+              fill="rgba(255, 255, 255, 0.4)">Scattered showers starting 4:00 PM</text>
             <!-- Weather SVG Icon -->
             <g transform="translate(355, 235)">
               <circle cx="45" cy="30" r="14" fill="#F59E0B" />
-              <path d="M 28 45 A 10 10 0 0 1 38 35 A 14 14 0 0 1 63 37 A 10 10 0 0 1 72 47 A 8 8 0 0 1 63 55 L 33 55 A 7 7 0 0 1 28 45 Z" fill="#475569" />
+              <path
+                d="M 28 45 A 10 10 0 0 1 38 35 A 14 14 0 0 1 63 37 A 10 10 0 0 1 72 47 A 8 8 0 0 1 63 55 L 33 55 A 7 7 0 0 1 28 45 Z"
+                fill="#475569" />
               <line x1="38" y1="60" x2="35" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
               <line x1="48" y1="60" x2="45" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
               <line x1="58" y1="60" x2="55" y2="67" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
             </g>
-            
+
             <!-- Nested Mobile Phone Overlay for Mockup Depth -->
             <g transform="translate(355, 185)" class="drop-shadow-2xl">
               <!-- Phone body -->
-              <rect x="0" y="0" width="115" height="215" rx="16" fill="rgba(10, 15, 30, 0.98)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+              <rect x="0" y="0" width="115" height="215" rx="16" fill="rgba(10, 15, 30, 0.98)"
+                stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
               <!-- Notch -->
               <rect x="37" y="6" width="41" height="8" rx="4" fill="rgba(0, 0, 0, 0.8)" />
-              
+
               <!-- Content: AI Diagnosis scanner -->
               <rect x="10" y="24" width="95" height="82" rx="6" fill="rgba(34, 197, 94, 0.05)" />
               <!-- Focus corners -->
@@ -196,17 +241,21 @@
               <!-- Leaf Shape inside phone -->
               <path d="M 57 32 C 43 47 43 82 57 94 C 71 82 71 47 57 32 Z" fill="#22C55E" opacity="0.65" />
               <path d="M 57 32 L 57 94" stroke="#15803d" stroke-width="1" />
-              
+
               <!-- Text -->
-              <text x="12" y="124" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" font-weight="700" fill="rgba(255, 255, 255, 0.4)">AI PLANT HEALTH</text>
-              <text x="12" y="139" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="800" fill="#22C55E">Healthy Crop</text>
-              <text x="12" y="151" font-family="'Plus Jakarta Sans', sans-serif" font-size="7.5" fill="rgba(255, 255, 255, 0.3)">Accuracy: 98.6%</text>
-              
+              <text x="12" y="124" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" font-weight="700"
+                fill="rgba(255, 255, 255, 0.4)">AI PLANT HEALTH</text>
+              <text x="12" y="139" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="800"
+                fill="#22C55E">Healthy Crop</text>
+              <text x="12" y="151" font-family="'Plus Jakarta Sans', sans-serif" font-size="7.5"
+                fill="rgba(255, 255, 255, 0.3)">Accuracy: 98.6%</text>
+
               <!-- CTA Button -->
               <rect x="10" y="170" width="95" height="26" rx="8" fill="#22C55E" />
-              <text x="57" y="186" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" font-weight="700" fill="#ffffff" text-anchor="middle">VIEW ANALYSIS</text>
+              <text x="57" y="186" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" font-weight="700"
+                fill="#ffffff" text-anchor="middle">VIEW ANALYSIS</text>
             </g>
-            
+
             <defs>
               <linearGradient id="hero-trend-gradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#F59E0B" />
@@ -223,16 +272,19 @@
   <!-- Impact / Stats Section -->
   <section id="impact" class="py-12 relative z-10">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="fs-glass-card border border-gray-200 dark:border-slate-800 shadow-xl grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div
+        class="fs-glass-card border border-gray-200 dark:border-slate-800 shadow-xl grid grid-cols-2 md:grid-cols-4 gap-8">
         @for (stat of stats; track stat.label) {
-          <div class="text-center space-y-2 group">
-            <div class="text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-emerald-500 to-green-600 dark:from-green-400 dark:to-emerald-300 transition-transform duration-300 group-hover:scale-105 telemetry-val">
-              {{ stat.value }}
-            </div>
-            <div class="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider font-display">
-              {{ stat.label }}
-            </div>
+        <div class="text-center space-y-2 group">
+          <div
+            class="text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-emerald-500 to-green-600 dark:from-green-400 dark:to-emerald-300 transition-transform duration-300 group-hover:scale-105 telemetry-val">
+            {{ stat.value }}
           </div>
+          <div
+            class="text-xs lg:text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider font-display">
+            {{ stat.label }}
+          </div>
+        </div>
         }
       </div>
     </div>
@@ -241,38 +293,41 @@
   <!-- Interactive Crop ROI Yield Calculator Section -->
   <section id="calculator" class="py-20 relative border-t border-gray-200/60 dark:border-slate-900">
     <div class="max-w-7xl mx-auto px-6">
-      
+
       <!-- Section Heading -->
       <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 font-extrabold text-xs uppercase tracking-wider font-display animate-pulse">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 font-extrabold text-xs uppercase tracking-wider font-display animate-pulse">
           🌾 Yield & Profitability Simulator
         </div>
-        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight font-display">Estimate Your Harvest Yield & ROI</h2>
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight font-display">Estimate Your Harvest Yield & ROI
+        </h2>
         <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400">
-          Select your crop and soil type, set your farm size, and see an instant projection of your estimated yield, production expenses, revenue, and gross profit.
+          Select your crop and soil type, set your farm size, and see an instant projection of your estimated yield,
+          production expenses, revenue, and gross profit.
         </p>
       </div>
 
       <!-- Calculator Grid -->
       <div class="grid lg:grid-cols-12 gap-8 items-stretch">
-        
+
         <!-- Controls Panel -->
-        <div class="lg:col-span-5 fs-glass-card bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-800/80 flex flex-col justify-between">
+        <div
+          class="lg:col-span-5 fs-glass-card bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-800/80 flex flex-col justify-between">
           <div class="space-y-6">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 font-display">
               <span class="material-icons text-emerald-500">settings</span> Configure Parameters
             </h3>
-            
+
             <!-- Crop Select -->
             <div class="space-y-2">
-              <label class="text-sm font-semibold text-gray-600 dark:text-gray-400 font-display">Select Cultivation Crop</label>
+              <label class="text-sm font-semibold text-gray-600 dark:text-gray-400 font-display">Select Cultivation
+                Crop</label>
               <div class="grid grid-cols-2 gap-2">
-                <button *ngFor="let crop of cropsMap | keyvalue"
-                        (click)="setCrop(crop.key)"
-                        [class]="selectedCrop() === crop.key 
+                <button *ngFor="let crop of cropsMap | keyvalue" (click)="setCrop(crop.key)"
+                  [class]="selectedCrop() === crop.key 
                           ? 'px-4 py-3 border-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl font-extrabold transition-all text-sm font-display'
-                          : 'px-4 py-3 border border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-all text-sm font-display'"
-                >
+                          : 'px-4 py-3 border border-gray-200 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-all text-sm font-display'">
                   {{ crop.value.name }}
                 </button>
               </div>
@@ -284,11 +339,9 @@
                 <span>Farm Land Size (Acres)</span>
                 <span class="text-emerald-500 font-bold telemetry-val">{{ farmSize() }} Acres</span>
               </label>
-              <input type="range" min="0.5" max="20" step="0.5" 
-                     [value]="farmSize()" 
-                     (input)="setFarmSize($any($event.target).value)"
-                     class="w-full accent-emerald-500 bg-gray-250 dark:bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-              />
+              <input type="range" min="0.5" max="20" step="0.5" [value]="farmSize()"
+                (input)="setFarmSize($any($event.target).value)"
+                class="w-full accent-emerald-500 bg-gray-250 dark:bg-slate-800 h-1.5 rounded-lg cursor-pointer" />
               <div class="flex justify-between text-xs text-gray-400 font-mono">
                 <span>0.5 Ac</span>
                 <span>10 Ac</span>
@@ -300,8 +353,7 @@
             <div class="space-y-2">
               <label class="text-sm font-semibold text-gray-600 dark:text-gray-400 font-display">Soil Condition</label>
               <select [value]="soilType()" (change)="setSoil($any($event.target).value)"
-                      class="w-full bg-white dark:bg-slate-950 border border-gray-250 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-emerald-500 transition-colors font-display"
-              >
+                class="w-full bg-white dark:bg-slate-950 border border-gray-250 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-emerald-500 transition-colors font-display">
                 <option value="loamy">Loamy Soil (Fertile & aerated)</option>
                 <option value="clayey">Clayey Soil (High water retention)</option>
                 <option value="sandy">Sandy Soil (Fast draining)</option>
@@ -310,22 +362,26 @@
             </div>
           </div>
 
-          <div class="pt-6 border-t border-gray-200 dark:border-slate-800 text-xs text-gray-400 leading-relaxed font-display">
-            *Calculations are estimates based on standard regional cultivation expenses, market modal averages, and typical crop maturation cycles.
+          <div
+            class="pt-6 border-t border-gray-200 dark:border-slate-800 text-xs text-gray-400 leading-relaxed font-display">
+            *Calculations are estimates based on standard regional cultivation expenses, market modal averages, and
+            typical crop maturation cycles.
           </div>
         </div>
 
         <!-- Yield Outputs Panel -->
-        <div class="lg:col-span-7 bg-slate-900 text-white rounded-3xl p-8 relative overflow-hidden border border-emerald-500/20 shadow-2xl flex flex-col justify-between dark:bg-gray-950">
+        <div
+          class="lg:col-span-7 bg-slate-900 text-white rounded-3xl p-8 relative overflow-hidden border border-emerald-500/20 shadow-2xl flex flex-col justify-between dark:bg-gray-950">
           <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent pointer-events-none"></div>
-          
+
           <div class="relative z-10 space-y-8">
             <div class="flex justify-between items-start">
               <div>
                 <h3 class="text-lg font-bold text-gray-300 font-display">Projected Outcomes</h3>
                 <p class="text-xs text-gray-400 font-display">Optimized via Agro-Tech Lumina algorithms</p>
               </div>
-              <div class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs uppercase telemetry-val font-mono">
+              <div
+                class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs uppercase telemetry-val font-mono">
                 Est. ROI: {{ calculatorResult().roi }}%
               </div>
             </div>
@@ -333,13 +389,16 @@
             <!-- Major Yield Stat -->
             <div class="grid grid-cols-2 gap-6 py-6 border-y border-white/10">
               <div class="space-y-1">
-                <span class="text-xs text-gray-400 uppercase font-bold tracking-wider font-display">Estimated Yield</span>
+                <span class="text-xs text-gray-400 uppercase font-bold tracking-wider font-display">Estimated
+                  Yield</span>
                 <div class="text-3xl font-extrabold text-emerald-400 telemetry-val">
-                  {{ calculatorResult().totalYield }} <span class="text-lg font-normal text-white font-display">Quintals</span>
+                  {{ calculatorResult().totalYield }} <span
+                    class="text-lg font-normal text-white font-display">Quintals</span>
                 </div>
               </div>
               <div class="space-y-1">
-                <span class="text-xs text-gray-400 uppercase font-bold tracking-wider font-display">Estimated Cost</span>
+                <span class="text-xs text-gray-400 uppercase font-bold tracking-wider font-display">Estimated
+                  Cost</span>
                 <div class="text-3xl font-extrabold text-red-400 telemetry-val">
                   ₹{{ calculatorResult().cost.toLocaleString() }}
                 </div>
@@ -353,9 +412,10 @@
                 <div class="text-2xl font-extrabold text-gray-100 telemetry-val">
                   ₹{{ calculatorResult().revenue.toLocaleString() }}
                 </div>
-                <p class="text-[10px] text-gray-400 font-display">Sold at current rate (₹{{ cropsMap[selectedCrop()].pricePerQl }}/Ql)</p>
+                <p class="text-[10px] text-gray-400 font-display">Sold at current rate (₹{{
+                  cropsMap[selectedCrop()].pricePerQl }}/Ql)</p>
               </div>
-              
+
               <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
                 <span class="text-xs text-emerald-400 font-bold uppercase font-display">Net Profit Margin</span>
                 <div class="text-2xl font-extrabold text-emerald-400 telemetry-val">
@@ -366,11 +426,13 @@
             </div>
           </div>
 
-          <div class="relative z-10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 mt-6">
+          <div
+            class="relative z-10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 mt-6">
             <p class="text-xs text-gray-400 text-center sm:text-left font-display">
               Want to set live mandi alert watchlists and coordinate watering queues?
             </p>
-            <a routerLink="/auth/register" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all font-display">
+            <a routerLink="/auth/register"
+              class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all font-display">
               Register for Free
             </a>
           </div>
@@ -383,32 +445,35 @@
   <!-- Features Section -->
   <section id="features" class="py-20 relative border-t border-gray-200/60 dark:border-slate-900">
     <div class="max-w-7xl mx-auto px-6">
-      
+
       <!-- Section Heading -->
       <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight font-display">Everything You Need to Succeed</h2>
         <p class="text-base sm:text-lg text-gray-500 dark:text-gray-400 leading-relaxed font-display">
-          FarmSetu brings the entire agricultural ecosystem directly to your device. From seeding insights to competitive marketplace sales, we empower your daily operations.
+          FarmSetu brings the entire agricultural ecosystem directly to your device. From seeding insights to
+          competitive marketplace sales, we empower your daily operations.
         </p>
       </div>
 
       <!-- Features Cards Grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         @for (f of features; track f.title) {
-          <div class="group fs-glass-card fs-glass-card-hover flex flex-col justify-between">
-            <div class="space-y-6">
-              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-green-400 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
-                <svg [lucideIcon]="f.icon" size="24"></svg>
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white font-display">{{ f.title }}</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-display">{{ f.desc }}</p>
+        <div class="group fs-glass-card fs-glass-card-hover flex flex-col justify-between">
+          <div class="space-y-6">
+            <div
+              class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20 dark:text-green-400 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+              <svg [lucideIcon]="f.icon" size="24"></svg>
             </div>
-            <div class="pt-6">
-              <a routerLink="/auth/login" class="text-xs font-bold text-primary dark:text-green-400 flex items-center gap-1 cursor-pointer group-hover:gap-2 transition-all font-display">
-                Learn more <span class="material-icons text-xs">arrow_forward</span>
-              </a>
-            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white font-display">{{ f.title }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-display">{{ f.desc }}</p>
           </div>
+          <div class="pt-6">
+            <a routerLink="/auth/login"
+              class="text-xs font-bold text-primary dark:text-green-400 flex items-center gap-1 cursor-pointer group-hover:gap-2 transition-all font-display">
+              Learn more <span class="material-icons text-xs">arrow_forward</span>
+            </a>
+          </div>
+        </div>
         }
       </div>
 
@@ -416,30 +481,42 @@
   </section>
 
   <!-- About Us Section -->
-  <section id="about" class="py-20 relative bg-gray-100/50 dark:bg-slate-900/20 border-y border-gray-200/50 dark:border-slate-900/50">
+  <section id="about"
+    class="py-20 relative bg-gray-100/50 dark:bg-slate-900/20 border-y border-gray-200/50 dark:border-slate-900/50">
     <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-16 items-center">
-      
+
       <!-- Visual representation on the left -->
       <div class="lg:col-span-6 relative">
-        <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-amber-500/10 rounded-3xl transform -rotate-2 scale-105"></div>
-        <div class="relative bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-3xl shadow-xl border border-gray-200/60 dark:border-slate-850 space-y-6">
-          
+        <div
+          class="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-amber-500/10 rounded-3xl transform -rotate-2 scale-105">
+        </div>
+        <div
+          class="relative bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-3xl shadow-xl border border-gray-200/60 dark:border-slate-850 space-y-6">
+
           <!-- Modern SVG Shield / Trust Badges visual -->
-          <div class="aspect-video bg-gray-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden relative border border-gray-100 dark:border-slate-800">
-            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px] opacity-40"></div>
+          <div
+            class="aspect-video bg-gray-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center overflow-hidden relative border border-gray-100 dark:border-slate-800">
+            <div
+              class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px] opacity-40">
+            </div>
             <svg viewBox="0 0 200 120" class="w-36 h-36 relative z-10">
               <!-- Glow ring -->
-              <circle cx="100" cy="60" r="45" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="4,4" class="animate-spin" style="animation-duration: 12s;" />
+              <circle cx="100" cy="60" r="45" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-dasharray="4,4"
+                class="animate-spin" style="animation-duration: 12s;" />
               <!-- Outer shield -->
-              <path d="M 100 25 C 115 25 130 20 135 15 C 135 45 125 75 100 95 C 75 75 65 45 65 15 C 70 20 85 25 100 25 Z" fill="rgba(34, 197, 94, 0.08)" stroke="#22C55E" stroke-width="2" />
+              <path
+                d="M 100 25 C 115 25 130 20 135 15 C 135 45 125 75 100 95 C 75 75 65 45 65 15 C 70 20 85 25 100 25 Z"
+                fill="rgba(34, 197, 94, 0.08)" stroke="#22C55E" stroke-width="2" />
               <!-- Checked Shield icon -->
-              <path d="M 88 58 L 97 67 L 115 48" fill="none" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M 88 58 L 97 67 L 115 48" fill="none" stroke="#22C55E" stroke-width="3.5" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
           </div>
 
           <h3 class="text-xl font-bold text-gray-900 dark:text-white font-display">Built for Trust and Transparency</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-display">
-            Every transaction, buyer profile, and farming advisor on FarmSetu is fully verified. We guarantee secure digital payments, genuine inputs, and transparent market pricing.
+            Every transaction, buyer profile, and farming advisor on FarmSetu is fully verified. We guarantee secure
+            digital payments, genuine inputs, and transparent market pricing.
           </p>
 
           <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 font-display">
@@ -458,18 +535,23 @@
           </ul>
         </div>
       </div>
-      
+
       <!-- Text details on the right -->
       <div class="lg:col-span-6 space-y-6">
         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight font-display">Our Mission & Values</h2>
         <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-display">
-          At FarmSetu, we believe modern engineering is the key to bridging the gap between traditional agricultural workflows and dynamic digital solutions. We represent a localized, digital bridge built to empower farmers nationwide.
+          At FarmSetu, we believe modern engineering is the key to bridging the gap between traditional agricultural
+          workflows and dynamic digital solutions. We represent a localized, digital bridge built to empower farmers
+          nationwide.
         </p>
         <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-display">
-          By bringing machine learning crop scanners, localized forecasting, direct B2B buyer-seller markets, and localized support centers to rural areas, we aim to increase farming productivity, eliminate middlemen margins, and raise overall farmer income.
+          By bringing machine learning crop scanners, localized forecasting, direct B2B buyer-seller markets, and
+          localized support centers to rural areas, we aim to increase farming productivity, eliminate middlemen
+          margins, and raise overall farmer income.
         </p>
         <div class="pt-2">
-          <a routerLink="/auth/register" class="inline-flex font-bold text-emerald-500 dark:text-emerald-400 items-center gap-1.5 hover:gap-3.5 transition-all font-display">
+          <a routerLink="/auth/register"
+            class="inline-flex font-bold text-emerald-500 dark:text-emerald-400 items-center gap-1.5 hover:gap-3.5 transition-all font-display">
             Join our agricultural mission today <span class="material-icons text-sm">arrow_forward</span>
           </a>
         </div>
@@ -479,18 +561,24 @@
   </section>
 
   <!-- CTA Banner Section -->
-  <section class="py-20 relative overflow-hidden bg-gradient-to-br from-green-950 via-slate-900 to-slate-950 text-white border-t border-slate-900">
-    <div class="absolute inset-0 bg-[radial-gradient(#ffffff_0.8px,transparent_0.8px)] [background-size:20px_20px] opacity-5"></div>
+  <section
+    class="py-20 relative overflow-hidden bg-gradient-to-br from-green-950 via-slate-900 to-slate-950 text-white border-t border-slate-900">
+    <div
+      class="absolute inset-0 bg-[radial-gradient(#ffffff_0.8px,transparent_0.8px)] [background-size:20px_20px] opacity-5">
+    </div>
     <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
-    
+
     <div class="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-8">
-      <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight font-display">Ready to Transform Your Farm?</h2>
+      <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight font-display">Ready to
+        Transform Your Farm?</h2>
       <p class="text-gray-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed font-display">
-        Join the FarmSetu family today and unlock the full potential of your agricultural harvest with AI-guided crop models.
+        Join the FarmSetu family today and unlock the full potential of your agricultural harvest with AI-guided crop
+        models.
       </p>
       <div class="pt-2">
-        <a routerLink="/auth/register" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base px-10 py-4.5 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] font-display">
+        <a routerLink="/auth/register"
+          class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base px-10 py-4.5 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] font-display">
           Create Your Free Account
         </a>
       </div>
@@ -498,12 +586,12 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-white dark:bg-slate-950 py-12 border-t border-gray-200/60 dark:border-slate-900 transition-colors duration-300 relative z-10">
+  <footer
+    class="bg-white dark:bg-slate-950 py-12 border-t border-gray-200/60 dark:border-slate-900 transition-colors duration-300 relative z-10">
     <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
       <div class="flex items-center">
-        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" 
-             alt="FarmSetu" 
-             class="h-8 w-auto object-contain">
+        <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu"
+          class="h-8 w-auto object-contain">
       </div>
       <div class="text-gray-400 text-xs sm:text-sm font-mono">
         &copy; {{ currentYear || '2026' }} FarmSetu. All rights reserved.
