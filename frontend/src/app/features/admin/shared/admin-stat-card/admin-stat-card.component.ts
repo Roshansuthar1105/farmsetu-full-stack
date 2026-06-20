@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -37,7 +37,34 @@ import { CommonModule } from '@angular/common';
         <div class="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
           [style.background]="iconBg"
           [style.color]="iconColor">
-          <span [innerHTML]="iconSvg" class="w-5 h-5"></span>
+          <span class="w-5 h-5 flex items-center justify-center">
+            @switch (icon) {
+              @case ('users') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              }
+              @case ('active-users') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 12l-4 4-2-2"/></svg>
+              }
+              @case ('new-users') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              }
+              @case ('orders') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+              }
+              @case ('revenue') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              }
+              @case ('products') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              }
+              @case ('crops') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+              }
+              @case ('posts') {
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              }
+            }
+          </span>
         </div>
       </div>
 
@@ -53,7 +80,7 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-export class AdminStatCardComponent {
+export class AdminStatCardComponent implements OnChanges, OnDestroy {
   @Input() label = '';
   @Input() value = 0;
   @Input() prefix = '';
@@ -64,7 +91,10 @@ export class AdminStatCardComponent {
   @Input() accentColor = '#22C55E';
   @Input() iconBg = 'rgba(34, 197, 94, 0.1)';
   @Input() iconColor = '#22C55E';
-  @Input() iconSvg = '';
+  @Input() icon = '';
+
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly ngZone = inject(NgZone);
 
   animatedValue = 0;
   private animFrame?: number;
@@ -84,15 +114,21 @@ export class AdminStatCardComponent {
     const duration = 800;
     const startTime = performance.now();
 
-    const step = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      this.animatedValue = Math.round(start + diff * eased);
-      if (progress < 1) {
-        this.animFrame = requestAnimationFrame(step);
-      }
-    };
-    this.animFrame = requestAnimationFrame(step);
+    this.ngZone.runOutsideAngular(() => {
+      const step = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        this.animatedValue = Math.round(start + diff * eased);
+        
+        // Manually trigger change detection locally for this component view
+        this.cdr.detectChanges();
+
+        if (progress < 1) {
+          this.animFrame = requestAnimationFrame(step);
+        }
+      };
+      this.animFrame = requestAnimationFrame(step);
+    });
   }
 }

@@ -21,7 +21,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
     <div class="space-y-6">
       <!-- Page Header -->
       <fs-admin-page-header title="Admin Dashboard" subtitle="Overview of your platform metrics and recent activity">
-        <button (click)="refreshData()" class="px-4 py-2.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
+        <button (click)="refreshData()" class="px-4 py-2.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" [class.animate-spin]="loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
@@ -46,7 +46,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#22C55E"
             iconBg="rgba(34, 197, 94, 0.1)"
             iconColor="#22C55E"
-            [iconSvg]="icons.users" />
+            icon="users" />
           <fs-admin-stat-card
             label="Active Users"
             [value]="stats().activeUsers"
@@ -55,7 +55,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#3B82F6"
             iconBg="rgba(59, 130, 246, 0.1)"
             iconColor="#3B82F6"
-            [iconSvg]="icons.activeUsers" />
+            icon="active-users" />
           <fs-admin-stat-card
             label="New This Month"
             [value]="stats().newUsersThisMonth"
@@ -64,7 +64,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#8B5CF6"
             iconBg="rgba(139, 92, 246, 0.1)"
             iconColor="#8B5CF6"
-            [iconSvg]="icons.newUsers" />
+            icon="new-users" />
           <fs-admin-stat-card
             label="Total Orders"
             [value]="stats().totalOrders"
@@ -73,7 +73,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#F59E0B"
             iconBg="rgba(245, 158, 11, 0.1)"
             iconColor="#F59E0B"
-            [iconSvg]="icons.orders" />
+            icon="orders" />
           <fs-admin-stat-card
             label="Revenue"
             [value]="stats().totalRevenue"
@@ -83,7 +83,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#10B981"
             iconBg="rgba(16, 185, 129, 0.1)"
             iconColor="#10B981"
-            [iconSvg]="icons.revenue" />
+            icon="revenue" />
           <fs-admin-stat-card
             label="Products"
             [value]="stats().totalProducts"
@@ -91,7 +91,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#EC4899"
             iconBg="rgba(236, 72, 153, 0.1)"
             iconColor="#EC4899"
-            [iconSvg]="icons.products" />
+            icon="products" />
           <fs-admin-stat-card
             label="Crops"
             [value]="stats().totalCrops"
@@ -99,7 +99,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#14B8A6"
             iconBg="rgba(20, 184, 166, 0.1)"
             iconColor="#14B8A6"
-            [iconSvg]="icons.crops" />
+            icon="crops" />
           <fs-admin-stat-card
             label="Community Posts"
             [value]="stats().totalPosts"
@@ -107,7 +107,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             accentColor="#6366F1"
             iconBg="rgba(99, 102, 241, 0.1)"
             iconColor="#6366F1"
-            [iconSvg]="icons.posts" />
+            icon="posts" />
         </div>
       }
 
@@ -183,12 +183,12 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
                   <div class="flex items-center gap-3 min-w-0">
                     <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/>
                       </svg>
                     </div>
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-slate-900 dark:text-white truncate">{{ order.product?.title || 'Order #' + order.id }}</p>
-                      <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ order.buyer?.name || 'Unknown' }} · ₹{{ order.totalAmount | number:'1.0-0' }}</p>
+                      <p class="text-xs text-slate-405 dark:text-slate-500 truncate">{{ order.buyer?.name || 'Unknown' }} · ₹{{ order.totalAmount | number:'1.0-0' }}</p>
                     </div>
                   </div>
                   <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0"
@@ -236,7 +236,7 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
                     </div>
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-slate-900 dark:text-white truncate">{{ user.name }}</p>
-                      <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ user.email || user.phone || 'No contact' }}</p>
+                      <p class="text-xs text-slate-405 dark:text-slate-500 truncate">{{ user.email || user.phone || 'No contact' }}</p>
                     </div>
                   </div>
                   <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0"
@@ -260,9 +260,30 @@ import { AdminPageHeaderComponent } from './shared/admin-page-header/admin-page-
             class="flex flex-col items-center gap-2 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/40 backdrop-blur-sm hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 group">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110"
               [style.background]="link.bg" [style.color]="link.color">
-              <span [innerHTML]="link.icon" class="w-5 h-5"></span>
+              <span class="w-5 h-5 flex items-center justify-center">
+                @switch (link.icon) {
+                  @case ('users') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  }
+                  @case ('orders') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                  }
+                  @case ('products') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                  }
+                  @case ('analytics') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  }
+                  @case ('crops') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/></svg>
+                  }
+                  @case ('settings') {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  }
+                }
+              </span>
             </div>
-            <span class="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-primary transition">{{ link.label }}</span>
+            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary transition">{{ link.label }}</span>
           </a>
         }
       </div>
@@ -296,25 +317,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   readonly orderStatusChartOptions = signal<any>(null);
   readonly userRoleChartOptions = signal<any>(null);
 
-  // SVG Icons
-  readonly icons = {
-    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    activeUsers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 12l-4 4-2-2"/></svg>',
-    newUsers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
-    orders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
-    revenue: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-    products: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
-    crops: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>',
-    posts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
-  };
-
   readonly quickLinks = [
-    { path: '/admin/users', label: 'Users', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', bg: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' },
-    { path: '/admin/orders', label: 'Orders', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>', bg: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' },
-    { path: '/admin/products', label: 'Products', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>', bg: 'rgba(236, 72, 153, 0.1)', color: '#EC4899' },
-    { path: '/admin/analytics', label: 'Analytics', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>', bg: 'rgba(99, 102, 241, 0.1)', color: '#6366F1' },
-    { path: '/admin/crops', label: 'Crops', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/></svg>', bg: 'rgba(20, 184, 166, 0.1)', color: '#14B8A6' },
-    { path: '/admin/settings', label: 'Settings', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', bg: 'rgba(107, 114, 128, 0.1)', color: '#6B7280' }
+    { path: '/admin/users', label: 'Users', icon: 'users', bg: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' },
+    { path: '/admin/orders', label: 'Orders', icon: 'orders', bg: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' },
+    { path: '/admin/products', label: 'Products', icon: 'products', bg: 'rgba(236, 72, 153, 0.1)', color: '#EC4899' },
+    { path: '/admin/analytics', label: 'Analytics', icon: 'analytics', bg: 'rgba(99, 102, 241, 0.1)', color: '#6366F1' },
+    { path: '/admin/crops', label: 'Crops', icon: 'crops', bg: 'rgba(20, 184, 166, 0.1)', color: '#14B8A6' },
+    { path: '/admin/settings', label: 'Settings', icon: 'settings', bg: 'rgba(107, 114, 128, 0.1)', color: '#6B7280' }
   ];
 
   ngOnInit(): void {
@@ -384,10 +393,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     // Revenue Chart
     const revMonths = data.monthlyRevenue?.length > 0
-      ? data.monthlyRevenue.map(d => d.month)
+      ? data.monthlyRevenue.map(d => d.month || '')
       : this.getLast12Months();
     const revData = data.monthlyRevenue?.length > 0
-      ? data.monthlyRevenue.map(d => d.revenue || d.count)
+      ? data.monthlyRevenue.map(d => d.revenue || d.count || 0)
       : this.generateFallbackData(12);
 
     this.revenueChartOptions.set({
@@ -405,10 +414,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     // Orders Chart
     const ordMonths = data.monthlyOrders?.length > 0
-      ? data.monthlyOrders.map(d => d.month)
+      ? data.monthlyOrders.map(d => d.month || '')
       : this.getLast12Months();
     const ordData = data.monthlyOrders?.length > 0
-      ? data.monthlyOrders.map(d => d.count)
+      ? data.monthlyOrders.map(d => d.count || 0)
       : this.generateFallbackData(12);
 
     this.ordersChartOptions.set({
@@ -425,10 +434,10 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     // User Growth Chart
     const ugMonths = data.userGrowth?.length > 0
-      ? data.userGrowth.map(d => d.month)
+      ? data.userGrowth.map(d => d.month || '')
       : this.getLast12Months();
     const ugData = data.userGrowth?.length > 0
-      ? data.userGrowth.map(d => d.count)
+      ? data.userGrowth.map(d => d.count || 0)
       : this.generateFallbackData(12);
 
     this.userGrowthChartOptions.set({

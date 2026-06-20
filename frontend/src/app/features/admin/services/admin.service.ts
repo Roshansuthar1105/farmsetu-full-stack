@@ -92,6 +92,13 @@ export class AdminService {
   getDashboardStats(forceRefresh = false): Observable<DashboardStats> {
     if (!this.dashboardCache$ || forceRefresh) {
       this.dashboardCache$ = this.api.get<DashboardStats>('/api/admin/dashboard').pipe(
+        map(stats => stats || {
+          totalUsers: 0, activeUsers: 0, newUsersThisMonth: 0,
+          totalOrders: 0, totalRevenue: 0, totalProducts: 0,
+          totalPosts: 0, totalCrops: 0, totalSchemes: 0,
+          totalInsurance: 0, totalMandis: 0, totalNews: 0,
+          totalResources: 0
+        }),
         retry(2),
         shareReplay(1),
         catchError(() =>
@@ -114,6 +121,10 @@ export class AdminService {
 
   getDashboardAnalytics(): Observable<DashboardAnalytics> {
     return this.api.get<DashboardAnalytics>('/api/admin/dashboard/analytics').pipe(
+      map(analytics => analytics || {
+        monthlyOrders: [], monthlyRevenue: [], userGrowth: [],
+        ordersByStatus: {}, ordersByPayment: {}, usersByRole: {}
+      }),
       retry(1),
       catchError(() =>
         of({
@@ -126,14 +137,14 @@ export class AdminService {
 
   getRecentOrders(limit = 5): Observable<RecentOrder[]> {
     return this.api.get<AdminPageResponse<RecentOrder>>('/api/admin/orders', { page: 0, size: limit }).pipe(
-      map(res => res.content || []),
+      map(res => (res && res.content) || []),
       catchError(() => of([]))
     );
   }
 
   getRecentUsers(limit = 5): Observable<RecentUser[]> {
     return this.api.get<AdminPageResponse<RecentUser>>('/api/admin/users', { page: 0, size: limit }).pipe(
-      map(res => res.content || []),
+      map(res => (res && res.content) || []),
       catchError(() => of([]))
     );
   }
