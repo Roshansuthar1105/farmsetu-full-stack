@@ -126,6 +126,7 @@ export class MainLayoutComponent {
   readonly adminNavItems: NavItem[] = [
     { path: '/admin', labelKey: 'nav.adminDashboard', icon: 'admin_panel_settings' },
     { path: '/admin/users', labelKey: 'nav.adminUsers', icon: 'manage_accounts' },
+    { path: '/admin/products', labelKey: 'nav.adminProducts', icon: 'package' },
     { path: '/admin/crops', labelKey: 'nav.adminCrops', icon: 'gavel' },
     { path: '/admin/mandis', labelKey: 'nav.adminMandis', icon: 'storefront' },
     { path: '/admin/market-prices', labelKey: 'nav.adminMarketPrices', icon: 'upload_file' },
@@ -133,7 +134,12 @@ export class MainLayoutComponent {
     { path: '/admin/orders', labelKey: 'nav.adminOrders', icon: 'local_shipping' },
     { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' },
     { path: '/admin/schemes', labelKey: 'nav.adminSchemes', icon: 'account_balance' },
-    { path: '/admin/insurance', labelKey: 'nav.adminInsurance', icon: 'health_and_safety' }
+    { path: '/admin/insurance', labelKey: 'nav.adminInsurance', icon: 'health_and_safety' },
+    { path: '/admin/news', labelKey: 'nav.adminNews', icon: 'article' },
+    { path: '/admin/resources', labelKey: 'nav.adminResources', icon: 'school' },
+    { path: '/admin/analytics', labelKey: 'nav.adminAnalytics', icon: 'trending_up' },
+    { path: '/admin/notifications', labelKey: 'nav.adminNotifications', icon: 'notifications' },
+    { path: '/admin/settings', labelKey: 'nav.adminSettings', icon: 'engineering' }
   ];
 
   readonly secondaryNavItems: NavItem[] = [

@@ -2,47 +2,148 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { ApiService } from '../../../core/services/api.service';
-import { User } from '../../../core/models/user.model';
+import { AdminService } from '../services/admin.service';
+import { AdminPageHeaderComponent } from '../shared/admin-page-header/admin-page-header.component';
+import { AdminDataTableComponent, TableColumn, TableAction, FilterOption } from '../shared/admin-data-table/admin-data-table.component';
+import { AdminModalComponent } from '../shared/admin-modal/admin-modal.component';
+import { AdminConfirmDialogComponent } from '../shared/admin-confirm-dialog/admin-confirm-dialog.component';
 
 @Component({
   selector: 'fs-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AdminPageHeaderComponent,
+    AdminDataTableComponent,
+    AdminModalComponent,
+    AdminConfirmDialogComponent
+  ],
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.scss']
 })
 export class AdminUsersComponent implements OnInit {
-  private readonly api = inject(ApiService);
+  private readonly adminService = inject(AdminService);
   private readonly toastr = inject(ToastrService);
 
-  users = signal<User[]>([]);
-  selectedUser = signal<any>(null);
-  showEditModal = signal(false);
+  readonly users = signal<any[]>([]);
+  readonly loading = signal(true);
+  readonly totalElements = signal(0);
+  readonly page = signal(0);
+  readonly size = signal(10);
 
-  // Pagination
-  page = 0;
-  size = 10;
-  totalElements = 0;
+  readonly showEditModal = signal(false);
+  readonly showDeactivateDialog = signal(false);
+  readonly selectedUser = signal<any>(null);
+
+  private searchTerm = '';
+  private activeFilters: Record<string, string> = {};
+
+  readonly columns: TableColumn[] = [
+    {
+      key: 'name',
+      label: 'User',
+      type: 'custom',
+      render: (row) => `
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex items-center justify-center text-slate-500 font-bold shrink-0">
+            ${row.profilePhoto ? `<img src="${row.profilePhoto}" class="object-cover w-full h-full" />` : `<span>${row.name?.charAt(0) || 'U'}</span>`}
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-slate-900 dark:text-white">${row.name || 'N/A'}</div>
+            <div class="text-xs text-slate-500">${row.email || row.phone || 'No Contact Info'}</div>
+          </div>
+        </div>
+      `
+    },
+    { key: 'role', label: 'Role', type: 'badge' },
+    {
+      key: 'location',
+      label: 'Location',
+      type: 'custom',
+      render: (row) => `${row.village ? row.village + ', ' : ''}${row.state || 'N/A'}`
+    },
+    { key: 'verified', label: 'Verified', type: 'boolean' },
+    { key: 'active', label: 'Active', type: 'boolean' },
+    { key: 'id', label: 'Actions', type: 'actions', align: 'right' }
+  ];
+
+  readonly rowActions: TableAction[] = [
+    { label: 'Edit', action: 'edit', color: 'primary' },
+    { label: 'Verify/Unverify', action: 'toggle-verify', color: 'info' },
+    { label: 'Deactivate', action: 'deactivate', color: 'danger', visible: (row) => row.active }
+  ];
+
+  readonly filters: FilterOption[] = [
+    {
+      key: 'role',
+      label: 'Role',
+      options: [
+        { value: 'FARMER', label: 'Farmer' },
+        { value: 'EXPERT', label: 'Expert' },
+        { value: 'SELLER', label: 'Seller' },
+        { value: 'ADMIN', label: 'Admin' }
+      ]
+    }
+  ];
 
   ngOnInit(): void {
-    this.loadUsers();
+    this.loadData();
   }
 
-  loadUsers(): void {
-    this.api.get<any>('/api/admin/users', { page: this.page, size: this.size }).subscribe({
+  loadData(): void {
+    this.loading.set(true);
+    // Combine standard pagination with filters/search
+    const params: Record<string, string | number | boolean> = { ...this.activeFilters };
+    if (this.searchTerm) {
+      params['search'] = this.searchTerm;
+    }
+
+    this.adminService.list<any>('/api/admin/users', this.page(), this.size(), params).subscribe({
       next: (res) => {
-        this.users.set(res.content);
-        this.totalElements = res.totalElements;
+        this.users.set(res.content || []);
+        this.totalElements.set(res.totalElements || 0);
+        this.loading.set(false);
       },
-      error: () => this.showError('Failed to load users')
+      error: () => {
+        this.toastr.error('Failed to load users');
+        this.loading.set(false);
+      }
     });
   }
 
-  onEdit(user: User): void {
-    this.api.get<any>(`/api/admin/users/${user.id}`).subscribe({
+  onPageChange(e: { page: number; size: number }): void {
+    this.page.set(e.page);
+    this.size.set(e.size);
+    this.loadData();
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    this.page.set(0);
+    this.loadData();
+  }
+
+  onFilterChange(filters: Record<string, string>): void {
+    this.activeFilters = filters;
+    this.page.set(0);
+    this.loadData();
+  }
+
+  onRowAction(e: { action: string; row: any }): void {
+    if (e.action === 'edit') {
+      this.openEditModal(e.row);
+    } else if (e.action === 'toggle-verify') {
+      this.toggleVerify(e.row);
+    } else if (e.action === 'deactivate') {
+      this.selectedUser.set(e.row);
+      this.showDeactivateDialog.set(true);
+    }
+  }
+
+  private openEditModal(user: any): void {
+    this.adminService.getById<any>('/api/admin/users', user.id).subscribe({
       next: (fullUser) => {
-        // Map farmer profile flat fields for easier form binding
         const fp = fullUser.farmerProfile || {};
         this.selectedUser.set({
           ...fullUser,
@@ -55,7 +156,18 @@ export class AdminUsersComponent implements OnInit {
         });
         this.showEditModal.set(true);
       },
-      error: () => this.showError('Failed to fetch user details')
+      error: () => this.toastr.error('Failed to fetch user details')
+    });
+  }
+
+  private toggleVerify(user: any): void {
+    const nextVerify = !user.verified;
+    this.adminService.update<any>('/api/admin/users', user.id, { verified: nextVerify }).subscribe({
+      next: () => {
+        this.toastr.success(`User verification updated successfully`);
+        this.loadData();
+      },
+      error: () => this.toastr.error('Failed to update verification status')
     });
   }
 
@@ -63,69 +175,27 @@ export class AdminUsersComponent implements OnInit {
     const user = this.selectedUser();
     if (!user) return;
 
-    this.api.put<any>(`/api/admin/users/${user.id}/details`, user).subscribe({
+    this.adminService.update<any>('/api/admin/users/' + user.id, 'details' as any, user).subscribe({
       next: () => {
-        this.showSuccess('User updated successfully');
+        this.toastr.success('User updated successfully');
         this.showEditModal.set(false);
-        this.loadUsers();
+        this.loadData();
       },
-      error: () => this.showError('Failed to save user details')
+      error: () => this.toastr.error('Failed to save user details')
     });
   }
 
-  onDelete(user: User): void {
-    if (confirm(`Are you sure you want to deactivate ${user.name}?`)) {
-      this.api.delete<void>(`/api/admin/users/${user.id}`).subscribe({
-        next: () => {
-          this.showSuccess('User deactivated successfully');
-          this.loadUsers();
-        },
-        error: () => this.showError('Failed to deactivate user')
-      });
-    }
-  }
+  confirmDeactivate(): void {
+    const user = this.selectedUser();
+    if (!user) return;
 
-  toggleActive(user: User, event: Event): void {
-    const active = (event.target as HTMLInputElement).checked;
-    this.api.put<any>(`/api/admin/users/${user.id}`, { active }).subscribe({
-      next: () => this.showSuccess(`User ${active ? 'activated' : 'deactivated'}`),
-      error: () => {
-        this.showError('Failed to update status');
-        this.loadUsers();
-      }
+    this.adminService.remove('/api/admin/users', user.id).subscribe({
+      next: () => {
+        this.toastr.success('User deactivated successfully');
+        this.showDeactivateDialog.set(false);
+        this.loadData();
+      },
+      error: () => this.toastr.error('Failed to deactivate user')
     });
-  }
-
-  toggleVerified(user: User, event: Event): void {
-    const verified = (event.target as HTMLInputElement).checked;
-    this.api.put<any>(`/api/admin/users/${user.id}`, { verified }).subscribe({
-      next: () => this.showSuccess(`User verification updated`),
-      error: () => {
-        this.showError('Failed to update status');
-        this.loadUsers();
-      }
-    });
-  }
-
-  nextPage(): void {
-    if ((this.page + 1) * this.size < this.totalElements) {
-      this.page++;
-      this.loadUsers();
-    }
-  }
-
-  prevPage(): void {
-    if (this.page > 0) {
-      this.page--;
-      this.loadUsers();
-    }
-  }
-
-  private showSuccess(msg: string): void {
-    this.toastr.success(msg, 'Success');
-  }
-
-  private showError(msg: string): void {
-    this.toastr.error(msg, 'Error');
   }
 }

@@ -167,6 +167,30 @@ export const routes: Routes = [
       {
         path: 'insurance',
         loadComponent: () => import('./features/admin/insurance/admin-insurance.component').then(m => m.AdminInsuranceComponent)
+      },
+      {
+        path: 'products',
+        loadComponent: () => import('./features/admin/products/admin-products.component').then(m => m.AdminProductsComponent)
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./features/admin/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
+      },
+      {
+        path: 'news',
+        loadComponent: () => import('./features/admin/news/admin-news.component').then(m => m.AdminNewsComponent)
+      },
+      {
+        path: 'resources',
+        loadComponent: () => import('./features/admin/resources/admin-resources.component').then(m => m.AdminResourcesComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/admin/notifications/admin-notifications.component').then(m => m.AdminNotificationsComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/admin/settings/admin-settings.component').then(m => m.AdminSettingsComponent)
       }
       // ,
       // {

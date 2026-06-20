@@ -1,154 +1,110 @@
 <div class="space-y-6">
-  <!-- Toast Messages -->
-  <div *ngIf="successMessage()" class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300">
-    {{ successMessage() }}
-  </div>
-  <div *ngIf="errorMessage()" class="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300">
-    {{ errorMessage() }}
-  </div>
-
-  <div class="flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Government Schemes Editor</h1>
-      <p class="text-sm text-gray-500 mt-1">Publish central and state financial and welfare schemes for farmers.</p>
-    </div>
+  <fs-admin-page-header title="Government Schemes Repository" subtitle="Register and manage central and state government schemes for farmers.">
     <button (click)="onAdd()" class="fs-btn-primary flex items-center space-x-2 text-sm">
       <span>+ Add Scheme</span>
     </button>
-  </div>
+  </fs-admin-page-header>
 
-  <!-- Schemes Table -->
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead class="bg-gray-50 dark:bg-gray-900">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheme Name</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Target State</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Deadline</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Helpline</th>
-            <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-          <tr *ngFor="let scheme of schemes()" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ scheme.name }}</div>
-              <div class="text-xs text-gray-500 truncate max-w-xs">{{ scheme.description || 'No description' }}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              <span class="px-2 py-0.5 text-xs font-semibold rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                {{ scheme.schemeType }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              {{ scheme.state || 'All India' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              {{ scheme.deadline ? (scheme.deadline | date) : 'Ongoing' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-              {{ scheme.helpline || 'N/A' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-              <button (click)="onEdit(scheme)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Edit</button>
-              <button (click)="onDelete(scheme)" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination Controls -->
-    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-      <span class="text-sm text-gray-500">Total: {{ totalElements }} schemes</span>
-      <div class="flex space-x-2">
-        <button (click)="prevPage()" [disabled]="page === 0" class="px-3 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50 text-sm">Prev</button>
-        <button (click)="nextPage()" [disabled]="(page + 1) * size >= totalElements" class="px-3 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50 text-sm">Next</button>
-      </div>
-    </div>
-  </div>
+  <!-- Data Table -->
+  <fs-admin-data-table
+    [columns]="columns"
+    [data]="schemes()"
+    [loading]="loading()"
+    [totalElements]="totalElements()"
+    [page]="page()"
+    [pageSize]="size()"
+    [rowActions]="rowActions"
+    [filters]="filters"
+    [selectable]="false"
+    searchPlaceholder="Search schemes by name..."
+    emptyMessage="No schemes found"
+    (pageChange)="onPageChange($event)"
+    (searchChange)="onSearch($event)"
+    (filterChange)="onFilterChange($event)"
+    (rowActionEvent)="onRowAction($event)">
+  </fs-admin-data-table>
 
   <!-- Edit/Add Modal -->
-  <div *ngIf="showEditModal()" class="fixed inset-0 z-40 overflow-y-auto">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" (click)="showEditModal.set(false)"></div>
-
-    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-      <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-200 dark:border-gray-700">
-        <div class="p-6">
-          <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ isEditMode() ? 'Edit Scheme Details' : 'Add New Scheme' }}
-            </h3>
-            <button (click)="showEditModal.set(false)" class="text-gray-400 hover:text-gray-500">✕</button>
-          </div>
-
-          <form (ngSubmit)="onSave()" class="space-y-4">
-            <!-- Grid for basic inputs -->
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Scheme Name</label>
-                <input type="text" [(ngModel)]="selectedScheme().name" name="name" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" required />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Scheme Type</label>
-                <select [(ngModel)]="selectedScheme().schemeType" name="schemeType" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm">
-                  <option value="CENTRAL">CENTRAL</option>
-                  <option value="STATE">STATE</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">State Name (if STATE type)</label>
-                <input type="text" [(ngModel)]="selectedScheme().state" name="state" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="e.g. Maharashtra" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Application Deadline</label>
-                <input type="date" [(ngModel)]="selectedScheme().deadline" name="deadline" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" />
-              </div>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Official Website Link</label>
-                <input type="text" [(ngModel)]="selectedScheme().officialLink" name="officialLink" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="e.g. https://pmkisan.gov.in" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Helpline Phone Number</label>
-                <input type="text" [(ngModel)]="selectedScheme().helpline" name="helpline" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="e.g. 18001801551" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Description</label>
-              <textarea [(ngModel)]="selectedScheme().description" name="description" rows="2" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm"></textarea>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Eligibility Criteria</label>
-              <textarea [(ngModel)]="selectedScheme().eligibilityCriteria" name="eligibilityCriteria" rows="2" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="Describe who is eligible..."></textarea>
-            </div>
-
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Benefits Offered</label>
-                <textarea [(ngModel)]="selectedScheme().benefits" name="benefits" rows="2" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="e.g. ₹6000 per year in three installments..."></textarea>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 mb-1">Application Process</label>
-                <textarea [(ngModel)]="selectedScheme().applicationProcess" name="applicationProcess" rows="2" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-900 dark:text-white text-sm" placeholder="e.g. Apply online or through nearest CSC..."></textarea>
-              </div>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button type="button" (click)="showEditModal.set(false)" class="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm">Cancel</button>
-              <button type="submit" class="fs-btn-primary text-sm">Save Scheme</button>
-            </div>
-          </form>
+  <fs-admin-modal [open]="showEditModal()" [title]="isEditMode() ? 'Edit Scheme Details' : 'Add New Scheme'" (close)="showEditModal.set(false)">
+    <form *ngIf="selectedScheme()" (ngSubmit)="onSave()" class="space-y-4">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Scheme Name</label>
+          <input type="text" [(ngModel)]="selectedScheme().name" name="name"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"
+            required />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Official Link (URL)</label>
+          <input type="url" [(ngModel)]="selectedScheme().officialLink" name="officialLink"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Scheme Type</label>
+          <select [(ngModel)]="selectedScheme().schemeType" name="schemeType"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm">
+            <option value="CENTRAL">Central</option>
+            <option value="STATE">State</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">State (If State Scheme)</label>
+          <input type="text" [(ngModel)]="selectedScheme().state" name="state"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"
+            [disabled]="selectedScheme().schemeType === 'CENTRAL'" />
         </div>
       </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Deadline</label>
+          <input type="date" [(ngModel)]="selectedScheme().deadline" name="deadline"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Helpline Phone</label>
+          <input type="text" [(ngModel)]="selectedScheme().helpline" name="helpline"
+            class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Eligibility Criteria</label>
+        <textarea [(ngModel)]="selectedScheme().eligibilityCriteria" name="eligibilityCriteria" rows="2"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Benefits</label>
+        <textarea [(ngModel)]="selectedScheme().benefits" name="benefits" rows="2"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Application Process</label>
+        <textarea [(ngModel)]="selectedScheme().applicationProcess" name="applicationProcess" rows="2"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Description</label>
+        <textarea [(ngModel)]="selectedScheme().description" name="description" rows="2"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white text-sm"></textarea>
+      </div>
+    </form>
+    <div footer>
+      <button (click)="showEditModal.set(false)"
+        class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm">Cancel</button>
+      <button (click)="onSave()" class="fs-btn-primary text-sm ml-2">Save Scheme</button>
     </div>
-  </div>
+  </fs-admin-modal>
+
+  <!-- Delete Dialog -->
+  <fs-admin-confirm-dialog
+    [open]="showDeleteDialog()"
+    title="Delete Scheme"
+    message="Are you sure you want to delete this scheme? This action cannot be undone."
+    (confirm)="confirmDelete()"
+    (cancel)="showDeleteDialog.set(false)">
+  </fs-admin-confirm-dialog>
 </div>

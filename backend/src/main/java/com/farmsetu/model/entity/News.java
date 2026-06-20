@@ -34,7 +34,7 @@ public class News extends BaseEntity {
 
     private String category;
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "news_tags", joinColumns = @JoinColumn(name = "news_id"))
     @Column(name = "tag")
     @Builder.Default
