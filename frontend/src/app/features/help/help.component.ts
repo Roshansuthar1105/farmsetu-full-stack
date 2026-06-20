@@ -247,6 +247,48 @@ export class HelpComponent {
           desc: 'Track farm logs, input costs (seeds, tools, fertilizers), revenues, and calculate total net profitability across seasons.'
         }
       ]
+    },
+    {
+      id: 7,
+      title: 'Financial Tools',
+      path: '/app/financial',
+      icon: 'coins',
+      purpose: 'Log operational crop expenses, compute estimated loan limits, and calculate agricultural profit margins.',
+      functionalities: [
+        {
+          name: 'Expense Tracker Ledger',
+          desc: 'Keep track of crop sowing, fertilizer purchases, labor wages, machinery rents, and fuel costs. Displays logged investments per season/year and totals overall expenses.'
+        },
+        {
+          name: 'Log Farm Expense Form (Modal)',
+          desc: 'Log new operational costs directly to your ledger log.',
+          fields: [
+            { name: 'Expense Type', purpose: 'Categorization options: Seeds, Fertilizers, Pesticides, Machinery Rent, Labor, Fuel, Irrigation, Other.' },
+            { name: 'Amount (₹)', purpose: 'The monetary cost of the expense in Rupees.' },
+            { name: 'Date', purpose: 'Calendar selector to record when the transaction took place.' },
+            { name: 'Season', purpose: 'Specify the crop season: Kharif, Rabi, or Zaid.' },
+            { name: 'Description', purpose: 'Text area for detailed notes (e.g. bought 5 bags of urea).' }
+          ]
+        },
+        {
+          name: 'Loan Eligibility Check Form',
+          desc: 'Check estimated agricultural credit limits based on standard policies.',
+          fields: [
+            { name: 'Annual Farm Income', purpose: 'Farmers total earnings per year in Rupees.' },
+            { name: 'Cultivable Land Area', purpose: 'Total crop acreage in Acres.' },
+            { name: 'Existing Debt', purpose: 'Total other liabilities or outstanding loans in Rupees.' }
+          ]
+        },
+        {
+          name: 'Crop Yield ROI Calculator Form',
+          desc: 'Estimate harvest profit margins and Return on Investment (ROI) ratios before selling crops.',
+          fields: [
+            { name: 'Harvest Yield Quantity', purpose: 'Total crop quantity harvested in Quintals.' },
+            { name: 'Expected Market Price', purpose: 'Crop sale price per Quintal in Rupees.' },
+            { name: 'Total Investment / Cost', purpose: 'Total cost incurred for cultivation in Rupees.' }
+          ]
+        }
+      ]
     }
   ];
 

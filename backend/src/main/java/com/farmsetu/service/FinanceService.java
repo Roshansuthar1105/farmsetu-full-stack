@@ -1,7 +1,11 @@
 package com.farmsetu.service;
 
+import com.farmsetu.exception.BadRequestException;
+import com.farmsetu.exception.ResourceNotFoundException;
 import com.farmsetu.model.entity.FarmExpense;
+import com.farmsetu.model.entity.User;
 import com.farmsetu.repository.FarmExpenseRepository;
+import com.farmsetu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +20,7 @@ import java.util.Map;
 public class FinanceService {
 
     private final FarmExpenseRepository farmExpenseRepository;
+    private final UserRepository userRepository;
 
     public Map<String, Object> loanEligibility(Map<String, Object> input) {
         return Map.of("eligible", true, "maxAmount", 200000, "input", input);
@@ -30,6 +35,12 @@ public class FinanceService {
 
     @Transactional
     public FarmExpense addExpense(FarmExpense expense) {
+        if (expense.getFarmer() == null || expense.getFarmer().getId() == null) {
+            throw new BadRequestException("Farmer ID is required");
+        }
+        User farmer = userRepository.findById(expense.getFarmer().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
+        expense.setFarmer(farmer);
         return farmExpenseRepository.save(expense);
     }
 
