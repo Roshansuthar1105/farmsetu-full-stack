@@ -39,7 +39,8 @@ import {
   LucideMoon,
   LucideMenu,
   LucideShoppingCart,
-  LucideX
+  LucideX,
+  LucideHelpCircle
 } from '@lucide/angular';
 
 interface NavItem {
@@ -90,7 +91,8 @@ interface NavItem {
     LucideMoon,
     LucideMenu,
     LucideShoppingCart,
-    LucideX
+    LucideX,
+    LucideHelpCircle
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -150,7 +152,8 @@ export class MainLayoutComponent {
     { path: '/app/labor-booking', labelKey: 'nav.laborBooking', icon: 'engineering' },
     { path: '/app/machinery', labelKey: 'nav.machinery', icon: 'agriculture' },
     { path: '/app/financial', labelKey: 'nav.finance', icon: 'payments' },
-    { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' }
+    { path: '/app/notifications', labelKey: 'nav.notifications', icon: 'notifications' },
+    { path: '/app/help', labelKey: 'nav.help', icon: 'help_circle' }
   ];
 
   t(key: string): string {
