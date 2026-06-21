@@ -131,13 +131,23 @@
         </span>
         <span class="nav-label whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
       </button>
-      <button type="button" (click)="logout()"
-        class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
-        <span class="text-red-650 dark:text-red-400 transition duration-200">
-          <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
-        </span>
-        <span class="nav-label whitespace-nowrap">Logout</span>
-      </button>
+      @if (auth.isAuthenticated()) {
+        <button type="button" (click)="logout()"
+          class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
+          <span class="text-red-650 dark:text-red-400 transition duration-200">
+            <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
+          </span>
+          <span class="nav-label whitespace-nowrap">Logout</span>
+        </button>
+      } @else {
+        <a routerLink="/auth/login"
+          class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
+          <span>
+            <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
+          </span>
+          <span class="nav-label whitespace-nowrap">Login / Register</span>
+        </a>
+      }
     </div>
   </aside>
 
@@ -180,36 +190,118 @@
           </select>
         </div>
 
-        <!-- Cart Link -->
-        <a routerLink="/app/marketplace/cart"
-          class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
-          <svg lucideShoppingCart size="16" class="stroke-[2]"></svg>
-        </a>
+        <!-- If Authenticated: show Cart, Notifications and Profile -->
+        <ng-container *ngIf="auth.isAuthenticated()">
+          <!-- Cart Link -->
+          <a routerLink="/app/marketplace/cart"
+            class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
+            <svg lucideShoppingCart size="16" class="stroke-[2]"></svg>
+          </a>
 
-        <!-- Notifications Link -->
-        <a routerLink="/app/notifications"
-          class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
-          <svg lucideBell size="16" class="stroke-[2]"></svg>
-          <span
-            class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
-        </a>
+          <!-- Notifications Link -->
+          <a routerLink="/app/notifications"
+            class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
+            <svg lucideBell size="16" class="stroke-[2]"></svg>
+            <span
+              class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+          </a>
 
-        <!-- User Profile Avatar Link -->
-        <a routerLink="/app/profile"
-          class="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow hover:shadow-lg active:scale-95 transition">
-          <img *ngIf="auth.currentUser()?.profilePhoto" [src]="auth.currentUser()!.profilePhoto" alt="Profile"
-            class="w-full h-full object-cover" />
-          <span *ngIf="!auth.currentUser()?.profilePhoto">
-            {{ auth.currentUser()?.name ? auth.currentUser()!.name.charAt(0).toUpperCase() : 'U' }}
-          </span>
-        </a>
+          <!-- User Profile Avatar Link -->
+          <a routerLink="/app/profile"
+            class="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow hover:shadow-lg active:scale-95 transition">
+            <img *ngIf="auth.currentUser()?.profilePhoto" [src]="auth.currentUser()!.profilePhoto" alt="Profile"
+              class="w-full h-full object-cover" />
+            <span *ngIf="!auth.currentUser()?.profilePhoto">
+              {{ auth.currentUser()?.name ? auth.currentUser()!.name.charAt(0).toUpperCase() : 'U' }}
+            </span>
+          </a>
+        </ng-container>
+
+        <!-- If NOT Authenticated: show "Login" and "Sign Up" button links -->
+        <ng-container *ngIf="!auth.isAuthenticated()">
+          <a routerLink="/auth/login"
+            class="px-3.5 py-2 text-xs font-bold text-slate-600 dark:text-slate-350 hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            Login
+          </a>
+          <a routerLink="/auth/register"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow transition duration-200">
+            Sign Up
+          </a>
+        </ng-container>
       </div>
     </header>
 
     <!-- CONTENT BODY -->
     <main class="flex-1 overflow-y-auto flex flex-col justify-between">
       <div class="p-2 lg:p-3 flex-1">
-        <router-outlet />
+        @if (requiresLogin()) {
+          <div class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-12 text-center animate-fade-in">
+            <div class="max-w-md w-full fs-glass-card border border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-8 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
+              <!-- Decorative background glow -->
+              <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              
+              <!-- Lock Shield Icon -->
+              <div class="w-16 h-16 bg-gradient-to-tr from-amber-500/15 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/10 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto shadow-md border border-amber-500/20">
+                <span class="material-icons text-3xl animate-bounce" style="animation-duration: 3s;">lock</span>
+              </div>
+
+              <!-- Title & Subtitle -->
+              <div class="space-y-2">
+                <h2 class="text-2xl font-extrabold tracking-tight text-slate-850 dark:text-white font-display">
+                  Authentication Required
+                </h2>
+                <p class="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider font-display flex items-center justify-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Member-Only Feature
+                </p>
+              </div>
+
+              <!-- Informational Message -->
+              <p class="text-sm text-slate-550 dark:text-slate-405 leading-relaxed font-display">
+                You are currently exploring FarmSetu as a guest. To access <strong class="text-slate-800 dark:text-slate-200">{{ getRequestedFeatureName() }}</strong>, please log in or create a free account.
+              </p>
+
+              <!-- Bullet points showing value of signing up -->
+              <div class="text-left bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl p-4.5 space-y-3 font-display">
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>Interact with verified agronomists & crop buyers</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>Secure direct B2B trading with prompt payments</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>AI crop diagnostics & personalized calendar schedules</span>
+                </div>
+              </div>
+
+              <!-- Actions Buttons -->
+              <div class="flex flex-col gap-3 pt-2">
+                <!-- Login Button -->
+                <a routerLink="/auth/login"
+                   class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-center">
+                  Log In / Sign In
+                </a>
+                
+                <!-- Register Button -->
+                <a routerLink="/auth/register"
+                   class="w-full py-3.5 bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-gray-300 font-extrabold text-sm rounded-xl transition-all duration-200 text-center">
+                  Register / Create Free Account
+                </a>
+                
+                <!-- Back to Dashboard -->
+                <a routerLink="/app/dashboard"
+                   class="text-xs font-bold text-emerald-555 dark:text-emerald-400 hover:underline flex items-center justify-center gap-1 py-1 font-display">
+                  <span class="material-icons text-xs">arrow_back</span> Return to Dashboard (Guest Mode)
+                </a>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <router-outlet />
+        }
       </div>
 
       <!-- Shared Layout Footer -->
@@ -390,11 +482,19 @@
           </span>
           <span>{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
         </button>
-        <button type="button" (click)="logout(); showMobileDrawer.set(false);"
-          class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
-          <svg lucideLogOut size="14" class="stroke-[2.25]"></svg>
-          <span>Logout</span>
-        </button>
+        @if (auth.isAuthenticated()) {
+          <button type="button" (click)="logout(); showMobileDrawer.set(false);"
+            class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
+            <svg lucideLogOut size="14" class="stroke-[2.25]"></svg>
+            <span>Logout</span>
+          </button>
+        } @else {
+          <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)"
+            class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
+            <svg lucideUserCheck size="14" class="stroke-[2.25]"></svg>
+            <span>Login / Register</span>
+          </a>
+        }
       </div>
 
     </div>

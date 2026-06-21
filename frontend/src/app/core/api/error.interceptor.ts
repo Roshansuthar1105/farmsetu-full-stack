@@ -22,10 +22,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         switch (error.status) {
           case 401:
             errorMessage = 'Session expired or unauthorized. Please log in again.';
-            authService.logout();
+            authService.logout(true);
             break;
           case 403:
-            errorMessage = 'You do not have permission to access this resource.';
+            const currentToken = authService.getAccessToken();
+            if (currentToken && authService.isTokenExpired(currentToken)) {
+              errorMessage = 'Session expired. Please log in again.';
+              authService.logout(true);
+            } else {
+              errorMessage = 'You do not have permission to access this resource.';
+            }
             break;
           case 404:
             errorMessage = 'The requested resource was not found.';

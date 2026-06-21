@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal, computed } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet, Router, NavigationEnd, Event } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { I18nService } from '../../../core/services/i18n.service';
@@ -101,6 +102,39 @@ export class MainLayoutComponent {
   readonly auth = inject(AuthService);
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
+  private readonly router = inject(Router);
+
+  readonly currentUrl = signal<string>('');
+
+  constructor() {
+    this.currentUrl.set(this.router.url);
+    this.router.events.pipe(
+      filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.currentUrl.set(event.urlAfterRedirects || event.url);
+    });
+  }
+
+  readonly requiresLogin = computed(() => {
+    if (this.auth.isAuthenticated()) {
+      return false;
+    }
+    const url = this.currentUrl();
+    if (!url || url.includes('/app/dashboard')) {
+      return false;
+    }
+    return url.startsWith('/app');
+  });
+
+  getRequestedFeatureName(): string {
+    const url = this.currentUrl();
+    const allItems = [...this.primaryNavItems, ...this.secondaryNavItems, ...this.adminNavItems];
+    const item = allItems.find(nav => url.startsWith(nav.path));
+    if (item) {
+      return this.t(item.labelKey);
+    }
+    return 'this page';
+  }
 
   readonly showMobileDrawer = signal(false);
   readonly showSidebar = signal(true);

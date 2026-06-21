@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../../store/auth/auth.actions';
 import { AuthLayoutComponent } from '../shared/auth-layout.component';
@@ -121,6 +121,15 @@ import { SocialLoginComponent } from '../shared/social-login.component';
             Register here →
           </a>
         </p>
+
+        <!-- Guest Explorer Link -->
+        <p class="text-center text-xs text-gray-500 dark:text-gray-400 pt-2">
+          Or just want to explore?
+          <a routerLink="/app/dashboard"
+             class="font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors">
+            Explore Dashboard as Guest →
+          </a>
+        </p>
       </form>
     </fs-auth-layout>
   `
@@ -129,10 +138,19 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly showPassword = signal(false);
+
+  constructor() {
+    this.route.queryParams.subscribe(params => {
+      if (params['expired'] === 'true') {
+        this.error.set('Your session has expired. Please log in again.');
+      }
+    });
+  }
 
   readonly form = this.fb.nonNullable.group({
     identifier: ['', Validators.required],

@@ -92,12 +92,16 @@
 
         <div class="h-5 w-px bg-gray-250 dark:bg-slate-800 hidden sm:block"></div>
 
+        <a routerLink="/app/dashboard"
+          class="px-4 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+          Explore App
+        </a>
         <a routerLink="/auth/login"
           class="px-4 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-primary transition-colors">
           {{ i18n.t('auth.login') }}
         </a>
         <a routerLink="/auth/register"
-          class="fs-btn-glow bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all duration-300">
+          class="fs-btn-glow bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all duration-300">
           {{ i18n.t('auth.register') }}
         </a>
       </div>
@@ -133,13 +137,13 @@
         <div
           class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4 animate-fade-in-up animation-delay-300">
           <a routerLink="/auth/register"
-            class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-base px-8 py-4 w-full sm:w-auto rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all">
+            class="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base px-8 py-4 w-full sm:w-auto rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all">
             Get Started For Free
             <svg lucideArrowRight size="18"></svg>
           </a>
-          <a routerLink="/" fragment="features"
+          <a routerLink="/app/dashboard"
             class="flex items-center justify-center bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-800 font-bold text-base px-8 py-4 w-full sm:w-auto rounded-xl border border-gray-250 dark:border-slate-850 hover:border-gray-300 transition-all duration-200">
-            Explore Features
+            Explore Dashboard
           </a>
         </div>
       </div>

@@ -181,7 +181,7 @@ aside.w-20 {
     .p-4.border-t {
       padding: 16px;
 
-      button {
+      button, a {
         justify-content: flex-start;
         padding-left: 12px;
         padding-right: 12px;
@@ -244,7 +244,7 @@ aside.w-20 {
       flex-direction: column;
       gap: 8px;
 
-      button {
+      button, a {
         justify-content: center;
         width: 40px;
         height: 40px;

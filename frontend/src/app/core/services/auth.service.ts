@@ -74,13 +74,32 @@ export class AuthService {
     return this.api.post<any>('/api/auth/reset-password', payload);
   }
 
-  logout(): void {
+  logout(expired = false): void {
     localStorage.removeItem('fs_access_token');
     localStorage.removeItem('fs_refresh_token');
     localStorage.removeItem('fs_user');
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
-    this.router.navigate(['/auth/login']);
+    setTimeout(() => {
+      if (expired) {
+        this.router.navigate(['/auth/login'], { queryParams: { expired: 'true' } });
+      } else {
+        this.router.navigate(['/auth/login']);
+      }
+    });
+  }
+
+  isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const payloadDecoded = atob(parts[1]);
+      const payload = JSON.parse(payloadDecoded);
+      if (!payload.exp) return false;
+      return Date.now() > (payload.exp * 1000);
+    } catch (e) {
+      return true;
+    }
   }
 
   getAccessToken(): string | null {
@@ -104,8 +123,12 @@ export class AuthService {
     const token = this.getAccessToken();
     const userRaw = localStorage.getItem('fs_user');
     if (token && userRaw) {
-      this.currentUser.set(JSON.parse(userRaw) as User);
-      this.isAuthenticated.set(true);
+      if (this.isTokenExpired(token)) {
+        this.logout(true);
+      } else {
+        this.currentUser.set(JSON.parse(userRaw) as User);
+        this.isAuthenticated.set(true);
+      }
     }
   }
 }
