@@ -29,8 +29,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("")
-    public ApiResponse<List<UserResponse>> getAll() {
-        return ApiResponse.ok(userService.getAllUsers());
+    public ApiResponse<List<UserResponse>> getAll(@RequestParam(name = "is_user", required = false) Boolean isUser) {
+        return ApiResponse.ok(userService.getAllUsers(isUser));
     }
 
     @GetMapping("/me")

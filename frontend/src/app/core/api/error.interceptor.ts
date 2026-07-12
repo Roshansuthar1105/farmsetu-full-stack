@@ -25,9 +25,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             authService.logout(true);
             break;
           case 403:
-            const currentToken = authService.getAccessToken();
-            if (currentToken && authService.isTokenExpired(currentToken)) {
-              errorMessage = 'Session expired. Please log in again.';
+            const hasExpiredToken = authService.isTokenExpired(authService.getAccessToken() || '');
+            if (hasExpiredToken || !req.url.includes('/api/admin')) {
+              errorMessage = 'Session expired or invalid. Please log in again.';
               authService.logout(true);
             } else {
               errorMessage = 'You do not have permission to access this resource.';

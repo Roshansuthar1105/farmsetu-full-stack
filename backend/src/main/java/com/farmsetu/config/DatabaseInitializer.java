@@ -19,6 +19,16 @@ public class DatabaseInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Initializing dynamic database updates...");
         try {
+            // Terminate other active connections to clear table locks (e.g. on users table)
+            jdbcTemplate.execute(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'farmsetu' AND pid <> pg_backend_pid()"
+            );
+            log.info("Terminated other active database backends to clear locks.");
+        } catch (Exception e) {
+            log.warn("Could not terminate other active database connections: {}", e.getMessage());
+        }
+
+        try {
             jdbcTemplate.execute(
                 "CREATE TABLE IF NOT EXISTS post_likes (" +
                 "  post_id BIGINT NOT NULL," +

@@ -31,6 +31,13 @@ public class UserResponse {
     private boolean verified;
     private Integer reputationScore;
     private List<String> currentCrops;
+    @com.fasterxml.jackson.annotation.JsonProperty("isAi")
+    private boolean isAi;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isAi")
+    public boolean isAi() {
+        return this.isAi;
+    }
 
     public static UserResponse from(User user) {
         return UserResponse.builder()
@@ -52,6 +59,7 @@ public class UserResponse {
                 .currentCrops(user.getCurrentCrops() != null
                         ? new ArrayList<>(user.getCurrentCrops())
                         : new ArrayList<>())
+                .isAi(user.isAi())
                 .build();
     }
 }

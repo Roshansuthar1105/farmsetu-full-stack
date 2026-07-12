@@ -108,9 +108,9 @@ export class FarmChatComponent implements OnInit, OnDestroy {
   }
 
   loadContacts(): void {
-    this.api.get<any[]>('/api/users').subscribe({
+    this.api.get<any[]>('/api/users', { is_user: true }).subscribe({
       next: (users) => {
-        const filtered = users.filter(u => u.id !== this.currentUser?.id);
+        const filtered = users.filter(u => u.id !== this.currentUser?.id && !u.isAi && !(u as any).ai);
         // Map mock last messages
         const contactsWithMsg = filtered.map(u => ({
           ...u,
@@ -123,17 +123,25 @@ export class FarmChatComponent implements OnInit, OnDestroy {
 
         // Load initial conversation lists to fetch last messages/unread counts if needed
         contactsWithMsg.forEach(c => {
-          this.api.get<ChatMessage[]>(`/api/chats/${c.id}?page=0&size=1`).subscribe(msgs => {
-            if (msgs && msgs.length > 0) {
-              const last = msgs[0];
-              c.lastMessage = last.messageText || (last.messageType === 'IMAGE' ? '📷 Photo' : last.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
-              c.lastMessageTime = last.createdAt;
+          this.api.get<ChatMessage[]>(`/api/chats/${c.id}?page=0&size=1`).subscribe({
+            next: (msgs) => {
+              if (msgs && msgs.length > 0) {
+                const last = msgs[0];
+                c.lastMessage = last.messageText || (last.messageType === 'IMAGE' ? '📷 Photo' : last.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
+                c.lastMessageTime = last.createdAt;
 
-              // Count unread
-              c.unreadCount = msgs.filter(m => m.senderId === c.id && !m.read).length;
+                // Count unread
+                c.unreadCount = msgs.filter(m => m.senderId === c.id && !m.read).length;
+              }
+            },
+            error: (err) => {
+              console.error(`Error loading last message for contact ${c.id}:`, err);
             }
           });
         });
+      },
+      error: (err) => {
+        console.error('Error loading contacts:', err);
       }
     });
   }
@@ -142,6 +150,9 @@ export class FarmChatComponent implements OnInit, OnDestroy {
     this.api.get<number[]>('/api/chats/online').subscribe({
       next: (ids) => {
         this.onlineUserIds.set(new Set(ids));
+      },
+      error: (err) => {
+        console.error('Error loading online users:', err);
       }
     });
   }
@@ -160,9 +171,17 @@ export class FarmChatComponent implements OnInit, OnDestroy {
         this.messages.set(ordered);
 
         // Mark conversation as read
-        this.api.put(`/api/chats/read-all/${contact.id}`, {}).subscribe(() => {
-          contact.unreadCount = 0;
+        this.api.put(`/api/chats/read-all/${contact.id}`, {}).subscribe({
+          next: () => {
+            contact.unreadCount = 0;
+          },
+          error: (err) => {
+            console.error(`Error marking messages read for ${contact.id}:`, err);
+          }
         });
+      },
+      error: (err) => {
+        console.error(`Error loading chat history for ${contact.id}:`, err);
       }
     });
   }
@@ -199,7 +218,9 @@ export class FarmChatComponent implements OnInit, OnDestroy {
 
         // Mark as read if received from partner and chat is open
         if (msg.senderId === activeContact.id) {
-          this.api.put(`/api/chats/${msg.id}/read`, {}).subscribe();
+          this.api.put(`/api/chats/${msg.id}/read`, {}).subscribe({
+            error: (err) => console.error('Error marking message as read:', err)
+          });
         }
       }
 
@@ -269,6 +290,9 @@ export class FarmChatComponent implements OnInit, OnDestroy {
             return m;
           });
         });
+      },
+      error: (err) => {
+        console.error(`Error toggling pin message ${msg.id}:`, err);
       }
     });
   }
@@ -315,6 +339,10 @@ export class FarmChatComponent implements OnInit, OnDestroy {
           mediaUrl: fileUrl
         };
         this.ws.send('/app/chat.send', payload);
+      },
+      error: (err) => {
+        console.error('Error uploading file:', err);
+        alert('File upload failed. Please try again.');
       }
     });
   }
@@ -392,6 +420,10 @@ export class FarmChatComponent implements OnInit, OnDestroy {
           mediaUrl: fileUrl
         };
         this.ws.send('/app/chat.send', payload);
+      },
+      error: (err) => {
+        console.error('Error uploading voice note:', err);
+        alert('Voice note upload failed. Please try again.');
       }
     });
   }

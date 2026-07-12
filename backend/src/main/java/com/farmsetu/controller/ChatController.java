@@ -27,6 +27,7 @@ public class ChatController {
     private final ChatService chatService;
     private final CloudinaryService cloudinaryService;
     private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+    private final com.farmsetu.repository.UserRepository userRepository;
 
     @GetMapping("/chats/{userId:\\d+}")
     public ApiResponse<java.util.List<java.util.Map<String, Object>>> conversation(
@@ -45,12 +46,45 @@ public class ChatController {
     }
 
     @PostMapping("/chats/send")
-    public ApiResponse<ChatMessage> send(@RequestBody Map<String, Object> body) {
+    public ApiResponse<Map<String, Object>> send(@RequestBody Map<String, Object> body) {
         Long receiverId = Long.valueOf(body.get("receiverId").toString());
         String text = (String) body.get("message");
         MessageType type = EnumUtils.parseEnum(MessageType.class, body.get("messageType"), MessageType.TEXT);
         String mediaUrl = (String) body.get("mediaUrl");
-        return ApiResponse.ok(chatService.sendMessage(receiverId, text, type, mediaUrl));
+        ChatMessage msg = chatService.sendMessage(receiverId, text, type, mediaUrl);
+
+        Map<String, Object> map = new java.util.HashMap<>();
+        map.put("id", msg.getId());
+        map.put("senderId", msg.getSender().getId());
+        map.put("receiverId", msg.getReceiver().getId());
+        map.put("messageText", msg.getMessageText() != null ? msg.getMessageText() : "");
+        map.put("messageType", msg.getMessageType() != null ? msg.getMessageType().name() : "TEXT");
+        map.put("mediaUrl", msg.getMediaUrl() != null ? msg.getMediaUrl() : "");
+        map.put("read", msg.isRead());
+        map.put("pinned", msg.isPinned());
+        map.put("createdAt", msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "");
+
+        messagingTemplate.convertAndSend("/topic/messages/" + receiverId, map);
+        messagingTemplate.convertAndSend("/topic/messages/" + msg.getSender().getId(), map);
+
+        return ApiResponse.ok(map);
+    }
+
+    @PostMapping("/chats/presence")
+    public ApiResponse<Void> updatePresence(@RequestParam(defaultValue = "true") boolean online) {
+        Long currentUserId = com.farmsetu.security.SecurityUtils.currentUserId();
+        if (online) {
+            com.farmsetu.websocket.ChatWebSocketController.getOnlineUserIds().add(currentUserId);
+        } else {
+            com.farmsetu.websocket.ChatWebSocketController.getOnlineUserIds().remove(currentUserId);
+        }
+
+        Map<String, Object> statusPayload = new java.util.HashMap<>();
+        statusPayload.put("userId", currentUserId);
+        statusPayload.put("status", online ? "ONLINE" : "OFFLINE");
+        messagingTemplate.convertAndSend("/topic/status", statusPayload);
+
+        return ApiResponse.ok(null);
     }
 
     @PutMapping("/chats/{id}/read")
@@ -101,7 +135,23 @@ public class ChatController {
     public ApiResponse<Map<String, Object>> aiChat(@RequestBody Map<String, Object> body) {
         String message = body.get("message") != null ? body.get("message").toString() : "";
         Long sessionId = body.get("sessionId") != null ? Long.valueOf(body.get("sessionId").toString()) : null;
-        Long botId = body.get("botId") != null ? Long.valueOf(body.get("botId").toString()) : 9901L;
-        return ApiResponse.ok(chatService.aiChat(message, sessionId, botId));
+        
+        Long botId = null;
+        if (body.get("botId") != null) {
+            botId = Long.valueOf(body.get("botId").toString());
+        } else {
+            botId = userRepository.findByIsAiTrue().stream().findFirst().map(com.farmsetu.model.entity.User::getId)
+                    .orElseThrow(() -> new com.farmsetu.exception.ResourceNotFoundException("AI Assistant bot not found in database"));
+        }
+        
+        boolean storeHistory = body.get("storeHistory") == null || Boolean.parseBoolean(body.get("storeHistory").toString());
+        return ApiResponse.ok(chatService.aiChat(message, sessionId, botId, storeHistory));
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/ai/chat/{botId}")
+    public ApiResponse<Void> clearAiChat(@PathVariable Long botId) {
+        Long farmerId = com.farmsetu.security.SecurityUtils.currentUserId();
+        chatService.clearAiChatHistory(farmerId, botId);
+        return ApiResponse.ok("AI chat history cleared", null);
     }
 }
