@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, TitleStrategy } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideStore } from '@ngrx/store';
@@ -15,11 +15,13 @@ import { errorInterceptor } from '@core/api/error.interceptor';
 import { loaderInterceptor } from '@core/api/loader.interceptor';
 import { authReducer } from './store/auth/auth.reducer';
 import { AuthEffects } from './store/auth/auth.effects';
+import { PageTitleStrategy } from '@core/services/page-title.strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: PageTitleStrategy },
     provideHttpClient(withInterceptors([loaderInterceptor, authInterceptor, errorInterceptor])),
     provideTranslateService({
       defaultLanguage: 'en'
