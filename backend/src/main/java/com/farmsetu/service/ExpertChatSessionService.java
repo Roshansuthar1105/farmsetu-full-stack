@@ -9,6 +9,7 @@ import com.farmsetu.repository.ExpertChatSessionRepository;
 import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,27 +22,38 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpertChatSessionService {
 
     private final ExpertChatSessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    /**
-     * Start a new AI chat session for the current farmer.
-     * If an active session already exists, return it instead of creating a new one.
-     */
     @Transactional
     public Map<String, Object> startSession() {
         Long farmerId = SecurityUtils.currentUserId();
+        log.info("Attempting to start chat session for user ID: {}", farmerId);
+        User farmer = userRepository.findById(farmerId)
+                .orElseThrow(() -> {
+                    log.error("Start session failed: User not found for ID: {}", farmerId);
+                    return new BadRequestException("User not found");
+                });
+
+        log.info("User found: name={}, role={}, isAi={}", farmer.getName(), farmer.getRole(), farmer.isAi());
+
+        if (farmer.getRole() != UserRole.FARMER) {
+            log.warn("Start session denied: User ID {} has role {}, only FARMER is allowed", farmerId, farmer.getRole());
+            throw new BadRequestException("Only farmers can start chat sessions");
+        }
 
         // Check for existing active session
         var existing = sessionRepository.findActiveSessionByFarmerId(farmerId);
         if (existing.isPresent()) {
+            log.info("Active session already exists for farmer ID {}: session ID={}", farmerId, existing.get().getId());
             return toMap(existing.get());
         }
 
-        User farmer = userRepository.getReferenceById(farmerId);
+        log.info("Creating a new AI active chat session for farmer ID: {}", farmerId);
         ExpertChatSession session = ExpertChatSession.builder()
                 .farmer(farmer)
                 .status(ChatSessionStatus.AI_ACTIVE)
@@ -49,6 +61,7 @@ public class ExpertChatSessionService {
                 .build();
 
         session = sessionRepository.save(session);
+        log.info("Successfully started chat session ID: {} for farmer ID: {}", session.getId(), farmerId);
         return toMap(session);
     }
 
@@ -57,15 +70,22 @@ public class ExpertChatSessionService {
      */
     @Transactional
     public Map<String, Object> escalateToExpert(Long sessionId, String reason) {
+        log.info("Escalating session ID {} to expert. Reason: {}", sessionId, reason);
         ExpertChatSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BadRequestException("Session not found"));
+                .orElseThrow(() -> {
+                    log.error("Escalation failed: Session not found for ID {}", sessionId);
+                    return new BadRequestException("Session not found");
+                });
 
         Long currentUserId = SecurityUtils.currentUserId();
+        log.info("Current user ID doing escalation: {}, Farmer ID in session: {}", currentUserId, session.getFarmer().getId());
         if (!session.getFarmer().getId().equals(currentUserId)) {
+            log.warn("Escalation denied: User ID {} is not authorized for session ID {}", currentUserId, sessionId);
             throw new BadRequestException("Not authorized to escalate this session");
         }
 
         if (session.getStatus() != ChatSessionStatus.AI_ACTIVE) {
+            log.warn("Escalation denied: Session ID {} is in state {}, not AI_ACTIVE", sessionId, session.getStatus());
             throw new BadRequestException("Session is not in AI_ACTIVE state");
         }
 
@@ -78,6 +98,7 @@ public class ExpertChatSessionService {
         }
 
         session = sessionRepository.save(session);
+        log.info("Successfully escalated session ID {} to expert queue", sessionId);
 
         // Broadcast to expert queue topic
         broadcastQueueUpdate();
@@ -90,17 +111,26 @@ public class ExpertChatSessionService {
      */
     @Transactional
     public Map<String, Object> acceptSession(Long sessionId) {
+        log.info("Expert attempting to accept session ID: {}", sessionId);
         ExpertChatSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new BadRequestException("Session not found"));
+                .orElseThrow(() -> {
+                    log.error("Accept session failed: Session not found for ID {}", sessionId);
+                    return new BadRequestException("Session not found");
+                });
 
         if (session.getStatus() != ChatSessionStatus.WAITING_FOR_EXPERT) {
+            log.warn("Accept session denied: Session ID {} has status {}, expected WAITING_FOR_EXPERT", sessionId, session.getStatus());
             throw new BadRequestException("Session is not waiting for an expert");
         }
 
         Long expertId = SecurityUtils.currentUserId();
-        User expert = userRepository.getReferenceById(expertId);
+        User expert = userRepository.findById(expertId)
+                .orElseThrow(() -> new BadRequestException("Expert user not found"));
+
+        log.info("Expert user found: name={}, role={}", expert.getName(), expert.getRole());
 
         if (expert.getRole() != UserRole.EXPERT && expert.getRole() != UserRole.ADMIN) {
+            log.warn("Accept session denied: User ID {} has role {}, only EXPERT/ADMIN can accept", expertId, expert.getRole());
             throw new BadRequestException("Only experts can accept sessions");
         }
 
@@ -174,8 +204,10 @@ public class ExpertChatSessionService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getMySessionHistory() {
         Long farmerId = SecurityUtils.currentUserId();
-        return sessionRepository.findByFarmerIdOrderByCreatedAtDesc(farmerId)
-                .stream().map(this::toMap).collect(Collectors.toList());
+        log.info("Fetching session history for farmer ID: {}", farmerId);
+        List<ExpertChatSession> sessions = sessionRepository.findByFarmerIdOrderByCreatedAtDesc(farmerId);
+        log.info("Found {} sessions in history for farmer ID {}", sessions.size(), farmerId);
+        return sessions.stream().map(this::toMap).collect(Collectors.toList());
     }
 
     /**

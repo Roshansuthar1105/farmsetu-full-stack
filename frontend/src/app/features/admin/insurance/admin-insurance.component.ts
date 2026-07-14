@@ -1,42 +1,101 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../../core/services/api.service';
+import { ToastrService } from 'ngx-toastr';
+import { AdminService } from '../services/admin.service';
+import { AdminPageHeaderComponent } from '../shared/admin-page-header/admin-page-header.component';
+import { AdminDataTableComponent, TableColumn, TableAction } from '../shared/admin-data-table/admin-data-table.component';
+import { AdminModalComponent } from '../shared/admin-modal/admin-modal.component';
+import { AdminConfirmDialogComponent } from '../shared/admin-confirm-dialog/admin-confirm-dialog.component';
 
 @Component({
   selector: 'fs-admin-insurance',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AdminPageHeaderComponent,
+    AdminDataTableComponent,
+    AdminModalComponent,
+    AdminConfirmDialogComponent
+  ],
   templateUrl: './admin-insurance.component.html',
   styleUrls: ['./admin-insurance.component.scss']
 })
 export class AdminInsuranceComponent implements OnInit {
-  private readonly api = inject(ApiService);
+  private readonly adminService = inject(AdminService);
+  private readonly toastr = inject(ToastrService);
 
-  insuranceSchemes = signal<any[]>([]);
-  selectedScheme = signal<any>(null);
-  showEditModal = signal(false);
-  isEditMode = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
+  readonly insuranceSchemes = signal<any[]>([]);
+  readonly loading = signal(true);
+  readonly totalElements = signal(0);
+  readonly page = signal(0);
+  readonly size = signal(10);
 
-  // Pagination
-  page = 0;
-  size = 10;
-  totalElements = 0;
+  readonly showEditModal = signal(false);
+  readonly isEditMode = signal(false);
+  readonly showDeleteDialog = signal(false);
+  readonly selectedScheme = signal<any>(null);
+
+  private searchTerm = '';
+
+  readonly columns: TableColumn[] = [
+    { key: 'name', label: 'Scheme Name', sortable: true },
+    { key: 'partnerCompany', label: 'Partner Company', type: 'badge' },
+    { key: 'coverageDetails', label: 'Coverage Highlights' },
+    { key: 'id', label: 'Actions', type: 'actions', align: 'right' }
+  ];
+
+  readonly rowActions: TableAction[] = [
+    { label: 'Edit', action: 'edit', color: 'primary' },
+    { label: 'Delete', action: 'delete', color: 'danger' }
+  ];
 
   ngOnInit(): void {
-    this.loadInsurance();
+    this.loadData();
   }
 
-  loadInsurance(): void {
-    this.api.get<any>('/api/admin/insurance', { page: this.page, size: this.size }).subscribe({
+  loadData(): void {
+    this.loading.set(true);
+    const params: Record<string, string | number | boolean> = {};
+    if (this.searchTerm) {
+      params['search'] = this.searchTerm;
+    }
+
+    this.adminService.list<any>('/api/admin/insurance', this.page(), this.size(), params).subscribe({
       next: (res) => {
-        this.insuranceSchemes.set(res.content);
-        this.totalElements = res.totalElements;
+        this.insuranceSchemes.set(res.content || []);
+        this.totalElements.set(res.totalElements || 0);
+        this.loading.set(false);
       },
-      error: () => this.showError('Failed to load insurance schemes')
+      error: () => {
+        this.toastr.error('Failed to load insurance schemes');
+        this.loading.set(false);
+      }
     });
+  }
+
+  onPageChange(e: { page: number; size: number }): void {
+    this.page.set(e.page);
+    this.size.set(e.size);
+    this.loadData();
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    this.page.set(0);
+    this.loadData();
+  }
+
+  onRowAction(e: { action: string; row: any }): void {
+    if (e.action === 'edit') {
+      this.isEditMode.set(true);
+      this.selectedScheme.set({ ...e.row });
+      this.showEditModal.set(true);
+    } else if (e.action === 'delete') {
+      this.selectedScheme.set(e.row);
+      this.showDeleteDialog.set(true);
+    }
   }
 
   onAdd(): void {
@@ -54,70 +113,35 @@ export class AdminInsuranceComponent implements OnInit {
     this.showEditModal.set(true);
   }
 
-  onEdit(scheme: any): void {
-    this.isEditMode.set(true);
-    this.selectedScheme.set({ ...scheme });
-    this.showEditModal.set(true);
-  }
-
   onSave(): void {
     const scheme = this.selectedScheme();
     if (!scheme) return;
 
-    if (this.isEditMode()) {
-      this.api.put<any>(`/api/admin/insurance/${scheme.id}`, scheme).subscribe({
-        next: () => {
-          this.showSuccess('Insurance scheme updated successfully');
-          this.showEditModal.set(false);
-          this.loadInsurance();
-        },
-        error: () => this.showError('Failed to save insurance details')
-      });
-    } else {
-      this.api.post<any>('/api/admin/insurance', scheme).subscribe({
-        next: () => {
-          this.showSuccess('Insurance scheme created successfully');
-          this.showEditModal.set(false);
-          this.loadInsurance();
-        },
-        error: () => this.showError('Failed to create insurance scheme')
-      });
-    }
+    const request$ = this.isEditMode()
+      ? this.adminService.update<any>('/api/admin/insurance', scheme.id, scheme)
+      : this.adminService.create<any>('/api/admin/insurance', scheme);
+
+    request$.subscribe({
+      next: () => {
+        this.toastr.success(this.isEditMode() ? 'Insurance scheme updated successfully' : 'Insurance scheme created successfully');
+        this.showEditModal.set(false);
+        this.loadData();
+      },
+      error: () => this.toastr.error('Failed to save insurance scheme details')
+    });
   }
 
-  onDelete(scheme: any): void {
-    if (confirm(`Are you sure you want to delete insurance scheme ${scheme.name}?`)) {
-      this.api.delete<void>(`/api/admin/insurance/${scheme.id}`).subscribe({
-        next: () => {
-          this.showSuccess('Insurance scheme deleted successfully');
-          this.loadInsurance();
-        },
-        error: () => this.showError('Failed to delete insurance scheme')
-      });
-    }
-  }
+  confirmDelete(): void {
+    const scheme = this.selectedScheme();
+    if (!scheme) return;
 
-  nextPage(): void {
-    if ((this.page + 1) * this.size < this.totalElements) {
-      this.page++;
-      this.loadInsurance();
-    }
-  }
-
-  prevPage(): void {
-    if (this.page > 0) {
-      this.page--;
-      this.loadInsurance();
-    }
-  }
-
-  private showSuccess(msg: string): void {
-    this.successMessage.set(msg);
-    setTimeout(() => this.successMessage.set(null), 3000);
-  }
-
-  private showError(msg: string): void {
-    this.errorMessage.set(msg);
-    setTimeout(() => this.errorMessage.set(null), 3000);
+    this.adminService.remove('/api/admin/insurance', scheme.id).subscribe({
+      next: () => {
+        this.toastr.success('Insurance scheme deleted successfully');
+        this.showDeleteDialog.set(false);
+        this.loadData();
+      },
+      error: () => this.toastr.error('Failed to delete insurance scheme')
+    });
   }
 }

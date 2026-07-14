@@ -9,13 +9,11 @@ import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
-    @Query("SELECT cm FROM ChatMessage cm WHERE (cm.sender.id = :userId AND cm.receiver.id = :otherUserId) OR (cm.sender.id = :otherUserId AND cm.receiver.id = :userId) ORDER BY cm.createdAt DESC")
+    @Query(value = "SELECT * FROM chats cm WHERE (cm.sender_id = :userId AND cm.receiver_id = :otherUserId) OR (cm.sender_id = :otherUserId AND cm.receiver_id = :userId) ORDER BY cm.created_at DESC", nativeQuery = true)
     List<ChatMessage> findConversation(@Param("userId") Long userId,
                                        @Param("otherUserId") Long otherUserId,
                                        Pageable pageable);
 
-    @Query("SELECT cm FROM ChatMessage cm WHERE cm.sender.id = :senderId AND cm.receiver.id = :receiverId AND cm.read = false")
-    List<ChatMessage> findUnreadMessages(@Param("senderId") Long senderId,
-                                         @Param("receiverId") Long receiverId);
+    List<ChatMessage> findBySenderIdAndReceiverIdAndRead(Long senderId, Long receiverId, boolean read);
 }
 

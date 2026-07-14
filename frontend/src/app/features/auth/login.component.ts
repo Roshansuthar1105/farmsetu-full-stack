@@ -50,7 +50,7 @@ export class LoginComponent {
     if (this.form.invalid) return;
     this.loading.set(true);
     const { identifier, password } = this.form.getRawValue();
-    this.store.dispatch(AuthActions.login({ identifier, password }));
+    this.store.dispatch(AuthActions.login({ identifier, password, rememberMe: false }));
     this.loading.set(false);
   }
 }

@@ -60,11 +60,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
+    public List<UserResponse> getAllUsers(Boolean isUser) {
         return userRepository.findAll().stream()
                 .filter(User::isActive)
+                .filter(u -> isUser == null || (isUser ? !u.isAi() : u.isAi()))
                 .map(UserResponse::from)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return getAllUsers(null);
     }
 
     private User findUser(Long id) {

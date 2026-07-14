@@ -1,138 +1,180 @@
-<div class="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 pb-16 lg:pb-0">
-  
+<div class="min-h-screen flex flex-col lg:flex-row bg-gray-50 dark:bg-slate-950 pb-16 lg:pb-0 font-sans">
+
   <!-- DESKTOP SIDEBAR -->
-  <aside [class.w-64]="showSidebar()" [class.w-20]="!showSidebar()" class="hidden lg:flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm shrink-0 h-[100dvh] sticky top-0 transition-all duration-300 ease-in-out">
-    <div [class.px-6]="showSidebar()" [class.px-4]="!showSidebar()" class="py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center transition-all duration-300">
-      <img [src]="showSidebar() 
-                  ? (theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png') 
-                  : (theme.darkMode() ? 'assets/favicon-white.png' : 'assets/favicon.png')" 
-           alt="FarmSetu Logo" 
-           [class.h-10]="showSidebar()"
-           [class.h-8]="!showSidebar()"
-           [class.rounded-full]="!showSidebar()"
-           [class.aspect-square]="!showSidebar()"
-           class="w-auto object-contain max-w-full transition-all duration-300">
+  <aside [class.w-64]="showSidebar()" [class.w-20]="!showSidebar()"
+    class="hidden lg:flex flex-col bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/60 shadow-sm shrink-0 h-[100dvh] sticky top-0 transition-all duration-300 ease-in-out z-40">
+    <!-- Logo Container -->
+    <div
+      class="logo-container py-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-center transition-all duration-300">
+      <!-- Full Logo -->
+      <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.svg' : 'assets/logo-light-bg.svg'" alt="FarmSetu Logo"
+        class="logo-full h-10 w-auto object-contain transition-all duration-300">
+      <!-- Mini Logo -->
+      <img src="assets/favicon.svg" alt="FarmSetu Mini"
+        class="logo-mini h-8 w-8 object-contain transition-all duration-300">
     </div>
 
     <!-- Navigation items (Desktop) -->
-    <nav [class.px-4]="showSidebar()" [class.px-3.5]="!showSidebar()" class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
-      @if (showSidebar()) {
-        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Main Features</p>
-      } @else {
-        <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
-      }
-      
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
+      <div class="nav-section-header">
+        <p
+          class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
+          Main Features</p>
+        <div class="nav-divider h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+      </div>
+
       @for (item of primaryNavItems; track item.path) {
-        <a [routerLink]="item.path"
-           routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-           [class.justify-start]="showSidebar()"
-           [class.justify-center]="!showSidebar()"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group relative">
-          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition shrink-0">{{ item.icon }}</span>
-          @if (showSidebar()) {
-            <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
-          } @else {
-            <!-- Floating Tooltip -->
-            <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
-              {{ t(item.labelKey) }}
-            </span>
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link"
+        class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
+        <span
+          class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
+          @switch (item.icon) {
+          @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
+          @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+          @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
+          @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }
+          @case ('forum') { <svg lucideMessagesSquare size="16" class="stroke-[2]"></svg> }
+          @case ('groups') { <svg lucideUsers size="16" class="stroke-[2]"></svg> }
+          @case ('person') { <svg lucideUser size="16" class="stroke-[2]"></svg> }
           }
-        </a>
+        </span>
+        <span class="nav-label whitespace-nowrap">{{ t(item.labelKey) }}</span>
+      </a>
       }
 
       @if (auth.currentUser()?.role === 'ADMIN') {
-        <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
-        @if (showSidebar()) {
-          <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Admin Control Panel</p>
-        }
-        
-        @for (item of adminNavItems; track item.path) {
-          <a [routerLink]="item.path"
-             routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-             [class.justify-start]="showSidebar()"
-             [class.justify-center]="!showSidebar()"
-             class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group relative">
-            <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition shrink-0">{{ item.icon }}</span>
-            @if (showSidebar()) {
-              <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
-            } @else {
-              <!-- Floating Tooltip -->
-              <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
-                {{ t(item.labelKey) }}
-              </span>
-            }
-          </a>
-        }
+      <div class="nav-section-header">
+        <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+        <p
+          class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
+          Admin Control Panel</p>
+      </div>
+
+      @for (item of adminNavItems; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
+        class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
+        <span
+          class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
+          @switch (item.icon) {
+          @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
+          @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
+          @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
+          @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+          @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
+          @case ('forward_to_inbox') { <svg lucideMail size="16" class="stroke-[2]"></svg> }
+          @case ('local_shipping') { <svg lucideTruck size="16" class="stroke-[2]"></svg> }
+          @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+          @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+          @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+          @case ('package') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+          @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+          @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+          @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+          @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+          @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+          }
+        </span>
+        <span class="nav-label whitespace-nowrap">{{ t(item.labelKey) }}</span>
+      </a>
+      }
       }
 
-      <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
-      
-      @if (showSidebar()) {
-        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2 transition-all duration-300">Services & Advisory</p>
-      }
-      
+      <div class="nav-section-header">
+        <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+        <p
+          class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
+          Services & Advisory</p>
+      </div>
+
       @for (item of secondaryNavItems; track item.path) {
-        <a [routerLink]="item.path"
-           routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-           [class.justify-start]="showSidebar()"
-           [class.justify-center]="!showSidebar()"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition duration-200 group relative">
-          <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition shrink-0">{{ item.icon }}</span>
-          @if (showSidebar()) {
-            <span class="transition-all duration-300 whitespace-nowrap">{{ t(item.labelKey) }}</span>
-          } @else {
-            <!-- Floating Tooltip -->
-            <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
-              {{ t(item.labelKey) }}
-            </span>
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link"
+        class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
+        <span
+          class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
+          @switch (item.icon) {
+          @case ('agriculture') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+          @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+          @case ('cloud') { <svg lucideCloud size="16" class="stroke-[2]"></svg> }
+          @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+          @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+          @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+          @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+          @case ('eco') { <svg lucideSprout size="16" class="stroke-[2]"></svg> }
+          @case ('calendar_month') { <svg lucideCalendar size="16" class="stroke-[2]"></svg> }
+          @case ('biotech') { <svg lucideFlaskConical size="16" class="stroke-[2]"></svg> }
+          @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
+          @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+          @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+          @case ('machinery') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+          @case ('payments') { <svg lucideCoins size="16" class="stroke-[2]"></svg> }
+          @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+          @case ('help_circle') { <svg lucideHelpCircle size="16" class="stroke-[2]"></svg> }
           }
-        </a>
+        </span>
+        <span class="nav-label whitespace-nowrap">{{ t(item.labelKey) }}</span>
+      </a>
       }
     </nav>
 
     <!-- Sidebar Footer (Desktop) -->
-    <div class="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/10 space-y-3 transition-all duration-300">
+    <div
+      class="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10 space-y-3 transition-all duration-300">
       <button type="button" (click)="theme.toggleDark()"
-              class="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition active:scale-[0.98] relative group">
-        <span class="material-icons text-base shrink-0">{{ theme.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
-        @if (showSidebar()) {
-          <span class="transition-all duration-300 whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
-        } @else {
-          <!-- Tooltip -->
-          <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
-            {{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}
-          </span>
-        }
+        class="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-650 dark:text-slate-350 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.98] relative group focus:outline-none">
+        <span
+          class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
+          @if (theme.darkMode()) {
+          <svg lucideSun size="16" class="stroke-[2]"></svg>
+          } @else {
+          <svg lucideMoon size="16" class="stroke-[2]"></svg>
+          }
+        </span>
+        <span class="nav-label whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
       </button>
-      <button type="button" (click)="logout()"
-              class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold transition active:scale-[0.98] flex items-center justify-center gap-2 relative group">
-        <span class="material-icons text-base shrink-0">logout</span>
-        @if (showSidebar()) {
-          <span class="transition-all duration-300 whitespace-nowrap">Logout</span>
-        } @else {
-          <!-- Tooltip -->
-          <span class="fixed left-20 ml-2 px-2.5 py-1.5 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-[10px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition duration-200 shadow-lg z-50">
-            Logout
+      @if (auth.isAuthenticated()) {
+        <button type="button" (click)="logout()"
+          class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
+          <span class="text-red-650 dark:text-red-400 transition duration-200">
+            <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
           </span>
-        }
-      </button>
+          <span class="nav-label whitespace-nowrap">Logout</span>
+        </button>
+      } @else {
+        <a routerLink="/auth/login"
+          class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
+          <span>
+            <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
+          </span>
+          <span class="nav-label whitespace-nowrap">Login / Register</span>
+        </a>
+      }
     </div>
   </aside>
 
   <!-- CONTENT CONTAINER -->
   <div class="flex-1 flex flex-col min-w-0">
-    
+
     <!-- TOP NAVBAR (COMMON) -->
-    <header class="sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 px-4 lg:px-6 py-3 flex justify-between items-center shadow-sm">
+    <header
+      class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/80 px-4 lg:px-6 py-3 flex justify-between items-center shadow-sm">
       <div class="flex items-center gap-3">
         <!-- Mobile Drawer Toggle -->
         <button (click)="toggleSidebar()" type="button"
-                class="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition active:scale-95">
-          <span class="material-icons">menu</span>
+          class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 lg:hidden focus:outline-none">
+          <svg lucideMenu size="18" class="stroke-[2.25]"></svg>
         </button>
+        <!-- Toggle button on desktop to collapse sidebar -->
+        <button (click)="toggleSidebar()" type="button"
+          class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 hidden lg:block focus:outline-none">
+          <svg lucideMenu size="18" class="stroke-[2.25]"></svg>
+        </button>
+
         <div class="flex items-center gap-2">
-          <img [src]="theme.darkMode() ? 'assets/logo-dark-bg.png' : 'assets/logo-light-bg.png'" alt="FarmSetu Logo" [class.lg:block]="!showSidebar()" class="lg:hidden h-8 w-auto object-contain">
-          <span class="hidden lg:inline font-extrabold text-base lg:text-lg text-gray-900 dark:text-white">FarmSetu Platform</span>
+          <img src="assets/favicon.svg" alt="FarmSetu Logo" [class.lg:block]="!showSidebar()"
+            class="lg:hidden h-8 w-8 object-contain">
+          <span
+            class="hidden lg:inline font-extrabold text-base lg:text-lg text-slate-850 dark:text-white font-display">FarmSetu
+            Platform</span>
         </div>
       </div>
 
@@ -140,53 +182,139 @@
       <div class="flex items-center gap-3">
         <!-- Language Switcher -->
         <div class="relative">
-          <select class="text-xs border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 dark:bg-gray-800 dark:text-white outline-none cursor-pointer hover:border-gray-300 transition focus:border-green-500"
-                  (change)="i18n.setLang($any($event.target).value)">
+          <select
+            class="text-xs border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 bg-white dark:bg-slate-900 text-slate-955 dark:text-white outline-none cursor-pointer hover:border-slate-350 dark:hover:border-slate-700 transition focus:border-green-600 font-medium"
+            (change)="i18n.setLang($any($event.target).value)">
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
           </select>
         </div>
 
-        <!-- Cart Link -->
-        <a routerLink="/app/marketplace/cart"
-           class="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition relative active:scale-95">
-          <span class="material-icons text-lg">shopping_cart</span>
-        </a>
+        <!-- If Authenticated: show Cart, Notifications and Profile -->
+        <ng-container *ngIf="auth.isAuthenticated()">
+          <!-- Cart Link -->
+          <a routerLink="/app/marketplace/cart"
+            class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
+            <svg lucideShoppingCart size="16" class="stroke-[2]"></svg>
+          </a>
 
-        <!-- Notifications Link -->
-        <a routerLink="/app/notifications"
-           class="w-9 h-9 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition relative active:scale-95">
-          <span class="material-icons text-lg">notifications</span>
-          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900 animate-pulse"></span>
-        </a>
+          <!-- Notifications Link -->
+          <a routerLink="/app/notifications"
+            class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/80 text-slate-650 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition relative active:scale-95">
+            <svg lucideBell size="16" class="stroke-[2]"></svg>
+            <span
+              class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+          </a>
 
-        <!-- User Profile Avatar Link -->
-        <a routerLink="/app/profile"
-           class="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow-md shadow-green-500/10 hover:shadow-lg active:scale-95 transition">
-          <img *ngIf="auth.currentUser()?.profilePhoto" [src]="auth.currentUser()!.profilePhoto" alt="Profile" class="w-full h-full object-cover" />
-          <span *ngIf="!auth.currentUser()?.profilePhoto">
-            {{ auth.currentUser()?.name ? auth.currentUser()!.name.charAt(0).toUpperCase() : 'U' }}
-          </span>
-        </a>
+          <!-- User Profile Avatar Link -->
+          <a routerLink="/app/profile"
+            class="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow hover:shadow-lg active:scale-95 transition">
+            <img *ngIf="auth.currentUser()?.profilePhoto" [src]="auth.currentUser()!.profilePhoto" alt="Profile"
+              class="w-full h-full object-cover" />
+            <span *ngIf="!auth.currentUser()?.profilePhoto">
+              {{ auth.currentUser()?.name ? auth.currentUser()!.name.charAt(0).toUpperCase() : 'U' }}
+            </span>
+          </a>
+        </ng-container>
+
+        <!-- If NOT Authenticated: show "Login" and "Sign Up" button links -->
+        <ng-container *ngIf="!auth.isAuthenticated()">
+          <a routerLink="/auth/login"
+            class="px-3.5 py-2 text-xs font-bold text-slate-600 dark:text-slate-350 hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            Login
+          </a>
+          <a routerLink="/auth/register"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow transition duration-200">
+            Sign Up
+          </a>
+        </ng-container>
       </div>
     </header>
 
     <!-- CONTENT BODY -->
     <main class="flex-1 overflow-y-auto flex flex-col justify-between">
-      <div class="p-4 lg:p-6 flex-1">
-        <router-outlet />
+      <div class="p-2 lg:p-3 flex-1">
+        @if (requiresLogin()) {
+          <div class="flex flex-col items-center justify-center min-h-[70vh] px-4 py-12 text-center animate-fade-in">
+            <div class="max-w-md w-full fs-glass-card border border-slate-200/60 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-8 rounded-3xl shadow-xl space-y-6 relative overflow-hidden">
+              <!-- Decorative background glow -->
+              <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+              
+              <!-- Lock Shield Icon -->
+              <div class="w-16 h-16 bg-gradient-to-tr from-amber-500/15 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/10 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center mx-auto shadow-md border border-amber-500/20">
+                <span class="material-icons text-3xl animate-bounce" style="animation-duration: 3s;">lock</span>
+              </div>
+
+              <!-- Title & Subtitle -->
+              <div class="space-y-2">
+                <h2 class="text-2xl font-extrabold tracking-tight text-slate-850 dark:text-white font-display">
+                  Authentication Required
+                </h2>
+                <p class="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider font-display flex items-center justify-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Member-Only Feature
+                </p>
+              </div>
+
+              <!-- Informational Message -->
+              <p class="text-sm text-slate-550 dark:text-slate-405 leading-relaxed font-display">
+                You are currently exploring FarmSetu as a guest. To access <strong class="text-slate-800 dark:text-slate-200">{{ getRequestedFeatureName() }}</strong>, please log in or create a free account.
+              </p>
+
+              <!-- Bullet points showing value of signing up -->
+              <div class="text-left bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/60 rounded-2xl p-4.5 space-y-3 font-display">
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>Interact with verified agronomists & crop buyers</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>Secure direct B2B trading with prompt payments</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-xs text-slate-650 dark:text-slate-350">
+                  <span class="material-icons text-emerald-500 text-sm">check_circle</span>
+                  <span>AI crop diagnostics & personalized calendar schedules</span>
+                </div>
+              </div>
+
+              <!-- Actions Buttons -->
+              <div class="flex flex-col gap-3 pt-2">
+                <!-- Login Button -->
+                <a routerLink="/auth/login"
+                   class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-center">
+                  Log In / Sign In
+                </a>
+                
+                <!-- Register Button -->
+                <a routerLink="/auth/register"
+                   class="w-full py-3.5 bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-gray-300 font-extrabold text-sm rounded-xl transition-all duration-200 text-center">
+                  Register / Create Free Account
+                </a>
+                
+                <!-- Back to Dashboard -->
+                <a routerLink="/app/dashboard"
+                   class="text-xs font-bold text-emerald-555 dark:text-emerald-400 hover:underline flex items-center justify-center gap-1 py-1 font-display">
+                  <span class="material-icons text-xs">arrow_back</span> Return to Dashboard (Guest Mode)
+                </a>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <router-outlet />
+        }
       </div>
-      
+
       <!-- Shared Layout Footer -->
-      <footer class="bg-white dark:bg-gray-800 border-t border-gray-150 dark:border-gray-700 py-5 px-6 mt-auto text-center sm:text-left transition-all duration-300">
+      <footer
+        class="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border-t border-slate-200/50 dark:border-slate-800/80 py-5 px-6 mt-auto text-center sm:text-left transition-all duration-300">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="text-gray-500 dark:text-gray-400 text-xs">
+          <div class="text-slate-500 dark:text-slate-450 text-xs">
             &copy; 2026 FarmSetu Platform. All rights reserved.
           </div>
-          <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
-            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Privacy Policy</a>
-            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Terms of Service</a>
-            <a href="#" class="hover:text-green-600 dark:hover:text-green-400 transition-colors">Help & Support</a>
+          <div class="flex gap-4 text-xs text-slate-500 dark:text-slate-455">
+            <a href="#" class="hover:text-green-650 dark:hover:text-green-400 transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-green-650 dark:hover:text-green-400 transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-green-650 dark:hover:text-green-400 transition-colors">Help & Support</a>
           </div>
         </div>
       </footer>
@@ -194,103 +322,183 @@
   </div>
 
   <!-- MOBILE BOTTOM NAVIGATION BAR -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 px-4 py-1.5 flex justify-around items-center shadow-lg">
-    <a routerLink="/app/dashboard"
-       routerLinkActive="text-green-600 dark:text-green-400 font-bold"
-       class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition active:scale-95">
-      <span class="material-icons text-xl">dashboard</span>
-      <span class="text-[9px] uppercase tracking-wider">Home</span>
-    </a>
-    
-    <a routerLink="/app/marketplace"
-       routerLinkActive="text-green-600 dark:text-green-400 font-bold"
-       class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition active:scale-95">
-      <span class="material-icons text-xl">store</span>
-      <span class="text-[9px] uppercase tracking-wider">Market</span>
+  <nav
+    class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800/80 px-4 py-2 flex justify-around items-center shadow-lg">
+    <a routerLink="/app/dashboard" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
+      <svg lucideLayoutDashboard size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">Home</span>
     </a>
 
-    <a routerLink="/app/community"
-       routerLinkActive="text-green-600 dark:text-green-400 font-bold"
-       class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition active:scale-95">
-      <span class="material-icons text-xl">groups</span>
-      <span class="text-[9px] uppercase tracking-wider">Chaupal</span>
+    <a routerLink="/app/marketplace" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
+      <svg lucideStore size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">Market</span>
     </a>
 
-    <a routerLink="/app/chat"
-       routerLinkActive="text-green-600 dark:text-green-400 font-bold"
-       class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition active:scale-95">
-      <span class="material-icons text-xl">chat</span>
-      <span class="text-[9px] uppercase tracking-wider">Chat</span>
+    <a routerLink="/app/community" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
+      <svg lucideUsers size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">Chaupal</span>
+    </a>
+
+    <a routerLink="/app/farm-chat" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
+      <svg lucideMessagesSquare size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">Chat</span>
     </a>
 
     <button (click)="showMobileDrawer.set(true)"
-            class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition active:scale-95">
-      <span class="material-icons text-xl">grid_view</span>
-      <span class="text-[9px] uppercase tracking-wider">More</span>
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95 focus:outline-none">
+      <svg lucideGrid size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">More</span>
     </button>
   </nav>
 
   <!-- MOBILE SLIDE-OVER DRAWER -->
   @if (showMobileDrawer()) {
-    <div class="fixed inset-0 z-50 lg:hidden overflow-hidden">
-      <!-- Backdrop -->
-      <div (click)="showMobileDrawer.set(false)"
-           class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"></div>
+  <div class="fixed inset-0 z-50 lg:hidden overflow-hidden">
+    <!-- Backdrop -->
+    <div (click)="showMobileDrawer.set(false)"
+      class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300"></div>
 
-      <!-- Drawer Content -->
-      <div class="absolute inset-y-0 left-0 max-w-xs w-full bg-white dark:bg-gray-800 shadow-2xl p-6 flex flex-col justify-between transform transition duration-300 ease-out translate-x-0 border-r border-gray-100 dark:border-gray-700">
-        
-        <div class="space-y-6">
-          <div class="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-gray-700">
-            <span class="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider">All Services</span>
-            <button (click)="showMobileDrawer.set(false)"
-                    class="p-1 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-              <span class="material-icons text-sm">close</span>
-            </button>
-          </div>
+    <!-- Drawer Content -->
+    <div
+      class="absolute inset-y-0 left-0 max-w-xs w-full bg-white dark:bg-slate-900 shadow-2xl p-6 flex flex-col justify-between transform transition duration-300 ease-out translate-x-0 border-r border-slate-105 dark:border-slate-800/80">
 
-          <!-- Secondary Links (Mobile) -->
-          <nav class="space-y-1 overflow-y-auto max-h-[60vh] pr-1">
-            @for (item of secondaryNavItems; track item.path) {
-              <a [routerLink]="item.path"
-                 (click)="showMobileDrawer.set(false)"
-                 routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition group">
-                <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition">{{ item.icon }}</span>
-                {{ t(item.labelKey) }}
-              </a>
-            }
+      <div class="space-y-6">
+        <div class="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+          <span class="font-extrabold text-sm text-slate-850 dark:text-white uppercase tracking-wider font-display">All
+            Services</span>
+          <button (click)="showMobileDrawer.set(false)"
+            class="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none">
+            <svg lucideX size="16" class="stroke-[2.5]"></svg>
+          </button>
+        </div>
 
-            @if (auth.currentUser()?.role === 'ADMIN') {
-              <div class="h-px bg-gray-100 dark:bg-gray-700 my-4 mx-2"></div>
-              <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-3 mb-2">Admin Control Panel</p>
-              @for (item of adminNavItems; track item.path) {
-                <a [routerLink]="item.path"
-                   (click)="showMobileDrawer.set(false)"
-                   routerLinkActive="bg-green-50/70 text-green-700 dark:bg-green-950/30 dark:text-green-400 font-semibold"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition group">
-                  <span class="material-icons text-base text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition">{{ item.icon }}</span>
-                  {{ t(item.labelKey) }}
-                </a>
+        <!-- Links (Mobile Slide-over Drawer) -->
+        <nav class="space-y-1 overflow-y-auto max-h-[60vh] pr-1 scrollbar-thin">
+          <!-- Main Features (Mobile) -->
+          <p
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Main Features</p>
+          @for (item of primaryNavItems; track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
+            class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
+              @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
+              @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }
+              @case ('forum') { <svg lucideMessagesSquare size="16" class="stroke-[2]"></svg> }
+              @case ('groups') { <svg lucideUsers size="16" class="stroke-[2]"></svg> }
+              @case ('person') { <svg lucideUser size="16" class="stroke-[2]"></svg> }
               }
-            }
-          </nav>
-        </div>
+            </span>
+            <span class="transition duration-200">{{ t(item.labelKey) }}</span>
+          </a>
+          }
 
-        <!-- Drawer Footer (Mobile) -->
-        <div class="pt-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/20 dark:bg-gray-900/5 space-y-2">
-          <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
-                  class="w-full py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center gap-2 transition">
-            <span>{{ theme.darkMode() ? '☀️ Light Mode' : '🌙 Dark Mode' }}</span>
-          </button>
-          <button type="button" (click)="logout(); showMobileDrawer.set(false);"
-                  class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold transition">
-            Logout
-          </button>
-        </div>
+          <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
 
+          <!-- Services & Advisory (Mobile) -->
+          <p
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Services & Advisory</p>
+          @for (item of secondaryNavItems; track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
+            class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('agriculture') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+              @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+              @case ('cloud') { <svg lucideCloud size="16" class="stroke-[2]"></svg> }
+              @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+              @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+              @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+              @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+              @case ('eco') { <svg lucideSprout size="16" class="stroke-[2]"></svg> }
+              @case ('calendar_month') { <svg lucideCalendar size="16" class="stroke-[2]"></svg> }
+              @case ('biotech') { <svg lucideFlaskConical size="16" class="stroke-[2]"></svg> }
+              @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
+              @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+              @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+              @case ('machinery') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+              @case ('payments') { <svg lucideCoins size="16" class="stroke-[2]"></svg> }
+              @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+              @case ('help_circle') { <svg lucideHelpCircle size="16" class="stroke-[2]"></svg> }
+              }
+            </span>
+            <span class="transition duration-200">{{ t(item.labelKey) }}</span>
+          </a>
+          }
+
+          @if (auth.currentUser()?.role === 'ADMIN') {
+          <div class="h-px bg-slate-100 dark:bg-slate-800 my-4 mx-2"></div>
+          <p
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Admin Control Panel</p>
+          @for (item of adminNavItems; track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
+            class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
+              @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
+              @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
+              @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
+              @case ('forward_to_inbox') { <svg lucideMail size="16" class="stroke-[2]"></svg> }
+              @case ('local_shipping') { <svg lucideTruck size="16" class="stroke-[2]"></svg> }
+              @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+              @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+              @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+              @case ('package') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+              @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+              @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+              @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+              @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+              }
+            </span>
+            <span class="transition duration-200">{{ t(item.labelKey) }}</span>
+          </a>
+          }
+          }
+        </nav>
       </div>
+
+      <!-- Drawer Footer (Mobile) -->
+      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 space-y-2">
+        <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
+          class="w-full py-2.5 rounded-xl border border-slate-250 dark:border-slate-800 text-xs font-semibold text-slate-650 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-850 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.98] focus:outline-none">
+          <span class="text-slate-400">
+            @if (theme.darkMode()) {
+            <svg lucideSun size="14" class="stroke-[2]"></svg>
+            } @else {
+            <svg lucideMoon size="14" class="stroke-[2]"></svg>
+            }
+          </span>
+          <span>{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
+        </button>
+        @if (auth.isAuthenticated()) {
+          <button type="button" (click)="logout(); showMobileDrawer.set(false);"
+            class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
+            <svg lucideLogOut size="14" class="stroke-[2.25]"></svg>
+            <span>Logout</span>
+          </button>
+        } @else {
+          <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)"
+            class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
+            <svg lucideUserCheck size="14" class="stroke-[2.25]"></svg>
+            <span>Login / Register</span>
+          </a>
+        }
+      </div>
+
     </div>
+  </div>
   }
 
 </div>

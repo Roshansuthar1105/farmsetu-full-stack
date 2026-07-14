@@ -31,7 +31,7 @@ export class WebsocketService {
     const wsBase = environment.wsUrl || 'http://localhost:8080';
     const wsScheme = wsBase.startsWith('https') ? 'wss' : 'ws';
     const hostPath = wsBase.replace(/^https?:\/\//, '');
-    const wsUrl = `${wsScheme}://${hostPath}/ws/websocket`;
+    const wsUrl = `${wsScheme}://${hostPath}/ws`;
 
     try {
       this.socket = new WebSocket(wsUrl);

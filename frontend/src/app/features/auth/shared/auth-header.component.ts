@@ -30,11 +30,11 @@ import { Component, Input } from '@angular/core';
         <h1 class="text-3xl font-bold tracking-wide">FarmSetu</h1>
         <p class="text-green-100 mt-2 text-sm tracking-widest uppercase">{{ tagline }}</p>
 
-        <!-- Animated wheat illustration -->
-        <div class="flex gap-2 mt-4 opacity-60">
-          <span class="text-2xl animate-bounce" style="animation-delay: 0ms">🌿</span>
-          <span class="text-2xl animate-bounce" style="animation-delay: 150ms">🌾</span>
-          <span class="text-2xl animate-bounce" style="animation-delay: 300ms">🌿</span>
+        <!-- Animated icons -->
+        <div class="flex gap-3 mt-4 opacity-60">
+          <span class="material-icons text-2xl animate-bounce text-green-200" style="animation-delay: 0ms">eco</span>
+          <span class="material-icons text-2xl animate-bounce text-green-200" style="animation-delay: 150ms">grass</span>
+          <span class="material-icons text-2xl animate-bounce text-green-200" style="animation-delay: 300ms">agriculture</span>
         </div>
       </div>
     </div>

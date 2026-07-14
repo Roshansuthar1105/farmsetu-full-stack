@@ -17,6 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhone(String phone);
     
     List<User> findByRole(UserRole role);
+    
+    List<User> findByIsAiTrue();
+
+    List<User> findTop5ByOrderByReputationScoreDesc();
 
     @Query("SELECT u FROM User u WHERE u.email = :identifier OR u.phone = :identifier")
     List<User> findByIdentifierNative(@Param("identifier") String identifier);

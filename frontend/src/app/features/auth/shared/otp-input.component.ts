@@ -15,6 +15,11 @@ import { NgFor } from '@angular/common';
         <input
           #otpInput
           type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          name="otp_digit_{{$index}}"
+          data-lpignore="true"
+          data-form-type="other"
           maxlength="1"
           [value]="digit"
           (input)="onInput($event, $index)"

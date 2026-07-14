@@ -1,0 +1,401 @@
+<div class="w-full min-h-screen space-y-6 pb-12">
+  <!-- HEADER WITH ACTIONS -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <fs-page-header title="Marketplace" subtitle="Buy seeds, tools, & fertilizers, or auction your produce" />
+    <button (click)="showCreateModal.set(true)"
+            class="fs-btn-glow px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-green-500/20 active:scale-[0.98] transition">
+      <svg lucidePlus size="16" class="stroke-[2.5]"></svg>
+      Add Listing
+    </button>
+  </div>
+
+  <!-- SEARCH & FILTER BAR -->
+  <div class="flex flex-col gap-5 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-md">
+    <!-- Search Input -->
+    <div class="relative w-full">
+      <svg lucideSearch size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></svg>
+      <input type="text"
+             [(ngModel)]="searchQuery"
+             (ngModelChange)="onSearchChange()"
+             placeholder="Search products by title or description..."
+             class="w-full pl-12 pr-12 py-3.5 bg-slate-50/60 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 rounded-xl text-sm focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" />
+      @if (searchQuery) {
+        <button (click)="clearSearch()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white transition active:scale-90 flex items-center justify-center">
+          <svg lucideX size="16"></svg>
+        </button>
+      }
+    </div>
+
+    <!-- Categories horizontal scroll -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin border-b border-slate-100 dark:border-slate-800/60">
+      @for (cat of categories; track cat.key) {
+        <button (click)="selectCategory(cat.key)"
+                class="category-btn"
+                [class.active]="cat.key === selectedCategory()">
+          @if (cat.key === 'ALL') {
+            <svg lucideGrid size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'SEEDS') {
+            <svg lucideSprout size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'FERTILIZERS') {
+            <svg lucideBeaker size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'TOOLS') {
+            <svg lucideWrench size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'EQUIPMENT') {
+            <svg lucideTractor size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'PESTICIDES') {
+            <svg lucideBug size="14" class="stroke-[2.25]"></svg>
+          } @else if (cat.key === 'ORGANIC_PRODUCTS') {
+            <svg lucideLeaf size="14" class="stroke-[2.25]"></svg>
+          }
+          {{ cat.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="flex items-center justify-between pt-1 flex-wrap gap-4">
+      <div class="flex items-center gap-4 flex-wrap text-xs">
+        <!-- Price filters -->
+        <div class="flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/20 px-3 py-1.5 rounded-xl border border-slate-200/40 dark:border-slate-800/60">
+          <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Price:</span>
+          <div class="flex items-center gap-1">
+            <input type="number" [(ngModel)]="minPrice" placeholder="Min" class="w-18 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:border-green-500 text-slate-850 dark:text-white" />
+            <span class="text-slate-400">-</span>
+            <input type="number" [(ngModel)]="maxPrice" placeholder="Max" class="w-18 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:border-green-500 text-slate-850 dark:text-white" />
+          </div>
+        </div>
+
+        <!-- Rating filter -->
+        <div class="flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/20 px-3 py-1.5 rounded-xl border border-slate-200/40 dark:border-slate-800/60">
+          <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Rating:</span>
+          <select [(ngModel)]="minRating" class="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:border-green-500 text-slate-850 dark:text-white cursor-pointer">
+            <option [ngValue]="undefined">Any Rating</option>
+            <option [ngValue]="4">4★ & above</option>
+            <option [ngValue]="3">3★ & above</option>
+            <option [ngValue]="2">2★ & above</option>
+          </select>
+        </div>
+
+        <!-- Stock status filter -->
+        <div class="flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/20 px-3 py-1.5 rounded-xl border border-slate-200/40 dark:border-slate-800/60">
+          <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Stock Status:</span>
+          <select [(ngModel)]="stockStatus" class="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:border-green-500 text-slate-850 dark:text-white cursor-pointer">
+            <option value="ALL">All Levels</option>
+            <option value="IN_STOCK">In Stock</option>
+            <option value="LOW_STOCK">Low Stock</option>
+            <option value="OUT_OF_STOCK">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sort & Actions -->
+      <div class="flex items-center gap-3 flex-wrap text-xs">
+        <div class="flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/20 px-3 py-1.5 rounded-xl border border-slate-200/40 dark:border-slate-800/60">
+          <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">Sort:</span>
+          <select [(ngModel)]="sortBy" (change)="loadProducts()" class="px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs outline-none focus:border-green-500 text-slate-850 dark:text-white cursor-pointer">
+            <option value="newest">Newest Listings</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="rating_desc">Top Rated</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2">
+          <button (click)="loadProducts()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl active:scale-95 transition flex items-center gap-1.5 shadow-sm">
+            <svg lucideSliders size="13" class="stroke-[2.5]"></svg>
+            Apply
+          </button>
+          <button (click)="resetFilters()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-750 active:scale-95 transition flex items-center gap-1.5">
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS CONTAINER -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+      @for (placeholder of [1, 2, 3, 4, 5, 6, 7, 8]; track $index) {
+        <div class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-4 block relative shadow-sm">
+          <!-- Image Wrapper Skeleton -->
+          <div class="h-44 bg-slate-100 dark:bg-slate-800 rounded-xl mb-4.5"></div>
+          
+          <!-- Details Skeleton -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center gap-2">
+              <div class="h-4 w-16 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              <div class="h-3.5 w-10 bg-slate-100 dark:bg-slate-800 rounded"></div>
+            </div>
+
+            <div class="h-5 w-3/4 bg-slate-100 dark:bg-slate-800 rounded"></div>
+            
+            <div class="flex justify-between items-baseline pt-1">
+              <div class="space-y-1">
+                <div class="h-3 w-10 bg-slate-100 dark:bg-slate-850 rounded"></div>
+                <div class="h-5 w-20 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              </div>
+              <div class="h-3.5 w-16 bg-slate-100 dark:bg-slate-800 rounded"></div>
+            </div>
+
+            <div class="border-t border-slate-100 dark:border-slate-800/60 pt-3 flex items-center justify-between">
+              <div class="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              <div class="h-4 w-12 bg-slate-100 dark:bg-slate-800 rounded"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    @if (products().length === 0) {
+      <!-- Empty State -->
+      <div class="bg-white/60 dark:bg-slate-900/40 backdrop-blur-md py-16 text-center max-w-md mx-auto space-y-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-md">
+        <div class="w-16 h-16 rounded-2xl bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto shadow-inner">
+          <svg lucideShoppingBag size="28" class="stroke-[2]"></svg>
+        </div>
+        <div class="space-y-1 px-6">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg">No Listings Found</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Try resetting filters, modifying your search query, or list a new product yourself.</p>
+        </div>
+        <button (click)="resetFilters()" class="px-5 py-2.5 text-xs font-bold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/40 rounded-xl hover:bg-green-100 dark:hover:bg-green-950/60 border border-green-150/40 dark:border-green-900/30 transition active:scale-95">
+          Reset All Filters
+        </button>
+      </div>
+    } @else {
+      <!-- Products Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @for (p of products(); track p.id) {
+          <a [routerLink]="[p.id]" class="bg-white dark:bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-200/60 dark:border-slate-800/80 p-4 block hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative group shadow-sm">
+            
+            <!-- Image Wrapper -->
+            <div class="h-44 bg-slate-50 dark:bg-slate-950/40 rounded-xl mb-4.5 flex items-center justify-center text-slate-400 relative overflow-hidden border border-slate-200/50 dark:border-slate-800/80 shadow-inner">
+              @if (p.images && p.images.length) {
+                <img [src]="p.images[0]" class="h-full w-full object-cover group-hover:scale-103 transition duration-500" alt="{{ p.title }}" />
+              } @else {
+                <svg lucideImage size="36" class="text-slate-350 dark:text-slate-700"></svg>
+              }
+              
+              <!-- Auction Indicator -->
+              @if (p.auction) {
+                <span class="absolute top-2.5 right-2.5 px-2.5 py-1 text-[9px] font-extrabold bg-red-650 text-white rounded-full shadow-md flex items-center gap-1.5 uppercase tracking-wide">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> Live Auction
+                </span>
+              }
+
+              <!-- Stock Badge -->
+              <span [class]="getStockBadgeClass(p.stockStatus)" class="absolute top-2.5 left-2.5 px-2.5 py-1 text-[9px] font-extrabold rounded-full shadow-md uppercase tracking-wider">
+                {{ getStockStatusText(p.stockStatus) }}
+              </span>
+            </div>
+
+            <!-- Product Details -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center gap-2">
+                <span class="px-2 py-0.5 text-[9px] font-bold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/30 rounded border border-green-150/40 dark:border-green-900/30 w-max block uppercase">
+                  {{ p.category }}
+                </span>
+                <!-- Star Ratings -->
+                <div class="flex items-center gap-1">
+                  <svg lucideStar size="12" class="fill-amber-400 text-amber-400 stroke-[2.5]"></svg>
+                  <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 telemetry-val">
+                    {{ p.averageRating ? (p.averageRating | number:'1.1-1') : 'New' }}
+                  </span>
+                </div>
+              </div>
+
+              <h3 class="font-bold text-sm sm:text-base text-slate-850 dark:text-white line-clamp-1 group-hover:text-green-600 transition duration-200">
+                {{ p.title }}
+              </h3>
+              
+              <div class="flex justify-between items-baseline pt-1">
+                <div>
+                  @if (p.auction) {
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-semibold">Current Bid</p>
+                    <p class="text-base font-extrabold text-slate-900 dark:text-white telemetry-val">₹{{ p.currentBid || p.startingBid }}</p>
+                  } @else {
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-semibold">Price</p>
+                    <p class="text-base font-extrabold text-green-600 dark:text-green-400 telemetry-val">₹{{ p.price }}</p>
+                  }
+                </div>
+                <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Stock: {{ p.stock }} {{ p.unit || 'units' }}</span>
+              </div>
+
+              <div class="border-t border-slate-100 dark:border-slate-800/60 pt-3 flex items-center justify-between text-[11px] text-slate-500">
+                <span class="flex items-center gap-1.5 text-slate-550 dark:text-slate-400">
+                  <svg lucideUser size="12" class="stroke-[2.5]"></svg>
+                  {{ p.sellerName }}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {{ p.condition === 'NEW' ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20 border border-blue-150/20 dark:border-blue-950/40' : 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 border border-amber-150/20 dark:border-amber-950/40' }}">
+                  {{ p.condition }}
+                </span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
+  }
+
+  <!-- ADD PRODUCT MODAL -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div (click)="showCreateModal.set(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"></div>
+
+      <!-- Content Container -->
+      <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl p-6 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-thin">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+              <svg lucideShoppingBag size="16" class="stroke-[2.5]"></svg>
+            </div>
+            List New Product
+          </h3>
+          <button (click)="showCreateModal.set(false)" class="w-8 h-8 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-white transition flex items-center justify-center">
+            <svg lucideX size="16"></svg>
+          </button>
+        </div>
+
+        <form (ngSubmit)="submitProduct()" class="space-y-4 text-xs sm:text-sm">
+          <!-- Row: Title & Category -->
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Product Title</label>
+              <input type="text" [(ngModel)]="form.title" name="title" required placeholder="e.g., Organic Wheat Seeds"
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Category</label>
+              <select [(ngModel)]="form.category" name="category" required
+                      class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white cursor-pointer">
+                <option value="SEEDS">Seeds</option>
+                <option value="FERTILIZERS">Fertilizers</option>
+                <option value="TOOLS">Tools</option>
+                <option value="EQUIPMENT">Equipment</option>
+                <option value="PESTICIDES">Pesticides</option>
+                <option value="ORGANIC_PRODUCTS">Organic Products</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Description</label>
+            <textarea [(ngModel)]="form.description" name="description" rows="3" placeholder="Describe the item condition, quality, crop variety, etc."
+                      class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white resize-none"></textarea>
+          </div>
+
+          <!-- Row: Price / Stock / LowStockThreshold -->
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Price (₹)</label>
+              <input type="number" [(ngModel)]="form.price" name="price" required min="1"
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Initial Stock</label>
+              <input type="number" [(ngModel)]="form.stock" name="stock" min="0" required
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Low Limit</label>
+              <input type="number" [(ngModel)]="form.lowStockThreshold" name="lowStockThreshold" min="1"
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+          </div>
+
+          <!-- Row: Unit / Condition / Location -->
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Unit</label>
+              <input type="text" [(ngModel)]="form.unit" name="unit" placeholder="Kg / Bags / Pcs"
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Condition</label>
+              <div class="flex gap-4 py-2">
+                <label class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">
+                  <input type="radio" [(ngModel)]="form.condition" name="condition" value="NEW" class="text-green-600 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800" /> New
+                </label>
+                <label class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">
+                  <input type="radio" [(ngModel)]="form.condition" name="condition" value="USED" class="text-green-600 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800" /> Used
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Location</label>
+              <input type="text" [(ngModel)]="form.location" name="location" placeholder="e.g. Pune, Maharashtra"
+                     class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+            </div>
+          </div>
+
+          <!-- Option: Toggle Auction -->
+          <div class="p-3 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/80 rounded-xl space-y-3">
+            <label class="flex items-center justify-between cursor-pointer font-bold text-xs uppercase text-slate-500 dark:text-slate-400">
+              <span>Sell via Bidding / Live Auction</span>
+              <input type="checkbox" [(ngModel)]="form.auction" name="auction" class="rounded text-green-600 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800" />
+            </label>
+
+            @if (form.auction) {
+              <div class="grid sm:grid-cols-2 gap-3 pt-2 animate-in slide-in-from-top-2 duration-200">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Starting Bid (₹)</label>
+                  <input type="number" [(ngModel)]="form.startingBid" name="startingBid" min="1"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">End Time</label>
+                  <input type="datetime-local" [(ngModel)]="auctionEndDate" name="auctionEndDate"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Multi-Image Upload Section -->
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Product Images</label>
+            
+            <div class="flex items-center justify-center w-full">
+              <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+                <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                  <svg lucideUploadCloud size="24" class="text-slate-400 dark:text-slate-500 mb-1"></svg>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                    {{ imageUploading() ? 'Uploading images...' : 'Click to upload files (multi-select)' }}
+                  </p>
+                  <p class="text-[9px] text-slate-400 dark:text-slate-500">PNG, JPG, JPEG up to 5MB each</p>
+                </div>
+                <input type="file" multiple class="hidden" accept="image/*" (change)="onFileSelect($event)" [disabled]="imageUploading()" />
+              </label>
+            </div>
+
+            <!-- Uploaded Images Thumbnails Grid -->
+            @if (uploadedImages().length) {
+              <div class="grid grid-cols-4 gap-2 pt-2">
+                @for (url of uploadedImages(); track url; let idx = $index) {
+                  <div class="relative w-full h-16 bg-slate-50 dark:bg-slate-950/40 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group">
+                    <img [src]="url" class="w-full h-full object-cover" />
+                    <button type="button" (click)="removeUploadedImage(idx)" 
+                            class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-650 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-90 transition opacity-0 group-hover:opacity-100 duration-200">
+                      <svg lucideX size="10" class="stroke-[3]"></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex justify-end space-x-2 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+            <button type="button" (click)="showCreateModal.set(false)"
+                    class="px-5 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition">Cancel</button>
+            <button type="submit" [disabled]="submitting() || imageUploading()"
+                    class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50 flex items-center gap-1.5">
+              {{ submitting() ? 'Listing...' : 'List Product' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

@@ -4,6 +4,7 @@ import { OtpInputComponent } from '../shared/otp-input.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { AuthLayoutComponent } from '../shared/auth-layout.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'fs-two-factor',
@@ -75,14 +76,13 @@ import { AuthLayoutComponent } from '../shared/auth-layout.component';
 
       <!-- Verify Button -->
       <button (click)="verify()"
-              [disabled]="!code() || loading()"
-              class="w-full rounded-xl text-sm font-bold text-white
-                     bg-gradient-to-r from-green-600 to-emerald-600
-                     hover:from-green-700 hover:to-emerald-700
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     shadow-lg shadow-green-500/10
-                     transition-all duration-200 flex items-center justify-center gap-2"
-              style="height: 48px;">
+              class="relative w-full rounded-xl text-sm font-bold text-white
+                     bg-green-600 hover:bg-green-500 active:bg-green-700
+                     border border-green-500/50 hover:border-green-400
+                     shadow-[0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(22,163,74,0.3)]
+                     transition-all duration-200 ease-in-out
+                     flex items-center justify-center gap-2"
+              style="height: 44px;">
         @if (loading()) {
           <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -100,6 +100,7 @@ export class TwoFactorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+  private readonly toastr = inject(ToastrService);
 
   readonly phone = signal<string | null>(null);
   readonly code = signal('');
@@ -116,7 +117,11 @@ export class TwoFactorComponent implements OnInit {
   }
 
   verify(): void {
-    if (!this.code()) return;
+    if (!this.code()) {
+      this.toastr.error('Please enter the 6-digit verification code.');
+      return;
+    }
+    if (this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
 
@@ -134,6 +139,6 @@ export class TwoFactorComponent implements OnInit {
   }
 
   sendPhoneOtp(): void {
-    alert('OTP has been resent successfully!');
+    this.toastr.success('OTP has been resent successfully!');
   }
 }

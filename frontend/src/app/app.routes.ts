@@ -14,7 +14,6 @@ export const routes: Routes = [
   {
     path: 'app',
     loadComponent: () => import('./shared/components/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
-    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
@@ -32,10 +31,6 @@ export const routes: Routes = [
       {
         path: 'orders',
         loadComponent: () => import('./features/marketplace/orders.component').then(m => m.OrdersComponent)
-      },
-      {
-        path: 'chat',
-        loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
       },
       {
         path: 'farm-chat',
@@ -116,6 +111,10 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./features/profile/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'help',
+        loadComponent: () => import('./features/help/help.component').then(m => m.HelpComponent)
       }
     ]
   },
@@ -155,6 +154,38 @@ export const routes: Routes = [
       {
         path: 'water-queue',
         loadComponent: () => import('./features/admin/water-queue/admin-water-queue.component').then(m => m.AdminWaterQueueComponent)
+      },
+      {
+        path: 'schemes',
+        loadComponent: () => import('./features/admin/schemes/admin-schemes.component').then(m => m.AdminSchemesComponent)
+      },
+      {
+        path: 'insurance',
+        loadComponent: () => import('./features/admin/insurance/admin-insurance.component').then(m => m.AdminInsuranceComponent)
+      },
+      {
+        path: 'products',
+        loadComponent: () => import('./features/admin/products/admin-products.component').then(m => m.AdminProductsComponent)
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./features/admin/analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
+      },
+      {
+        path: 'news',
+        loadComponent: () => import('./features/admin/news/admin-news.component').then(m => m.AdminNewsComponent)
+      },
+      {
+        path: 'resources',
+        loadComponent: () => import('./features/admin/resources/admin-resources.component').then(m => m.AdminResourcesComponent)
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/admin/notifications/admin-notifications.component').then(m => m.AdminNotificationsComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/admin/settings/admin-settings.component').then(m => m.AdminSettingsComponent)
       }
       // ,
       // {

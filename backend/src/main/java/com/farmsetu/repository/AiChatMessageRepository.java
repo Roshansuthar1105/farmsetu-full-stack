@@ -11,4 +11,6 @@ import java.util.List;
 public interface AiChatMessageRepository extends JpaRepository<AiChatMessage, Long> {
     
     List<AiChatMessage> findByFarmerIdAndBotIdOrderByCreatedAtDesc(Long farmerId, Integer botId, Pageable pageable);
+    
+    void deleteByFarmerIdAndBotId(Long farmerId, Integer botId);
 }

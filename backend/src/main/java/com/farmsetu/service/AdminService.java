@@ -7,9 +7,7 @@ import com.farmsetu.model.entity.*;
 import com.farmsetu.model.enums.*;
 import com.farmsetu.repository.*;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,11 +34,122 @@ public class AdminService {
     private final FarmerProfileRepository farmerProfileRepository;
 
     public Map<String, Object> dashboard() {
-        return Map.of(
-                "totalUsers", userRepository.count(),
-                "totalOrders", orderRepository.count(),
-                "totalPosts", postRepository.count()
-        );
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalUsers", userRepository.count());
+        stats.put("totalOrders", orderRepository.count());
+        stats.put("totalPosts", postRepository.count());
+        stats.put("totalProducts", productRepository.count());
+        stats.put("totalCrops", cropRepository.count());
+        stats.put("totalSchemes", govtSchemeRepository.count());
+        stats.put("totalInsurance", insuranceSchemeRepository.count());
+        stats.put("totalMandis", mandiRepository.count());
+        stats.put("totalNews", newsRepository.count());
+        stats.put("totalResources", resourceRepository.count());
+
+        // Active users (users with active=true)
+        long activeUsers = userRepository.findAll().stream().filter(User::isActive).count();
+        stats.put("activeUsers", activeUsers);
+
+        // New users this month
+        java.time.Instant startOfMonth = java.time.ZonedDateTime.now(java.time.ZoneId.systemDefault())
+                .withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).toInstant();
+        long newUsersThisMonth = userRepository.findAll().stream()
+                .filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(startOfMonth))
+                .count();
+        stats.put("newUsersThisMonth", newUsersThisMonth);
+
+        // Total revenue
+        java.math.BigDecimal totalRevenue = orderRepository.findAll().stream()
+                .filter(o -> o.getTotalAmount() != null)
+                .map(Order::getTotalAmount)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        stats.put("totalRevenue", totalRevenue.longValue());
+
+        return stats;
+    }
+
+    public Map<String, Object> dashboardAnalytics() {
+        Map<String, Object> analytics = new HashMap<>();
+
+        List<Order> allOrders = orderRepository.findAll();
+        List<User> allUsers = userRepository.findAll();
+
+        // Monthly Orders (last 12 months)
+        List<Map<String, Object>> monthlyOrders = new ArrayList<>();
+        List<Map<String, Object>> monthlyRevenue = new ArrayList<>();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+        for (int i = 11; i >= 0; i--) {
+            java.time.LocalDateTime monthStart = now.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            java.time.LocalDateTime monthEnd = monthStart.plusMonths(1);
+            java.time.Instant monthStartInstant = monthStart.atZone(java.time.ZoneId.systemDefault()).toInstant();
+            java.time.Instant monthEndInstant = monthEnd.atZone(java.time.ZoneId.systemDefault()).toInstant();
+            String monthLabel = monthNames[monthStart.getMonthValue() - 1];
+
+            long orderCount = allOrders.stream()
+                    .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().isAfter(monthStartInstant) && o.getCreatedAt().isBefore(monthEndInstant))
+                    .count();
+
+            long revenue = allOrders.stream()
+                    .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().isAfter(monthStartInstant) && o.getCreatedAt().isBefore(monthEndInstant))
+                    .filter(o -> o.getTotalAmount() != null)
+                    .map(o -> o.getTotalAmount().longValue())
+                    .reduce(0L, Long::sum);
+
+            Map<String, Object> orderEntry = new HashMap<>();
+            orderEntry.put("month", monthLabel);
+            orderEntry.put("count", orderCount);
+            monthlyOrders.add(orderEntry);
+
+            Map<String, Object> revenueEntry = new HashMap<>();
+            revenueEntry.put("month", monthLabel);
+            revenueEntry.put("count", revenue);
+            revenueEntry.put("revenue", revenue);
+            monthlyRevenue.add(revenueEntry);
+        }
+        analytics.put("monthlyOrders", monthlyOrders);
+        analytics.put("monthlyRevenue", monthlyRevenue);
+
+        // User Growth (last 12 months)
+        List<Map<String, Object>> userGrowth = new ArrayList<>();
+        for (int i = 11; i >= 0; i--) {
+            java.time.LocalDateTime monthStart = now.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            java.time.LocalDateTime monthEnd = monthStart.plusMonths(1);
+            java.time.Instant monthStartInstant = monthStart.atZone(java.time.ZoneId.systemDefault()).toInstant();
+            java.time.Instant monthEndInstant = monthEnd.atZone(java.time.ZoneId.systemDefault()).toInstant();
+            String monthLabel = monthNames[monthStart.getMonthValue() - 1];
+
+            long userCount = allUsers.stream()
+                    .filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(monthStartInstant) && u.getCreatedAt().isBefore(monthEndInstant))
+                    .count();
+
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("month", monthLabel);
+            entry.put("count", userCount);
+            userGrowth.add(entry);
+        }
+        analytics.put("userGrowth", userGrowth);
+
+        // Orders by status
+        Map<String, Long> ordersByStatus = allOrders.stream()
+                .filter(o -> o.getDeliveryStatus() != null)
+                .collect(Collectors.groupingBy(o -> o.getDeliveryStatus().name(), Collectors.counting()));
+        analytics.put("ordersByStatus", ordersByStatus);
+
+        // Orders by payment
+        Map<String, Long> ordersByPayment = allOrders.stream()
+                .filter(o -> o.getPaymentStatus() != null)
+                .collect(Collectors.groupingBy(o -> o.getPaymentStatus().name(), Collectors.counting()));
+        analytics.put("ordersByPayment", ordersByPayment);
+
+        // Users by role
+        Map<String, Long> usersByRole = allUsers.stream()
+                .filter(u -> u.getRole() != null)
+                .collect(Collectors.groupingBy(u -> u.getRole().name(), Collectors.counting()));
+        analytics.put("usersByRole", usersByRole);
+
+        return analytics;
     }
 
     public Map<String, Object> listUsers(int page, int size) {

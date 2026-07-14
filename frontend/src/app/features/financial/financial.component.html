@@ -1,0 +1,454 @@
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+  <div>
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white font-display">Financial Tools</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+      Log operational crop expenses, compute estimated loan limits, and calculate agricultural profit margins.
+    </p>
+  </div>
+  @if (activeTab() === 'expenses') {
+    <button (click)="openExpenseModal()"
+      class="relative group overflow-hidden flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 hover:from-green-600 hover:via-green-700 hover:to-emerald-750 text-white text-sm font-extrabold rounded-2xl shadow-md shadow-green-500/20 hover:shadow-lg transition-all duration-300 flex-shrink-0 border border-green-400/20">
+      <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none"></span>
+      <svg lucidePlusCircle class="w-4 h-4"></svg>
+      <span>Log Farm Expense</span>
+    </button>
+  }
+</div>
+
+<!-- Stats Banner -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center">
+      <svg lucideCoins class="w-5 h-5 text-green-600 dark:text-green-400"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Total Expenses</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">₹{{ report()?.['totalExpenses'] ?? 0 | number }}</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+      <svg lucideReceipt class="w-5 h-5 text-blue-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Expense Logs</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">{{ expenseCount() }} entries</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 flex items-center justify-center">
+      <svg lucideAward class="w-5 h-5 text-orange-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Loan Schemes</p>
+      <p class="text-lg font-extrabold text-gray-900 dark:text-white">{{ schemes().length }} policies</p>
+    </div>
+  </div>
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center">
+      <svg lucideCalculator class="w-5 h-5 text-purple-500"></svg>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 dark:text-gray-500">Credit Limit</p>
+      <p class="text-sm font-extrabold text-purple-600 dark:text-purple-400 mt-0.5">
+        {{ maxLoanAmount() > 0 ? '₹' + (maxLoanAmount() | number) : 'Check Below' }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="flex gap-2 mb-5 border-b border-gray-200/60 dark:border-slate-800/60 pb-3">
+  <button (click)="activeTab.set('expenses')" class="px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+    [ngClass]="activeTab() === 'expenses'
+      ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
+      : 'bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 text-gray-600 dark:text-gray-300 hover:bg-gray-50'">
+    <svg lucideCoins class="w-3.5 h-3.5"></svg>
+    Expense Tracker
+  </button>
+  <button (click)="activeTab.set('loans')" class="px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+    [ngClass]="activeTab() === 'loans'
+      ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
+      : 'bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 text-gray-600 dark:text-gray-300 hover:bg-gray-50'">
+    <svg lucideAward class="w-3.5 h-3.5"></svg>
+    Loan Schemes & Credit Check
+  </button>
+  <button (click)="activeTab.set('roi')" class="px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2"
+    [ngClass]="activeTab() === 'roi'
+      ? 'bg-green-600 text-white shadow-md shadow-green-600/20'
+      : 'bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 text-gray-600 dark:text-gray-300 hover:bg-gray-50'">
+    <svg lucideCalculator class="w-3.5 h-3.5"></svg>
+    Crop Yield ROI
+  </button>
+</div>
+
+<!-- TAB 1: Expense Tracker -->
+@if (activeTab() === 'expenses') {
+  <div class="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-6 shadow-sm">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Expense Ledger Log</h3>
+      <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Logged Farm Investments</span>
+    </div>
+
+    @if (loading()) {
+      <div class="space-y-3 animate-pulse">
+        <div class="h-10 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
+        <div class="h-10 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
+        <div class="h-10 bg-gray-200 dark:bg-slate-800 rounded-xl"></div>
+      </div>
+    } @else if (expensesList().length === 0) {
+      <div class="border border-dashed border-gray-200 dark:border-slate-800/60 rounded-2xl p-16 text-center flex flex-col items-center justify-center">
+        <svg lucideCoins class="w-14 h-14 text-slate-350 dark:text-slate-650 mb-4"></svg>
+        <p class="text-base font-bold text-gray-700 dark:text-gray-300">No expenses logged yet</p>
+        <p class="text-sm text-gray-400 mt-1.5">Keep track of seed, fertilizer, labor, and fuel costs to calculate seasonality margins.</p>
+        <button (click)="openExpenseModal()" class="mt-5 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition">
+          Log Your First Expense
+        </button>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200/50 dark:divide-slate-800/50">
+          <thead>
+            <tr class="text-left text-xs font-extrabold text-gray-450 dark:text-gray-500 uppercase tracking-wider">
+              <th class="pb-3 pr-4">Date</th>
+              <th class="pb-3 px-4">Expense Type</th>
+              <th class="pb-3 px-4">Season / Year</th>
+              <th class="pb-3 px-4">Description</th>
+              <th class="pb-3 pl-4 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-150 dark:divide-slate-800/40 text-xs font-medium text-gray-700 dark:text-gray-300">
+            @for (exp of expensesList(); track exp.id) {
+              <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition duration-150">
+                <td class="py-3 pr-4 text-gray-500 dark:text-gray-450">{{ exp.date | date:'mediumDate' }}</td>
+                <td class="py-3 px-4 font-bold text-gray-900 dark:text-white">
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 border border-slate-200 dark:border-slate-700">
+                    {{ exp.expenseType }}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-gray-500 dark:text-gray-400">{{ exp.season }} {{ exp.year }}</td>
+                <td class="py-3 px-4 max-w-xs truncate text-gray-600 dark:text-gray-400">{{ exp.description || 'N/A' }}</td>
+                <td class="py-3 pl-4 text-right font-extrabold text-gray-900 dark:text-white">₹{{ exp.amount | number:'1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- TAB 2: Loan Schemes & Credit Check -->
+@if (activeTab() === 'loans') {
+  <div class="grid lg:grid-cols-12 gap-6">
+    <!-- Credit Checker wizard -->
+    <div class="lg:col-span-5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-6 shadow-sm self-start space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center shadow-sm">
+          <svg lucideCalculator class="w-5 h-5 text-green-600 dark:text-green-400"></svg>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white font-display">Credit Eligibility</h3>
+          <p class="text-xs text-gray-400">Evaluate maximum agricultural loan limits</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="checkLoanEligibility()" class="space-y-4">
+        <!-- Income -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Annual Farm Income</label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="e.g. 150000" [(ngModel)]="loanForm.income" name="income"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">₹</span>
+          </div>
+        </div>
+
+        <!-- Land Area -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Cultivable Land Area (Acres)</label>
+          <div class="relative">
+            <input type="number" step="0.1" min="0.1" placeholder="e.g. 4.0" [(ngModel)]="loanForm.area" name="area"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">Acres</span>
+          </div>
+        </div>
+
+        <!-- Existing loans -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Existing Debt / Liabilities</label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="e.g. 20000" [(ngModel)]="loanForm.existingDebt" name="existingDebt"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">₹</span>
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="submittingLoan() || !loanForm.income || !loanForm.area"
+          class="relative group overflow-hidden w-full flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 hover:from-green-600 hover:via-green-700 hover:to-emerald-700 text-white text-sm font-extrabold rounded-2xl shadow-md shadow-green-500/20 hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none border border-green-400/20">
+          <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none"></span>
+          @if (submittingLoan()) {
+            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Evaluating credit...
+          } @else {
+            <svg lucideSparkles class="w-4 h-4"></svg>
+            Evaluate Credit Eligibility
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Schemes & Results List -->
+    <div class="lg:col-span-7 space-y-5">
+      <!-- Calculator eligibility display -->
+      @if (eligibilityResult() !== null) {
+        <div class="bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center gap-3">
+            <svg lucideCheckCircle class="w-8 h-8 text-green-500"></svg>
+            <div>
+              <h5 class="text-sm font-bold text-gray-900 dark:text-white">Credit Review Complete</h5>
+              <p class="text-xs text-gray-450 dark:text-gray-400">Agricultural loan eligibility matching is ready</p>
+            </div>
+          </div>
+          <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-4">
+            <span class="text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider block">Maximum Borrowing Credit Limit</span>
+            <span class="text-2xl font-extrabold text-green-700 dark:text-green-300 mt-1 block">₹{{ maxLoanAmount() | number }}</span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            NABARD/Cooperative interest rates are estimated between **4.0% — 7.0% p.a.** under Government Subvention programs.
+          </p>
+        </div>
+      }
+
+      <!-- Schemes Cards -->
+      <div class="space-y-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Government Loan Schemes</h4>
+        
+        @if (schemes().length === 0) {
+          <div class="bg-white/30 dark:bg-slate-900/30 border border-dashed border-gray-200 dark:border-slate-800/50 rounded-2xl p-8 text-center text-xs text-gray-400">
+            No active loan schemes loaded.
+          </div>
+        } @else {
+          <div class="grid md:grid-cols-2 gap-4">
+            @for (s of schemes(); track s['name']) {
+              <div class="bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-5 shadow-sm space-y-3">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30 uppercase tracking-wide">
+                  {{ s['provider'] }}
+                </span>
+                <h3 class="font-extrabold text-gray-900 dark:text-white text-base leading-snug">
+                  {{ s['name'] }}
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Subsidized credit rates for crop seeds, fertilizers, and land development inputs.
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- TAB 3: Crop Yield ROI -->
+@if (activeTab() === 'roi') {
+  <div class="grid lg:grid-cols-12 gap-6">
+    <!-- ROI Calculator Form -->
+    <div class="lg:col-span-5 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-6 shadow-sm self-start space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center shadow-sm">
+          <svg lucideCalculator class="w-5 h-5 text-green-600 dark:text-green-400"></svg>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white font-display">Crop Margin ROI</h3>
+          <p class="text-xs text-gray-400">Calculate net profitability margins on harvest yield</p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="calculateRoi()" class="space-y-4">
+        <!-- Crop Quantity -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Harvest Yield Quantity</label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="e.g. 50" [(ngModel)]="roiForm.quantity" name="quantity"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">Quintals</span>
+          </div>
+        </div>
+
+        <!-- Sell Price -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Expected Market Price</label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="e.g. 2200" [(ngModel)]="roiForm.pricePerQuintal" name="pricePerQuintal"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">₹ / Quintal</span>
+          </div>
+        </div>
+
+        <!-- Production cost -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Total Investment / Cost</label>
+          <div class="relative">
+            <input type="number" min="0" placeholder="e.g. 40000" [(ngModel)]="roiForm.totalCost" name="totalCost"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400">₹</span>
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="submittingRoi() || !roiForm.quantity || !roiForm.pricePerQuintal || !roiForm.totalCost"
+          class="relative group overflow-hidden w-full flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 hover:from-green-600 hover:via-green-700 hover:to-emerald-700 text-white text-sm font-extrabold rounded-2xl shadow-md shadow-green-500/20 hover:shadow-lg transition-all duration-300 disabled:opacity-60 disabled:pointer-events-none border border-green-400/20">
+          <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none"></span>
+          @if (submittingRoi()) {
+            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Calculating margins...
+          } @else {
+            <svg lucideCalculator class="w-4 h-4"></svg>
+            Estimate Profit & ROI
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- ROI Results display panel -->
+    <div class="lg:col-span-7 space-y-4">
+      <div class="flex items-center justify-between">
+        <h4 class="text-sm font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Calculator Estimate</h4>
+      </div>
+
+      @if (roiResult() === null) {
+        <div class="bg-white/40 dark:bg-slate-900/40 border border-dashed border-gray-200 dark:border-slate-800/50 rounded-3xl p-16 text-center flex flex-col items-center justify-center h-full min-h-[300px]">
+          <svg lucideCalculator class="w-12 h-12 text-slate-300 dark:text-slate-700 mb-3"></svg>
+          <h5 class="text-sm font-bold text-gray-700 dark:text-gray-300">Ready to Estimate Profit</h5>
+          <p class="text-xs text-gray-400 mt-1 max-w-xs mx-auto">Fill in harvest metrics to calculate gross returns and Net Return on Investment (ROI) ratios.</p>
+        </div>
+      } @else {
+        <div class="bg-white/60 dark:bg-slate-900/60 border border-gray-100/80 dark:border-slate-800/40 rounded-3xl p-6 shadow-sm space-y-5">
+          <div class="flex items-center gap-3">
+            <svg lucideCheckCircle class="w-8 h-8 text-green-500"></svg>
+            <div>
+              <h5 class="text-sm font-bold text-gray-900 dark:text-white">Margin Calculation Complete</h5>
+              <p class="text-xs text-gray-400">Values calculated based on standard production ROI</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-blue-50/50 dark:bg-slate-950/50 rounded-2xl p-4 border border-blue-500/10">
+              <span class="text-[8px] font-bold text-gray-400 uppercase">Gross Return (Total Revenue)</span>
+              <span class="text-xl font-extrabold text-blue-600 mt-1 block">₹{{ roiResult()!.grossReturn | number }}</span>
+            </div>
+            <div class="bg-green-50/50 dark:bg-green-950/20 rounded-2xl p-4 border border-green-500/10">
+              <span class="text-[8px] font-bold text-gray-400 uppercase">Net Profit Margin</span>
+              <span class="text-xl font-extrabold text-green-600 mt-1 block">₹{{ roiResult()!.netProfit | number }}</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-gray-150 dark:border-slate-800/80 text-xs">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Total Investment Cost</span>
+              <span class="font-semibold text-gray-800 dark:text-gray-250">₹{{ roiForm.totalCost | number }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Return on Investment (ROI)</span>
+              <span class="font-extrabold text-green-600">{{ roiResult()!.roi | number:'1.1-2' }}%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Profit Ratio</span>
+              <span class="font-semibold text-gray-800 dark:text-gray-250">{{ roiResult()!.profitMarginRatio | number:'1.1-2' }}%</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- LOG EXPENSE MODAL DIALOG -->
+@if (showExpenseModal()) {
+  <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" (click)="closeExpenseModal()">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md border border-gray-100 dark:border-slate-800 shadow-2xl relative"
+      (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="p-6 pb-4 border-b border-gray-100 dark:border-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white shadow-md">
+            <svg lucidePlusCircle class="w-5 h-5"></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-gray-900 dark:text-white font-display">Log Farm Expense</h3>
+            <p class="text-[10px] text-gray-400">Log inputs, machinery, fuel, or labor costs</p>
+          </div>
+        </div>
+        <button (click)="closeExpenseModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition rounded-full p-1 bg-gray-50 dark:bg-slate-850">
+          <svg lucideX class="w-4 h-4"></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <form (ngSubmit)="submitExpense()" class="p-6 space-y-4">
+        <!-- Expense Type Selection -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Expense Type</label>
+          <select [(ngModel)]="expenseForm.expenseType" name="expenseType"
+            class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required>
+            <option value="Seeds">Seeds</option>
+            <option value="Fertilizers">Fertilizers</option>
+            <option value="Pesticides">Pesticides</option>
+            <option value="Machinery Rent">Machinery Rent</option>
+            <option value="Labor">Labor</option>
+            <option value="Fuel">Fuel</option>
+            <option value="Irrigation">Irrigation</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Amount -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount (₹)</label>
+          <input type="number" min="1" placeholder="e.g. 5000" [(ngModel)]="expenseForm.amount" name="amount"
+            class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Date -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</label>
+            <input type="date" [(ngModel)]="expenseForm.date" name="date"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200" required />
+          </div>
+
+          <!-- Season -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Season</label>
+            <select [(ngModel)]="expenseForm.season" name="season"
+              class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200">
+              <option value="KHARIF">Kharif</option>
+              <option value="RABI">Rabi</option>
+              <option value="ZAID">Zaid</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Description</label>
+          <textarea rows="2" placeholder="Purchased organic fertilizer bags..." [(ngModel)]="expenseForm.description" name="description"
+            class="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-500 transition text-gray-800 dark:text-gray-200 resize-none"></textarea>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="closeExpenseModal()"
+            class="flex-1 px-4 py-3 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 font-bold rounded-2xl text-sm hover:bg-gray-50 dark:hover:bg-slate-850 transition">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="submittingExpense() || !expenseForm.amount || !expenseForm.date"
+            class="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl text-sm transition disabled:opacity-50">
+            Log Expense
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

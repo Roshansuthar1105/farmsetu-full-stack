@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "mediaUrls", "tags", "author"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "mediaUrls", "tags", "author" })
 public class Post extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,12 +42,12 @@ public class Post extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "post_media", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "media_url")
-    @Builder.Default
+    @lombok.Builder.Default
     private List<String> mediaUrls = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "post_type")
-    @Builder.Default
+    @lombok.Builder.Default
     private PostType postType = PostType.TEXT;
 
     private String category;
@@ -55,20 +55,26 @@ public class Post extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "tag")
-    @Builder.Default
+    @lombok.Builder.Default
     private List<String> tags = new ArrayList<>();
 
     private String location;
 
     @Column(name = "likes_count")
-    @Builder.Default
+    @lombok.Builder.Default
     private Integer likesCount = 0;
 
     @Column(name = "comments_count")
-    @Builder.Default
+    @lombok.Builder.Default
     private Integer commentsCount = 0;
 
     @Column(name = "shares_count")
-    @Builder.Default
+    @lombok.Builder.Default
     private Integer sharesCount = 0;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "post_likes", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "user_id")
+    @lombok.Builder.Default
+    private java.util.Set<Long> likedUserIds = new java.util.HashSet<>();
 }

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PageResponse } from '../models/user.model';
 import { Observable } from 'rxjs';
@@ -10,9 +10,22 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiUrl;
 
-  get<T>(path: string, params?: Record<string, string | number | boolean>): Observable<T> {
+  get<T>(
+    path: string, 
+    params?: Record<string, string | number | boolean>, 
+    headers?: Record<string, string>
+  ): Observable<T> {
+    let httpHeaders = new HttpHeaders();
+    if (headers) {
+      Object.entries(headers).forEach(([k, v]) => {
+        httpHeaders = httpHeaders.set(k, v);
+      });
+    }
     return this.http
-      .get<ApiResponse<T>>(`${this.base}${path}`, { params: this.toParams(params) })
+      .get<ApiResponse<T>>(`${this.base}${path}`, { 
+        params: this.toParams(params),
+        headers: httpHeaders
+      })
       .pipe(map((r) => r.data));
   }
 

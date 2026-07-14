@@ -9,12 +9,13 @@ import { RegistrationData } from '../register.component';
   template: `
     <div class="space-y-5">
       <div class="text-center mb-2">
-        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">
-          Farming Profile 🚜
-        </h2>
-        <p class="text-gray-400 text-xs">
-          Help us customize your FarmSetu features
-        </p>
+        <div class="flex justify-center mb-3">
+          <div class="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-950/40 border border-green-100 dark:border-green-900/50 flex items-center justify-center">
+            <span class="material-icons text-2xl text-green-600 dark:text-green-400">agriculture</span>
+          </div>
+        </div>
+        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">Farming Profile</h2>
+        <p class="text-gray-400 text-xs mt-1">Help us customize your FarmSetu features</p>
       </div>
 
       <form [formGroup]="form" (ngSubmit)="onComplete()" class="space-y-4">
@@ -105,7 +106,7 @@ import { RegistrationData } from '../register.component';
                       [class]="form.get('soilType')?.value === soil.value
                         ? 'border-green-500 bg-green-50/50 dark:bg-green-950/20 shadow-sm text-green-700 dark:text-green-400'
                         : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-green-300'">
-                <span class="text-xl">{{ soil.icon }}</span>
+                <span class="material-icons text-xl">{{ soil.icon }}</span>
                 <span class="text-[9px] font-bold leading-none text-center">
                   {{ soil.label }}
                 </span>
@@ -125,7 +126,7 @@ import { RegistrationData } from '../register.component';
             </span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-lg">👨‍🌾</span>
+            <span class="material-icons text-lg text-gray-400">eco</span>
             <input type="range" formControlName="experience"
                    min="0" max="30" step="1"
                    class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full
@@ -152,9 +153,11 @@ import { RegistrationData } from '../register.component';
                          hover:from-green-700 hover:to-emerald-700
                          active:scale-[0.98]
                          shadow-lg shadow-green-500/10
-                         transition-all duration-200"
+                         transition-all duration-200
+                         flex items-center justify-center gap-2"
                   style="height: 48px;">
-            Complete 🎉
+            <span class="material-icons text-base">check_circle</span>
+            Complete
           </button>
         </div>
       </form>
@@ -175,11 +178,11 @@ export class FarmDetailsStepComponent {
   ];
 
   readonly soilTypes = [
-    { value: 'sandy', label: 'Sandy', icon: '🏖️' },
-    { value: 'clay', label: 'Clay', icon: '🧱' },
-    { value: 'loamy', label: 'Loamy', icon: '🌱' },
-    { value: 'silt', label: 'Silt', icon: '🌊' },
-    { value: 'black', label: 'Black', icon: '⬛' }
+    { value: 'sandy', label: 'Sandy', icon: 'terrain' },
+    { value: 'clay', label: 'Clay', icon: 'water_drop' },
+    { value: 'loamy', label: 'Loamy', icon: 'grass' },
+    { value: 'silt', label: 'Silt', icon: 'waves' },
+    { value: 'black', label: 'Black', icon: 'circle' }
   ];
 
   readonly form = this.fb.nonNullable.group({

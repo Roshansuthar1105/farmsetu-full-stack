@@ -4,5 +4,9 @@ public enum UserRole {
     FARMER,
     EXPERT,
     ADMIN,
-    SELLER
+    SELLER,
+    SUPER_ADMIN,
+    MANAGER,
+    EDITOR,
+    VIEWER
 }

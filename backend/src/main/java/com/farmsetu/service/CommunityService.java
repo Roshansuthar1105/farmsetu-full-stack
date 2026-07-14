@@ -32,6 +32,13 @@ public class CommunityService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listPosts(int page, int size) {
         List<Post> posts = postRepository.findAllWithAuthor(org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending()));
+        Long currentUserId = null;
+        try {
+            currentUserId = SecurityUtils.currentUserId();
+        } catch (Exception e) {
+            // ignore
+        }
+        final Long finalUserId = currentUserId;
         return posts.stream().map(p -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", p.getId());
@@ -48,6 +55,7 @@ public class CommunityService {
             map.put("mediaUrls", p.getMediaUrls() != null ? new java.util.ArrayList<>(p.getMediaUrls()) : new java.util.ArrayList<>());
             map.put("tags", p.getTags() != null ? new java.util.ArrayList<>(p.getTags()) : new java.util.ArrayList<>());
             map.put("createdAt", p.getCreatedAt() != null ? p.getCreatedAt().toString() : "");
+            map.put("hasLiked", finalUserId != null && p.getLikedUserIds() != null && p.getLikedUserIds().contains(finalUserId));
             return map;
         }).collect(java.util.stream.Collectors.toList());
     }
@@ -72,7 +80,10 @@ public class CommunityService {
                 .tags(tags)
                 .location(location)
                 .build();
-        return postRepository.save(post);
+        Post saved = postRepository.save(post);
+        author.setReputationScore((author.getReputationScore() != null ? author.getReputationScore() : 0) + 5);
+        userRepository.save(author);
+        return saved;
     }
 
     @Transactional
@@ -90,7 +101,30 @@ public class CommunityService {
     @Transactional
     public Post likePost(Long id) {
         Post post = getPost(id);
-        post.setLikesCount(post.getLikesCount() + 1);
+        Long currentUserId = SecurityUtils.currentUserId();
+        java.util.Set<Long> likedUsers = post.getLikedUserIds();
+        if (likedUsers == null) {
+            likedUsers = new java.util.HashSet<>();
+            post.setLikedUserIds(likedUsers);
+        }
+        User author = post.getAuthor();
+        if (likedUsers.contains(currentUserId)) {
+            // Toggle off (unlike)
+            likedUsers.remove(currentUserId);
+            post.setLikesCount(Math.max(0, (post.getLikesCount() != null ? post.getLikesCount() : 0) - 1));
+            if (author != null) {
+                author.setReputationScore(Math.max(0, (author.getReputationScore() != null ? author.getReputationScore() : 0) - 2));
+                userRepository.save(author);
+            }
+        } else {
+            // Toggle on (like)
+            likedUsers.add(currentUserId);
+            post.setLikesCount((post.getLikesCount() != null ? post.getLikesCount() : 0) + 1);
+            if (author != null) {
+                author.setReputationScore((author.getReputationScore() != null ? author.getReputationScore() : 0) + 2);
+                userRepository.save(author);
+            }
+        }
         return postRepository.save(post);
     }
 
@@ -144,8 +178,22 @@ public class CommunityService {
         return storyRepository.save(story);
     }
 
-    public List<Story> activeStories() {
-        return storyRepository.findByExpiresAtAfterOrderByCreatedAtDesc(Instant.now());
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> activeStories() {
+        List<Story> stories = storyRepository.findByExpiresAtAfterOrderByCreatedAtDesc(Instant.now());
+        return stories.stream().map(s -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", s.getId());
+            map.put("mediaUrl", s.getMediaUrl());
+            map.put("mediaType", s.getMediaType());
+            map.put("caption", s.getCaption());
+            map.put("viewsCount", s.getViewsCount());
+            map.put("authorId", s.getAuthor().getId());
+            map.put("authorName", s.getAuthor().getName());
+            map.put("authorProfilePhoto", s.getAuthor().getProfilePhoto());
+            map.put("createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : "");
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional
@@ -153,8 +201,17 @@ public class CommunityService {
         storyRepository.deleteById(id);
     }
 
-    public Map<String, Object> leaderboard() {
-        return Map.of("message", "Leaderboard aggregation placeholder");
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getLeaderboard() {
+        List<User> topUsers = userRepository.findTop5ByOrderByReputationScoreDesc();
+        return topUsers.stream().map(u -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", u.getId());
+            map.put("name", u.getName());
+            map.put("profilePhoto", u.getProfilePhoto());
+            map.put("reputationScore", u.getReputationScore() != null ? u.getReputationScore() : 0);
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 }
 

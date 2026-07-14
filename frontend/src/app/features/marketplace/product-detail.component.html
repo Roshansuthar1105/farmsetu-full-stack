@@ -1,0 +1,908 @@
+<div class="w-full mx-auto space-y-6 pb-16">
+  
+  <!-- HEADER: Back navigation & Breadcrumbs -->
+  @if (!loading() && product(); as p) {
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-md">
+      <div class="flex items-center gap-4">
+        <a routerLink="/app/marketplace" 
+           class="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-350 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 group shadow-sm">
+          <svg lucideArrowLeft size="16" class="group-hover:-translate-x-0.5 transition stroke-[2.5]"></svg>
+        </a>
+        
+        <div class="space-y-0.5">
+          <!-- Breadcrumbs -->
+          <div class="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-wider uppercase">
+            <a routerLink="/app/marketplace" class="hover:text-green-600 transition">Marketplace</a>
+            <svg lucideChevronRight size="10" class="stroke-[2.5]"></svg>
+            <span class="text-green-650 dark:text-green-400 font-semibold">{{ p.category }}</span>
+          </div>
+          <h1 class="text-base font-bold text-slate-850 dark:text-white line-clamp-1">
+            {{ p.title }}
+          </h1>
+        </div>
+      </div>
+
+      <!-- Quick Stock Indicator -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        @if (p.status === 'CANCELLED') {
+          <span class="px-3 py-1 text-[10px] font-extrabold rounded-full uppercase tracking-wider text-red-650 bg-red-500/10 border border-red-500/20">
+            Cancelled
+          </span>
+        } @else {
+          <span [class]="getStockBadgeClass(p.stockStatus)" class="px-3 py-1 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
+            {{ getStockStatusText(p.stockStatus) }}
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <!-- Two Column Premium Layout Skeleton -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-pulse">
+      
+      <!-- LEFT COLUMN: Product Images, Details, & Reviews (Spans 2 cols) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Image Carousel Card Skeleton -->
+        <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800/80 shadow-md">
+          <div class="h-96 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+          <div class="flex items-center gap-2.5 justify-center py-3 mt-2">
+            <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+            <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+            <div class="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+          </div>
+        </div>
+
+        <!-- Product Details / Description Skeleton -->
+        <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800"></div>
+            <div class="h-5 w-40 bg-slate-100 dark:bg-slate-800 rounded"></div>
+          </div>
+          <div class="space-y-2.5">
+            <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded"></div>
+            <div class="h-4 w-5/6 bg-slate-100 dark:bg-slate-800 rounded"></div>
+            <div class="h-4 w-2/3 bg-slate-100 dark:bg-slate-800 rounded"></div>
+          </div>
+        </div>
+
+        <!-- Rating & Reviews Skeleton -->
+        <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-6">
+          <div class="h-5 w-48 bg-slate-105 dark:bg-slate-800 rounded mb-4"></div>
+          <div class="grid md:grid-cols-3 gap-8 items-center bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-2xl border border-slate-200/40 dark:border-slate-800/60">
+            <div class="text-center space-y-2">
+              <div class="h-12 w-16 bg-slate-105 dark:bg-slate-800 rounded mx-auto"></div>
+              <div class="h-4 w-24 bg-slate-105 dark:bg-slate-800 rounded mx-auto"></div>
+              <div class="h-3 w-20 bg-slate-105 dark:bg-slate-800 rounded mx-auto"></div>
+            </div>
+            <div class="md:col-span-2 space-y-2.5">
+              <div class="h-3.5 w-full bg-slate-105 dark:bg-slate-800 rounded"></div>
+              <div class="h-3.5 w-full bg-slate-105 dark:bg-slate-800 rounded"></div>
+              <div class="h-3.5 w-full bg-slate-105 dark:bg-slate-800 rounded"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Sticky Buy & Bidding Panel -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Pricing & Action Panel Skeleton -->
+        <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-6">
+          <div class="space-y-2">
+            <div class="h-3 w-12 bg-slate-100 dark:bg-slate-850 rounded"></div>
+            <div class="h-10 w-36 bg-slate-100 dark:bg-slate-800 rounded"></div>
+          </div>
+          <div class="border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-4">
+            <div class="flex justify-between items-center">
+              <div class="h-4 w-16 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              <div class="h-9 w-28 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+            </div>
+            <div class="space-y-2 pt-2">
+              <div class="h-3 w-32 bg-slate-100 dark:bg-slate-850 rounded"></div>
+              <div class="h-9 w-full bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+            </div>
+            <div class="flex flex-col gap-2.5 pt-2">
+              <div class="h-11 w-full bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+              <div class="h-11 w-full bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seller Profile Panel Skeleton -->
+        <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-4">
+          <div class="h-3 w-28 bg-slate-100 dark:bg-slate-800 rounded"></div>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+            <div class="space-y-1.5 flex-grow">
+              <div class="h-4 w-28 bg-slate-100 dark:bg-slate-800 rounded"></div>
+              <div class="h-3 w-20 bg-slate-105 dark:bg-slate-850 rounded"></div>
+            </div>
+          </div>
+          <div class="h-px bg-slate-100 dark:bg-slate-850"></div>
+          <div class="flex justify-between items-center">
+            <div class="h-3.5 w-16 bg-slate-100 dark:bg-slate-850 rounded"></div>
+            <div class="h-3.5 w-24 bg-slate-100 dark:bg-slate-800 rounded"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  } @else {
+    @if (product(); as p) {
+      <!-- Two Column Premium Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- LEFT COLUMN: Product Images, Details, & Reviews (Spans 2 cols) -->
+        <div class="lg:col-span-2 space-y-6">
+          
+          <!-- Image Carousel Card -->
+          <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800/80 shadow-md">
+            <div class="h-96 flex items-center justify-center bg-slate-50 dark:bg-slate-950/40 rounded-2xl overflow-hidden border border-slate-200/40 dark:border-slate-800/60 relative group">
+              @if (p.images && p.images.length) {
+                <img [src]="p.images[activeImageIndex()]" class="max-h-full max-w-full object-contain rounded-lg transition duration-500" alt="{{ p.title }}" />
+                
+                <!-- Left/Right Nav Arrows -->
+                @if (p.images.length > 1) {
+                  <button (click)="prevImage(p.images.length)" class="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 shadow-lg text-slate-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 transition active:scale-90 opacity-0 group-hover:opacity-100 duration-300">
+                    <svg lucideChevronLeft size="16" class="stroke-[2.5]"></svg>
+                  </button>
+                  <button (click)="nextImage(p.images.length)" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 shadow-lg text-slate-700 dark:text-white flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 transition active:scale-90 opacity-0 group-hover:opacity-100 duration-300">
+                    <svg lucideChevronRight size="16" class="stroke-[2.5]"></svg>
+                  </button>
+                }
+              } @else {
+                <div class="text-center text-slate-400 dark:text-slate-600">
+                  <svg lucideImage size="48" class="mx-auto mb-2 opacity-80"></svg>
+                  <p class="text-xs font-semibold">No image available</p>
+                </div>
+              }
+
+              <!-- Live Auction Indicator -->
+              @if (p.auction) {
+                <span class="absolute top-3 right-3 px-3 py-1.5 text-[9px] font-extrabold bg-red-650 text-white rounded-full shadow-md flex items-center gap-1.5 uppercase tracking-wide">
+                  <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> Live Auction
+                </span>
+              }
+            </div>
+
+            <!-- Carousel Thumbnails -->
+            @if (p.images && p.images.length > 1) {
+              <div class="flex items-center gap-2.5 overflow-x-auto py-3 justify-center scrollbar-thin">
+                @for (img of p.images; track img; let idx = $index) {
+                  <button (click)="activeImageIndex.set(idx)"
+                          [class]="idx === activeImageIndex()
+                            ? 'w-14 h-14 rounded-xl overflow-hidden border-2 border-green-500 scale-105 transition flex-shrink-0 shadow-sm'
+                            : 'w-14 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 opacity-60 hover:opacity-100 hover:scale-102 transition flex-shrink-0 shadow-sm'">
+                    <img [src]="img" class="w-full h-full object-cover" />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Product Details / Description -->
+          <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-4">
+            <h2 class="text-base font-bold text-slate-850 dark:text-white flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                <svg lucideFileText size="16" class="stroke-[2]"></svg>
+              </div>
+              Product Description
+            </h2>
+            <p class="text-slate-650 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line">
+              {{ p.description || 'No description provided for this product listing.' }}
+            </p>
+          </div>
+
+          <!-- RATING & REVIEWS STATISTICS BREAKDOWN -->
+          <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-6">
+            <h2 class="text-base font-bold text-slate-850 dark:text-white border-b border-slate-100 dark:border-slate-850 pb-4 flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                <svg lucideBarChart2 size="16" class="stroke-[2]"></svg>
+              </div>
+              Ratings & Reviews
+            </h2>
+
+            <div class="grid md:grid-cols-3 gap-8 items-center bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-2xl border border-slate-200/40 dark:border-slate-800/60">
+              <!-- Score Stats -->
+              <div class="text-center md:border-r md:border-slate-200 md:dark:border-slate-800 space-y-2">
+                <p class="text-5xl font-extrabold text-slate-850 dark:text-white telemetry-val">
+                  {{ p.averageRating ? (p.averageRating | number:'1.1-1') : '0.0' }}
+                </p>
+                <div class="flex items-center justify-center gap-0.5">
+                  @for (star of [1,2,3,4,5]; track star) {
+                    <svg lucideStar size="16" 
+                         [class]="(p.averageRating || 0) >= star ? 'fill-amber-400 text-amber-400' : (p.averageRating || 0) >= star - 0.5 ? 'fill-amber-400/50 text-amber-400' : 'text-slate-300 dark:text-slate-700'"
+                         class="stroke-[2]"></svg>
+                  }
+                </div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{{ p.totalReviews || 0 }} reviews total</p>
+              </div>
+
+              <!-- Distribution Bars -->
+              <div class="md:col-span-2 space-y-2.5">
+                @for (star of [5, 4, 3, 2, 1]; track star) {
+                  <div class="flex items-center gap-3 text-xs">
+                    <span class="w-12 text-slate-500 font-semibold text-right">{{ star }} Star</span>
+                    <div class="flex-grow bg-slate-100 dark:bg-slate-950/40 h-2.5 rounded-full overflow-hidden border border-slate-200/20 dark:border-slate-850/60">
+                      <div class="bg-amber-400 h-full rounded-full" 
+                           [style.width.%]="getStarPercentage(star, p.starDistribution, p.totalReviews || 0)"></div>
+                    </div>
+                    <span class="w-12 text-slate-450 dark:text-slate-400 text-left telemetry-val">
+                      {{ getStarPercentage(star, p.starDistribution, p.totalReviews || 0) | number:'1.0-0' }}%
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Review Input / Form -->
+            @if (canSubmitReview()) {
+              <div class="bg-slate-50/50 dark:bg-slate-950/25 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-5 space-y-4">
+                <h3 class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 uppercase tracking-wider text-slate-400">
+                  <svg lucideMessageSquarePlus size="14" class="stroke-[2.5] text-green-500"></svg>
+                  {{ editingReviewId() ? 'Edit Your Review' : 'Write a Review' }}
+                </h3>
+                
+                <!-- Star Rating click selector -->
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs text-slate-450 dark:text-slate-400 font-semibold mr-2">Your Rating:</span>
+                  @for (star of [1,2,3,4,5]; track star) {
+                    <button type="button" (click)="newReviewRating.set(star)" class="text-amber-400 hover:scale-110 active:scale-95 transition outline-none">
+                      <svg lucideStar size="22" [class]="star <= newReviewRating() ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-750'" class="stroke-[2]"></svg>
+                    </button>
+                  }
+                </div>
+
+                <div class="space-y-3">
+                  <textarea [(ngModel)]="newReviewComment" rows="3" placeholder="Share your experience using this product. Be descriptive..."
+                            class="w-full text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900/50 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white resize-none"></textarea>
+                  
+                  <div class="flex justify-end gap-2">
+                    @if (editingReviewId()) {
+                      <button (click)="cancelReviewEdit()" class="px-4 py-2 border border-slate-200 dark:border-slate-800 text-slate-650 dark:text-slate-350 font-bold text-xs rounded-xl hover:bg-slate-100 dark:hover:bg-slate-850 transition">
+                        Cancel
+                      </button>
+                    }
+                    <button (click)="submitReview(p.id)" [disabled]="!newReviewRating() || isSubmittingReview()"
+                            class="px-5 py-2 bg-green-600 text-white font-bold text-xs rounded-xl shadow hover:bg-green-700 active:scale-95 transition disabled:opacity-50 flex items-center gap-1.5">
+                      {{ isSubmittingReview() ? 'Submitting...' : editingReviewId() ? 'Update Review' : 'Submit Review' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <div class="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2 font-medium">
+                <svg lucideInfo size="14" class="stroke-[2.5] flex-shrink-0"></svg>
+                <span>You have already reviewed this product. You can update or delete your review below.</span>
+              </div>
+            }
+
+            <!-- Reviews List -->
+            <div class="space-y-4 pt-2">
+              <h3 class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Customer Comments</h3>
+
+              @if (reviews().length === 0) {
+                <p class="text-xs text-slate-450 italic">No reviews written for this product yet. Be the first to write one!</p>
+              } @else {
+                <div class="space-y-3.5">
+                  @for (rev of reviews(); track rev.id) {
+                    <div class="bg-slate-50/20 dark:bg-slate-950/10 border border-slate-200/50 dark:border-slate-850/80 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-350 dark:hover:border-slate-700 transition duration-200">
+                      <div class="space-y-1.5 flex-grow">
+                        <!-- Rating & Name -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <div class="flex items-center gap-0.5">
+                            @for (star of [1,2,3,4,5]; track star) {
+                              <svg lucideStar size="11" [class]="star <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-700'" class="stroke-[2.5]"></svg>
+                            }
+                          </div>
+                          <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ rev.reviewerName }}</span>
+                          @if (isMyReview(rev.reviewerId)) {
+                            <span class="text-[8px] font-extrabold text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-950/30 border border-green-150/40 px-1.5 py-0.2 rounded uppercase tracking-wider">Your Review</span>
+                          }
+                        </div>
+                        <!-- Review Text -->
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-normal">{{ rev.reviewText }}</p>
+                      </div>
+
+                      <!-- Owner Actions (Edit/Delete) -->
+                      @if (isMyReview(rev.reviewerId)) {
+                        <div class="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+                          <button (click)="editReview(rev)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-650 dark:text-slate-300 flex items-center justify-center transition active:scale-90" title="Edit Review">
+                            <svg lucideEdit size="13" class="stroke-[2.5]"></svg>
+                          </button>
+                          <button (click)="deleteReview(rev.id)" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-900/20 text-red-650 dark:text-red-400 flex items-center justify-center transition active:scale-90" title="Delete Review">
+                            <svg lucideTrash2 size="13" class="stroke-[2.5]"></svg>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Reviews Pagination -->
+                @if (totalReviewsCount() > reviewsPageSize) {
+                  <div class="flex items-center justify-center gap-4 pt-4 border-t border-slate-100 dark:border-slate-850">
+                    <button (click)="prevReviewsPage()" 
+                            [disabled]="reviewsPage === 0"
+                            class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 dark:bg-slate-950 dark:border-slate-850 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold transition active:scale-95 disabled:opacity-40">
+                      Previous
+                    </button>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-semibold telemetry-val">Page {{ reviewsPage + 1 }}</span>
+                    <button (click)="nextReviewsPage()" 
+                            [disabled]="(reviewsPage + 1) * reviewsPageSize >= totalReviewsCount()"
+                            class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 dark:bg-slate-950 dark:border-slate-850 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-bold transition active:scale-95 disabled:opacity-40">
+                      Next
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Sticky Buy & Bidding Panel -->
+        <div class="lg:col-span-1 space-y-6 lg:sticky lg:top-20">
+          
+          <!-- Pricing & Action Panel -->
+          <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-6">
+            <!-- Auction status or Fixed Price -->
+            <div>
+              @if (p.auction) {
+                <div class="space-y-1.5">
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Current Bid</span>
+                  </div>
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-3xl font-extrabold text-slate-900 dark:text-white telemetry-val">₹{{ p.currentBid || p.startingBid }}</span>
+                  </div>
+                  <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold">Starting Bid: ₹{{ p.startingBid }}</p>
+                  @if (p.auctionEndTime) {
+                    <p class="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1.5 pt-1.5">
+                      <svg lucideClock size="13" class="stroke-[2.5]"></svg>
+                      Closes: {{ p.auctionEndTime | date:'medium' }}
+                    </p>
+                  }
+                </div>
+              } @else {
+                <div class="space-y-1">
+                  <span class="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider block">Price</span>
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-4xl font-extrabold text-green-600 dark:text-green-400 telemetry-val">₹{{ p.price }}</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 font-semibold">/ {{ p.unit || 'Kg' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-4">
+              @if (p.status === 'CANCELLED') {
+                <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
+                  <svg lucideX size="24" class="text-red-500 stroke-[2.5] flex-shrink-0"></svg>
+                  <div>
+                    <h5 class="text-xs font-extrabold text-red-600 dark:text-red-400 uppercase tracking-wider">Listing Cancelled</h5>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-medium mt-0.5">This product listing is no longer active and cannot be purchased or bid on.</p>
+                  </div>
+                </div>
+              } @else if (isSeller()) {
+                <!-- Seller Actions -->
+                <div class="flex flex-col gap-3 pt-2">
+                  <button (click)="openEditModal()" 
+                          class="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition text-xs flex items-center justify-center gap-1.5">
+                    <svg lucideEdit size="14" class="stroke-[2.5]"></svg>
+                    Edit Product Listing
+                  </button>
+
+                  <button (click)="deleteListing()" 
+                          class="w-full py-3.5 bg-red-500/10 hover:bg-red-600 hover:text-white border border-red-500/20 text-red-500 font-bold rounded-xl active:scale-[0.98] transition text-xs flex items-center justify-center gap-1.5">
+                    <svg lucideTrash2 size="14" class="stroke-[2.5]"></svg>
+                    Cancel Listing
+                  </button>
+                </div>
+              } @else if (p.auction) {
+                <!-- Bidding Form -->
+                <form (ngSubmit)="placeBid()" class="space-y-3">
+                  <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Bid Amount (₹)</label>
+                    <input type="number" [(ngModel)]="bidAmount" name="bidAmount" placeholder="Enter bid amount in ₹" required class="w-full border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 bg-slate-50 dark:bg-slate-950/40 text-sm outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                  </div>
+                  <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition">
+                    Place Bid
+                  </button>
+                  <p class="text-[10px] text-slate-450 dark:text-slate-500 text-center leading-normal">Your bid must be higher than ₹{{ p.currentBid || p.startingBid }}</p>
+                </form>
+              } @else {
+                <!-- Purchase Form -->
+                <div class="space-y-4">
+                  <!-- Quantity Selector -->
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Quantity</span>
+                    <div class="flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-slate-50 dark:bg-slate-950/40 overflow-hidden">
+                      <button (click)="decreaseQty()" 
+                              [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty <= 1"
+                              class="w-9 h-9 flex items-center justify-center text-slate-550 dark:text-slate-400 hover:text-green-600 transition active:scale-95 disabled:opacity-30">
+                        <svg lucideMinus size="12" class="stroke-[2.5]"></svg>
+                      </button>
+                      <span class="w-8 text-center text-xs font-bold text-slate-900 dark:text-white telemetry-val">{{ orderQty }}</span>
+                      <button (click)="increaseQty(p.stock)" 
+                              [disabled]="p.stockStatus === 'OUT_OF_STOCK' || orderQty >= p.stock"
+                              class="w-9 h-9 flex items-center justify-center text-slate-550 dark:text-slate-400 hover:text-green-600 transition active:scale-95 disabled:opacity-30">
+                        <svg lucidePlus size="12" class="stroke-[2.5]"></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Direct Order Delivery Address -->
+                  <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850">
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Shipping Address (For Buy Now)</label>
+                    <input type="text" [(ngModel)]="deliveryAddress" placeholder="Enter full address for direct checkout" class="w-full border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 bg-slate-50 dark:bg-slate-955/40 text-xs outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                  </div>
+
+                  <!-- Actions buttons -->
+                  <div class="flex flex-col gap-2.5 pt-2">
+                    <button (click)="addToCart()" 
+                            [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0"
+                            class="w-full py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-slate-705 dark:text-slate-300 font-bold rounded-xl active:scale-[0.98] transition disabled:opacity-50 text-xs flex items-center justify-center gap-1.5 border border-slate-200/50 dark:border-slate-800/40">
+                      <svg lucideShoppingCart size="14" class="stroke-[2]"></svg>
+                      Add to Cart
+                    </button>
+
+                    <button (click)="placeOrder()" 
+                            [disabled]="p.stockStatus === 'OUT_OF_STOCK' || p.stock <= 0 || !deliveryAddress.trim()"
+                            class="w-full py-3.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50 text-xs flex items-center justify-center gap-1.5">
+                      <svg lucideShoppingBag size="14" class="stroke-[2]"></svg>
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- ORDER INFO PANEL -->
+          @if (associatedOrders().length > 0) {
+            <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-3.5 animate-in fade-in slide-in-from-bottom-3 duration-300">
+              <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <svg lucideTruck size="16" class="stroke-[2]"></svg>
+                <h3 class="text-[10px] font-bold uppercase tracking-wider">Order Track Info</h3>
+              </div>
+              
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                {{ isSeller() 
+                    ? 'You have received ' + associatedOrders().length + ' order(s) for this listing.' 
+                    : 'You have ordered this product ' + (associatedOrders().length === 1 ? 'once' : associatedOrders().length + ' times') + '.' }}
+              </p>
+
+              <button (click)="openOrdersModal()"
+                      class="w-full py-3 bg-green-50 hover:bg-green-100 dark:bg-green-950/20 dark:hover:bg-green-950/40 text-green-700 dark:text-green-400 font-bold text-xs rounded-xl active:scale-[0.98] transition border border-green-150/40 dark:border-green-800/30 flex items-center justify-center gap-1.5 shadow-sm">
+                <svg lucideFileText size="14" class="stroke-[2.5]"></svg>
+                {{ isSeller() ? 'View Received Orders' : 'View Order Details' }}
+              </button>
+            </div>
+          }
+
+          <!-- Seller Profile Panel -->
+          <div class="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 border border-slate-200/60 dark:border-slate-800/80 shadow-md space-y-4">
+            <h3 class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Seller Information</h3>
+            
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-600 text-white font-bold flex items-center justify-center shadow">
+                {{ p.sellerName ? p.sellerName.charAt(0).toUpperCase() : 'S' }}
+              </div>
+              <div>
+                <h4 class="text-xs sm:text-sm font-bold text-slate-850 dark:text-white">{{ p.sellerName }}</h4>
+                <span class="px-2 py-0.5 text-[8px] font-extrabold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20 rounded uppercase tracking-wider border border-blue-150/20 dark:border-blue-950/40">Verified Listing</span>
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-100 dark:bg-slate-850"></div>
+
+            <div class="flex items-center justify-between text-xs text-slate-550 dark:text-slate-400">
+              <span class="flex items-center gap-1.5"><svg lucideMapPin size="13" class="stroke-[2.5]"></svg> Location:</span>
+              <span class="font-semibold text-slate-700 dark:text-slate-200">{{ p.location || 'Not Specified' }}</span>
+            </div>
+            
+            <div class="flex items-center justify-between text-xs text-slate-550 dark:text-slate-400">
+              <span class="flex items-center gap-1.5"><svg lucideStar size="13" class="stroke-[2.5]"></svg> Seller Rating:</span>
+              <span class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-0.5">
+                4.8★ <span class="text-[10px] text-slate-400 dark:text-slate-500">(45 sales)</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+        
+      </div>
+
+      <!-- ORDER DETAILS MODAL -->
+      @if (showOrdersModal()) {
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+          <!-- Backdrop -->
+          <div (click)="closeOrdersModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"></div>
+
+          <!-- Content Container -->
+          <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full shadow-2xl p-6 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-thin">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+              <div class="space-y-0.5">
+                <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Marketplace Orders</span>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                    <svg lucideFileText size="16" class="stroke-[2]"></svg>
+                  </div>
+                  {{ isSeller() ? 'Orders Received for Listing' : 'Your Order Purchase Info' }}
+                </h3>
+              </div>
+              <button (click)="closeOrdersModal()" class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-white flex items-center justify-center transition active:scale-95">✕</button>
+            </div>
+
+            <!-- Modal Body -->
+            @if (associatedOrders().length > 1 && !selectedAssociatedOrder()) {
+              <!-- Order List View -->
+              <div class="space-y-3">
+                <p class="text-xs text-slate-450 mb-2 font-medium">Select an order below to view full details:</p>
+                <div class="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50/20 dark:bg-slate-950/10">
+                  @for (order of associatedOrders(); track order.id) {
+                    <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-850/50 transition">
+                      <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs font-bold text-slate-900 dark:text-white">Order #{{ order.id }}</span>
+                          <span class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{{ order.createdAt | date:'mediumDate' }}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">
+                          Qty: <strong class="text-slate-700 dark:text-slate-350">{{ order.quantity }}</strong> • 
+                          Total: <strong class="text-green-600 dark:text-green-400 font-bold telemetry-val">₹{{ order.totalAmount }}</strong> •
+                          {{ isSeller() ? 'Buyer: ' + (order.buyer?.name || 'Unknown') : 'Seller: ' + (order.seller?.name || 'Unknown') }}
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                        <span [class]="getStatusClass(order.deliveryStatus)" class="text-[9px]">
+                          {{ order.deliveryStatus }}
+                        </span>
+                        <button (click)="selectAssociatedOrder(order)" 
+                                class="px-3.5 py-2 bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold rounded-lg transition active:scale-95">
+                          View Receipt
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              @if (selectedAssociatedOrder(); as detail) {
+                <!-- Detailed View -->
+                <div class="space-y-5">
+                  @if (associatedOrders().length > 1) {
+                    <button (click)="clearSelectedAssociatedOrder()" 
+                            class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-green-600 transition font-bold mb-2">
+                      <svg lucideArrowLeft size="14" class="stroke-[2.5]"></svg> Back to Orders List
+                    </button>
+                  }
+
+                  <div class="grid sm:grid-cols-2 gap-6 text-xs sm:text-sm">
+                    
+                    <!-- Left Side: Product Info (Historical Snapshot) -->
+                    <div class="space-y-4">
+                      <!-- Thumbnail -->
+                      <div class="h-44 bg-slate-50 dark:bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center relative shadow-inner">
+                        @if (detail.productImage) {
+                          <img [src]="detail.productImage" class="w-full h-full object-cover" />
+                        } @else if (p.images && p.images.length) {
+                          <img [src]="p.images[0]" class="w-full h-full object-cover" />
+                        } @else {
+                          <svg lucideImage size="28" class="text-slate-300 dark:text-slate-700"></svg>
+                        }
+                        
+                        <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider {{ p.condition === 'NEW' ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20' : 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20' }}">
+                          {{ p.condition }}
+                        </span>
+                      </div>
+
+                      <!-- Product Details -->
+                      <div class="space-y-1.5">
+                        <span class="px-2 py-0.5 text-[8px] font-extrabold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/30 rounded border border-green-150/40 dark:border-green-900/30 w-max block uppercase tracking-wider">
+                          {{ p.category }}
+                        </span>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-base">
+                          {{ detail.productTitle || p.title }}
+                        </h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-h-24 overflow-y-auto pr-1 scrollbar-thin">
+                          {{ p.description || 'No description provided.' }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Right Side: Order Transaction Details -->
+                    <div class="space-y-4 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/40 dark:border-slate-800/80 p-4 rounded-2xl">
+                      <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Order Summary</h4>
+                      
+                      <div class="space-y-2 text-xs">
+                        <!-- Buyer Details -->
+                        <div class="flex justify-between items-center">
+                          <span class="text-slate-450 dark:text-slate-400 font-medium">Buyer:</span>
+                          <span class="font-bold text-slate-800 dark:text-slate-200">{{ detail.buyer?.name || 'Unknown' }}</span>
+                        </div>
+
+                        <!-- Seller Details -->
+                        <div class="flex justify-between items-center">
+                          <span class="text-slate-450 dark:text-slate-400 font-medium">Seller:</span>
+                          <span class="font-bold text-slate-800 dark:text-slate-200">{{ detail.seller?.name || p.sellerName || 'Unknown' }}</span>
+                        </div>
+
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+
+                        <!-- Qty and Total Price -->
+                        <div class="flex justify-between items-center">
+                          <span class="text-slate-450 dark:text-slate-400 font-medium">Quantity Ordered:</span>
+                          <span class="font-bold text-slate-800 dark:text-slate-200 telemetry-val">{{ detail.quantity }} units</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="text-slate-450 dark:text-slate-400 font-medium">Price Per Unit:</span>
+                          <span class="font-semibold text-slate-700 dark:text-slate-300 telemetry-val">₹{{ detail.unitPrice || p.price }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="text-slate-450 dark:text-slate-400 font-medium">Total Charged:</span>
+                          <span class="font-extrabold text-green-600 dark:text-green-400 text-sm telemetry-val">₹{{ detail.totalAmount }}</span>
+                        </div>
+
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+
+                        <!-- Shipping Address -->
+                        <div class="space-y-1">
+                          <span class="text-[9px] font-bold uppercase text-slate-400 dark:text-slate-500 block tracking-wider">Shipping Address</span>
+                          <p class="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-semibold">
+                            {{ detail.deliveryAddress }}
+                          </p>
+                        </div>
+
+                        <!-- Status Badges -->
+                        <div class="flex gap-4 pt-2 flex-wrap">
+                          <!-- Delivery Status Badge -->
+                          <div class="flex flex-col gap-1">
+                            <span class="text-[8px] font-bold uppercase text-slate-450 dark:text-slate-500 tracking-wider">Shipping Status</span>
+                            <span [class]="getStatusClass(detail.deliveryStatus)" class="text-[9px]">
+                              {{ detail.deliveryStatus }}
+                            </span>
+                          </div>
+                          <!-- Payment Status Badge -->
+                          <div class="flex flex-col gap-1">
+                            <span class="text-[8px] font-bold uppercase text-slate-455 tracking-wider">Payment Status</span>
+                            <span class="px-2.5 py-0.5 text-[9px] font-extrabold uppercase rounded-full border border-green-500/30 text-green-500 bg-green-500/10 tracking-wider">
+                              PAID
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Visual Status Tracking Stepper -->
+                  @if (detail.deliveryStatus !== 'CANCELLED' && detail.deliveryStatus !== 'RETURNED') {
+                    <div class="mt-5 p-5 bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/40 dark:border-slate-800/80 rounded-2xl animate-in fade-in duration-300">
+                      <span class="text-[9px] font-bold text-slate-450 dark:text-slate-500 uppercase tracking-wider block mb-4">Order Tracking Status</span>
+                      <div class="flex items-center justify-between relative">
+                        <!-- Stepper line connecting nodes -->
+                        <div class="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1 bg-slate-200 dark:bg-slate-800 z-0">
+                          <div class="h-full bg-green-500 transition-all duration-500" 
+                               [style.width.%]="detail.deliveryStatus === 'PENDING' ? 0 : detail.deliveryStatus === 'CONFIRMED' ? 33 : detail.deliveryStatus === 'SHIPPED' ? 66 : 100">
+                          </div>
+                        </div>
+                        
+                        <!-- Step 1: Placed -->
+                        <div class="flex flex-col items-center z-10 relative">
+                          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'PENDING') }}">
+                            <svg lucideFileText size="14" class="stroke-[2.5]"></svg>
+                          </div>
+                          <span class="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 mt-1.5">Placed</span>
+                        </div>
+                        
+                        <!-- Step 2: Confirmed -->
+                        <div class="flex flex-col items-center z-10 relative">
+                          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'CONFIRMED') }}">
+                            <svg lucideThumbsUp size="14" class="stroke-[2.5]"></svg>
+                          </div>
+                          <span class="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 mt-1.5">Confirmed</span>
+                        </div>
+                        
+                        <!-- Step 3: Shipped -->
+                        <div class="flex flex-col items-center z-10 relative">
+                          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'SHIPPED') }}">
+                            <svg lucideTruck size="14" class="stroke-[2.5]"></svg>
+                          </div>
+                          <span class="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 mt-1.5">Shipped</span>
+                        </div>
+                        
+                        <!-- Step 4: Delivered -->
+                        <div class="flex flex-col items-center z-10 relative">
+                          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 {{ getStepClass(detail.deliveryStatus, 'DELIVERED') }}">
+                            <svg lucideCheckCheck size="14" class="stroke-[2.5]"></svg>
+                          </div>
+                          <span class="text-[10px] font-extrabold text-slate-600 dark:text-slate-300 mt-1.5">Delivered</span>
+                        </div>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="mt-5 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-in fade-in duration-300">
+                      <svg lucideX size="22" class="text-red-500 stroke-[2.5]"></svg>
+                      <div>
+                        <h5 class="text-xs font-extrabold text-red-600 dark:text-red-400 uppercase tracking-wider">Order {{ detail.deliveryStatus }}</h5>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-medium mt-0.5">This order has been {{ detail.deliveryStatus | lowercase }}. Tracking history is unavailable.</p>
+                      </div>
+                    </div>
+                  }
+
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+
+      <!-- EDIT LISTING MODAL -->
+      @if (showEditModal()) {
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+          <!-- Backdrop -->
+          <div (click)="closeEditModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"></div>
+
+          <!-- Content Container -->
+          <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl p-6 border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-thin">
+            <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+              <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                  <svg lucideEdit size="16" class="stroke-[2.5]"></svg>
+                </div>
+                Edit Product Listing
+              </h3>
+              <button (click)="closeEditModal()" class="w-8 h-8 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-white transition flex items-center justify-center">✕</button>
+            </div>
+
+            <form (ngSubmit)="submitProductEdit()" class="space-y-4 text-xs sm:text-sm">
+              <!-- Row: Title & Category -->
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Product Title</label>
+                  <input type="text" [(ngModel)]="editForm.title" name="title" required placeholder="e.g. Organic Wheat Seeds"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Category</label>
+                  <select [(ngModel)]="editForm.category" name="category" required
+                          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white cursor-pointer">
+                    <option value="SEEDS">Seeds</option>
+                    <option value="FERTILIZERS">Fertilizers</option>
+                    <option value="TOOLS">Tools</option>
+                    <option value="EQUIPMENT">Equipment</option>
+                    <option value="PESTICIDES">Pesticides</option>
+                    <option value="ORGANIC_PRODUCTS">Organic Products</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Description</label>
+                <textarea [(ngModel)]="editForm.description" name="description" rows="3" placeholder="Describe the item condition, quality, crop variety, etc."
+                          class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white resize-none"></textarea>
+              </div>
+
+              <!-- Row: Price / Stock / LowStockThreshold -->
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Price (₹)</label>
+                  <input type="number" [(ngModel)]="editForm.price" name="price" required min="1"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Stock</label>
+                  <input type="number" [(ngModel)]="editForm.stock" name="stock" min="0" required
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-955/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Low Limit</label>
+                  <input type="number" [(ngModel)]="editForm.lowStockThreshold" name="lowStockThreshold" min="1"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+              </div>
+
+              <!-- Row: Unit / Condition / Location -->
+              <div class="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Unit</label>
+                  <input type="text" [(ngModel)]="editForm.unit" name="unit" placeholder="Kg / Bags / Pcs"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Condition</label>
+                  <div class="flex gap-4 py-2">
+                    <label class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">
+                      <input type="radio" [(ngModel)]="editForm.condition" name="condition" value="NEW" class="text-green-600 focus:ring-green-500 dark:bg-slate-955 dark:border-slate-800" /> New
+                    </label>
+                    <label class="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold cursor-pointer">
+                      <input type="radio" [(ngModel)]="editForm.condition" name="condition" value="USED" class="text-green-600 focus:ring-green-500 dark:bg-slate-955 dark:border-slate-800" /> Used
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Location</label>
+                  <input type="text" [(ngModel)]="editForm.location" name="location" placeholder="e.g. Pune, Maharashtra"
+                         class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                </div>
+              </div>
+
+              <!-- Option: Toggle Auction -->
+              <div class="p-3 bg-slate-50/50 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/80 rounded-xl space-y-3">
+                <label class="flex items-center justify-between cursor-pointer font-bold text-xs uppercase text-slate-500 dark:text-slate-400">
+                  <span>Sell via Bidding / Live Auction</span>
+                  <input type="checkbox" [(ngModel)]="editForm.auction" name="auction" class="rounded text-green-600 focus:ring-green-500 dark:bg-slate-955 dark:border-slate-800" />
+                </label>
+
+                @if (editForm.auction) {
+                  <div class="grid sm:grid-cols-2 gap-3 pt-2 animate-in slide-in-from-top-2 duration-200">
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Starting Bid (₹)</label>
+                      <input type="number" [(ngModel)]="editForm.startingBid" name="startingBid" min="1"
+                             class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">End Time</label>
+                      <input type="datetime-local" [(ngModel)]="editAuctionEndDate" name="editAuctionEndDate"
+                             class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition text-slate-900 dark:text-white" />
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Multi-Image Upload Section -->
+              <div class="space-y-2">
+                <label class="block text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Product Images</label>
+                
+                <div class="flex items-center justify-center w-full">
+                  <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+                    <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                      <svg lucideUploadCloud size="24" class="text-slate-400 dark:text-slate-500 mb-1"></svg>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                        {{ editImageUploading() ? 'Uploading images...' : 'Click to upload files (multi-select)' }}
+                      </p>
+                      <p class="text-[9px] text-slate-400 dark:text-slate-500">PNG, JPG, JPEG up to 5MB each</p>
+                    </div>
+                    <input type="file" multiple class="hidden" accept="image/*" (change)="onEditFileSelect($event)" [disabled]="editImageUploading()" />
+                  </label>
+                </div>
+
+                <!-- Uploaded Images Thumbnails Grid -->
+                @if (editUploadedImages().length) {
+                  <div class="grid grid-cols-4 gap-2 pt-2">
+                    @for (url of editUploadedImages(); track url; let idx = $index) {
+                      <div class="relative w-full h-16 bg-slate-50 dark:bg-slate-950/40 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 group">
+                        <img [src]="url" class="w-full h-full object-cover" />
+                        <button type="button" (click)="removeEditUploadedImage(idx)" 
+                                class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-655 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-90 transition opacity-0 group-hover:opacity-100 duration-200">
+                          <svg lucideX size="10" class="stroke-[3]"></svg>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Action buttons -->
+              <div class="flex justify-end space-x-2 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+                <button type="button" (click)="closeEditModal()"
+                        class="px-5 py-2.5 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-350 rounded-xl text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                <button type="submit" [disabled]="editSubmitting() || editImageUploading()"
+                        class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-green-500/20 active:scale-[0.98] transition disabled:opacity-50">
+                  {{ editSubmitting() ? 'Saving...' : 'Save Changes' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

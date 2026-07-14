@@ -31,6 +31,11 @@ public class AdminController {
         return ApiResponse.ok(adminService.dashboard());
     }
 
+    @GetMapping("/dashboard/analytics")
+    public ApiResponse<Map<String, Object>> dashboardAnalytics() {
+        return ApiResponse.ok(adminService.dashboardAnalytics());
+    }
+
     // Users
     @GetMapping("/users")
     public ApiResponse<Map<String, Object>> users(

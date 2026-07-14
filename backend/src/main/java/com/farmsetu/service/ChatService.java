@@ -7,6 +7,7 @@ import com.farmsetu.repository.ChatMessageRepository;
 import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import com.farmsetu.repository.AiChatMessageRepository;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
@@ -28,12 +30,16 @@ public class ChatService {
 
     public List<Map<String, Object>> getConversation(Long otherUserId, int page, int size) {
         Long userId = SecurityUtils.currentUserId();
+        log.info("Fetching conversation between current user ID: {} and other user ID: {} (page: {}, size: {})", userId, otherUserId, page, size);
 
         // If query is for an AI bot, load from ai_chats table
-        if (otherUserId != null && otherUserId >= 9901 && otherUserId <= 9910) {
+        Optional<User> otherUserOpt = otherUserId != null ? userRepository.findById(otherUserId) : Optional.empty();
+        if (otherUserOpt.isPresent() && otherUserOpt.get().isAi()) {
+            log.info("Target user ID {} is verified as an AI Bot. Fetching AI chats.", otherUserId);
             List<com.farmsetu.model.entity.AiChatMessage> messages = aiChatMessageRepository.findByFarmerIdAndBotIdOrderByCreatedAtDesc(
                 userId, otherUserId.intValue(), org.springframework.data.domain.PageRequest.of(page, size)
             );
+            log.info("Found {} AI chat messages.", messages.size());
             return messages.stream().map(msg -> {
                 Map<String, Object> map = new java.util.HashMap<>();
                 map.put("id", msg.getId());
@@ -49,7 +55,15 @@ public class ChatService {
             }).collect(java.util.stream.Collectors.toList());
         }
 
+        if (otherUserOpt.isPresent()) {
+            User u = otherUserOpt.get();
+            log.info("Target user ID {} found: name={}, role={}, isAi={}. Fetching standard chats.", otherUserId, u.getName(), u.getRole(), u.isAi());
+        } else {
+            log.warn("Target user ID {} not found in database", otherUserId);
+        }
+
         List<com.farmsetu.model.entity.ChatMessage> messages = chatMessageRepository.findConversation(userId, otherUserId, org.springframework.data.domain.PageRequest.of(page, size));
+        log.info("Found {} standard chat messages in conversation.", messages.size());
         return messages.stream().map(msg -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", msg.getId());
@@ -96,11 +110,14 @@ public class ChatService {
     @Transactional
     public void markConversationAsRead(Long otherUserId) {
         Long currentUserId = SecurityUtils.currentUserId();
-        List<ChatMessage> unread = chatMessageRepository.findUnreadMessages(otherUserId, currentUserId);
+        log.info("Marking conversation read: currentUserId={}, otherUserId={}", currentUserId, otherUserId);
+        List<ChatMessage> unread = chatMessageRepository.findBySenderIdAndReceiverIdAndRead(otherUserId, currentUserId, false);
+        log.info("Found {} unread messages to mark as read", unread.size());
         for (ChatMessage m : unread) {
             m.setRead(true);
         }
         chatMessageRepository.saveAll(unread);
+        log.info("Successfully marked messages as read");
     }
 
     @Transactional
@@ -191,32 +208,7 @@ public class ChatService {
     );
 
     private String getSystemInstructionForBot(Long botId) {
-        if (botId == null) botId = 9901L;
-        
-        switch (botId.intValue()) {
-            case 9901:
-                return "You are the FarmSetu AI Crop Disease & Pest Specialist. You specialize in identifying crop diseases, insect infestations, and offering organic or chemical remedies. Focus answers on plant pathology and pest management. If severe, advise a human agronomist.";
-            case 9902:
-                return "You are the FarmSetu AI Soil & Nutrient Expert. You specialize in soil health cards, testing parameters, nitrogen/phosphorus/potassium ratios, micronutrients, compost, and chemical/organic fertilizer applications.";
-            case 9903:
-                return "You are the FarmSetu AI Market Analyst & Pricing Advisor. You specialize in Indian mandi rates, MSP (Minimum Support Price), wholesale market trends, crop demand forecasts, and selling advice.";
-            case 9904:
-                return "You are the FarmSetu AI Irrigation Specialist. You specialize in drip and sprinkler irrigation, groundwater management, rainwater harvesting, soil moisture maintenance, and water conservation technologies.";
-            case 9905:
-                return "You are the FarmSetu AI Weather Advisory Specialist. You specialize in short and long-term weather forecasting advice, monsoon patterns, climate resilient crops, and frost/heatwave mitigation.";
-            case 9906:
-                return "You are the FarmSetu AI Government Schemes Expert. You specialize in Indian agricultural subsidies, PM-Kisan, KCC loans, crop insurance (PMFBY), and applying for state/central government agricultural schemes.";
-            case 9907:
-                return "You are the FarmSetu AI Seed Selection Expert. You specialize in high-yield seed varieties, hybrid breeding, seed treatment methods, germination tests, and matching seeds to specific soil/climatic zones.";
-            case 9908:
-                return "You are the FarmSetu AI Organic Farming Consultant. You specialize in natural farming, permaculture, vermicomposting, crop rotation, green manures, and biological pest control.";
-            case 9909:
-                return "You are the FarmSetu AI Livestock and Dairy Expert. You specialize in cattle health, poultry management, high-protein feed options, veterinary first-aid, and milk production enhancement.";
-            case 9910:
-                return "You are the FarmSetu AI Farm Machinery & Drone Specialist. You specialize in smart tractors, drone crop spraying, seed drills, combine harvesters, and implements.";
-            default:
-                return "You are FarmSetu AI Assistant, a helpful and certified agricultural assistant. Answer the farmer's question precisely, focusing on Indian agriculture context, crops, soil, pests, and market advice. If the query involves severe crop disease spreading, massive pest attack, legal disputes, bank loans/subsidies, or urgent crop failures, advise them to consult a human expert.";
-        }
+        return "You are the FarmSetu AI Assistant, a helpful and certified agricultural assistant. Answer the farmer's question precisely, focusing on Indian agriculture context, crops, soil, pests, and market advice. If the query involves severe crop disease spreading, massive pest attack, legal disputes, bank loans/subsidies, or urgent crop failures, advise them to consult a human expert.";
     }
 
     @SuppressWarnings("unchecked")
@@ -357,20 +349,22 @@ public class ChatService {
         return null;
     }
 
-    public Map<String, Object> aiChat(String message, Long sessionId, Long botId) {
+    public Map<String, Object> aiChat(String message, Long sessionId, Long botId, boolean storeHistory) {
         String reply = generateAiReply(message, botId);
         boolean escalationSuggested = detectEscalation(message) || detectEscalation(reply);
 
         // Save conversation history to database
-        try {
-            Long farmerId = SecurityUtils.currentUserId();
-            if (farmerId != null && botId != null) {
-                saveAiChatMessage(farmerId, botId.intValue(), message, false);
-                saveAiChatMessage(farmerId, botId.intValue(), reply, true);
+        if (storeHistory) {
+            try {
+                Long farmerId = SecurityUtils.currentUserId();
+                if (farmerId != null && botId != null) {
+                    saveAiChatMessage(farmerId, botId.intValue(), message, false);
+                    saveAiChatMessage(farmerId, botId.intValue(), reply, true);
+                }
+            } catch (Exception e) {
+                System.err.println("Error saving AI chat messages to database: " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            System.err.println("Error saving AI chat messages to database: " + e.getMessage());
-            e.printStackTrace();
         }
 
         // Record interaction in session if sessionId provided
@@ -388,13 +382,21 @@ public class ChatService {
         return response;
     }
 
+    public Map<String, Object> aiChat(String message, Long sessionId, Long botId) {
+        return aiChat(message, sessionId, botId, true);
+    }
+
     public Map<String, Object> aiChat(String message, Long sessionId) {
-        return aiChat(message, sessionId, 9901L);
+        Long botId = userRepository.findByIsAiTrue().stream().findFirst().map(User::getId)
+                .orElseThrow(() -> new com.farmsetu.exception.ResourceNotFoundException("AI Assistant bot not found in database"));
+        return aiChat(message, sessionId, botId, true);
     }
 
     // Backward-compatible overload
     public Map<String, Object> aiChat(String message) {
-        return aiChat(message, null, 9901L);
+        Long botId = userRepository.findByIsAiTrue().stream().findFirst().map(User::getId)
+                .orElseThrow(() -> new com.farmsetu.exception.ResourceNotFoundException("AI Assistant bot not found in database"));
+        return aiChat(message, null, botId, true);
     }
 
     private String generateAiReply(String message, Long botId) {
@@ -451,7 +453,16 @@ public class ChatService {
     }
 
     private String generateAiReply(String message) {
-        return generateAiReply(message, 9901L);
+        Long botId = userRepository.findByIsAiTrue().stream().findFirst().map(User::getId)
+                .orElseThrow(() -> new com.farmsetu.exception.ResourceNotFoundException("AI Assistant bot not found in database"));
+        return generateAiReply(message, botId);
+    }
+
+    @Transactional
+    public void clearAiChatHistory(Long farmerId, Long botId) {
+        if (farmerId != null && botId != null) {
+            aiChatMessageRepository.deleteByFarmerIdAndBotId(farmerId, botId.intValue());
+        }
     }
 
     private boolean detectEscalation(String message) {

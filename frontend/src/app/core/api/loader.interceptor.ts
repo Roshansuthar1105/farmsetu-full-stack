@@ -12,11 +12,11 @@ export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req.clone({ headers }));
   }
 
-  loaderService.show();
+  const requestId = loaderService.show();
 
   return next(req).pipe(
     finalize(() => {
-      loaderService.hide();
+      loaderService.hide(requestId);
     })
   );
 };

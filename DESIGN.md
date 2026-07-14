@@ -161,6 +161,7 @@ The shape language is **distinctly rounded (Level 2)** to counteract the potenti
 - **Cards & Major Containers:** `rounded-2xl` (1rem / 16px) or `rounded-3xl` (1.5rem / 24px) for a soft, approachable feel.
 - **Buttons & Inputs:** `rounded-xl` (0.75rem / 12px) to ensure a modern SaaS aesthetic.
 - **Icons:** Use the leaf-inspired curves from the logo. Icon containers should be circular or softly rounded squares.
+- **Emojies** Do not use emojies, remove all emojies and use icons instead.
 
 ## Components
 

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,11 @@ public class User extends BaseEntity {
 
     private String bio;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("isAi")
+    @Column(name = "is_ai")
+    @Builder.Default
+    private Boolean isAi = false;
+
     @Column(name = "preferred_language")
     @Builder.Default
     private String preferredLanguage = "en";
@@ -66,15 +72,21 @@ public class User extends BaseEntity {
 
     @Column(name = "is_verified")
     @Builder.Default
-    private boolean verified = false;
+    private Boolean verified = false;
 
     @Column(name = "is_active")
     @Builder.Default
-    private boolean active = true;
+    private Boolean active = true;
 
     @Column(name = "two_factor_enabled")
     @Builder.Default
-    private boolean twoFactorEnabled = false;
+    private Boolean twoFactorEnabled = false;
+
+    @Column(name = "magic_link_token")
+    private String magicLinkToken;
+
+    @Column(name = "magic_link_expiry")
+    private Instant magicLinkExpiry;
 
     @Column(name = "reputation_score")
     @Builder.Default
@@ -88,4 +100,21 @@ public class User extends BaseEntity {
     @Column(name = "crop_name")
     @Builder.Default
     private List<String> currentCrops = new ArrayList<>();
+
+    public boolean isVerified() {
+        return verified != null && verified;
+    }
+
+    public boolean isActive() {
+        return active != null && active;
+    }
+
+    public boolean isTwoFactorEnabled() {
+        return twoFactorEnabled != null && twoFactorEnabled;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isAi")
+    public boolean isAi() {
+        return isAi != null && isAi;
+    }
 }
