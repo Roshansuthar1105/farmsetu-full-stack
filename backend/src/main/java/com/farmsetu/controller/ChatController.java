@@ -46,45 +46,12 @@ public class ChatController {
     }
 
     @PostMapping("/chats/send")
-    public ApiResponse<Map<String, Object>> send(@RequestBody Map<String, Object> body) {
+    public ApiResponse<ChatMessage> send(@RequestBody Map<String, Object> body) {
         Long receiverId = Long.valueOf(body.get("receiverId").toString());
         String text = (String) body.get("message");
         MessageType type = EnumUtils.parseEnum(MessageType.class, body.get("messageType"), MessageType.TEXT);
         String mediaUrl = (String) body.get("mediaUrl");
-        ChatMessage msg = chatService.sendMessage(receiverId, text, type, mediaUrl);
-
-        Map<String, Object> map = new java.util.HashMap<>();
-        map.put("id", msg.getId());
-        map.put("senderId", msg.getSender().getId());
-        map.put("receiverId", msg.getReceiver().getId());
-        map.put("messageText", msg.getMessageText() != null ? msg.getMessageText() : "");
-        map.put("messageType", msg.getMessageType() != null ? msg.getMessageType().name() : "TEXT");
-        map.put("mediaUrl", msg.getMediaUrl() != null ? msg.getMediaUrl() : "");
-        map.put("read", msg.isRead());
-        map.put("pinned", msg.isPinned());
-        map.put("createdAt", msg.getCreatedAt() != null ? msg.getCreatedAt().toString() : "");
-
-        messagingTemplate.convertAndSend("/topic/messages/" + receiverId, map);
-        messagingTemplate.convertAndSend("/topic/messages/" + msg.getSender().getId(), map);
-
-        return ApiResponse.ok(map);
-    }
-
-    @PostMapping("/chats/presence")
-    public ApiResponse<Void> updatePresence(@RequestParam(defaultValue = "true") boolean online) {
-        Long currentUserId = com.farmsetu.security.SecurityUtils.currentUserId();
-        if (online) {
-            com.farmsetu.websocket.ChatWebSocketController.getOnlineUserIds().add(currentUserId);
-        } else {
-            com.farmsetu.websocket.ChatWebSocketController.getOnlineUserIds().remove(currentUserId);
-        }
-
-        Map<String, Object> statusPayload = new java.util.HashMap<>();
-        statusPayload.put("userId", currentUserId);
-        statusPayload.put("status", online ? "ONLINE" : "OFFLINE");
-        messagingTemplate.convertAndSend("/topic/status", statusPayload);
-
-        return ApiResponse.ok(null);
+        return ApiResponse.ok(chatService.sendMessage(receiverId, text, type, mediaUrl));
     }
 
     @PutMapping("/chats/{id}/read")

@@ -2,6 +2,7 @@ package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.auth.AuthResponse;
 import com.farmsetu.model.dto.auth.LoginRequest;
+import com.farmsetu.model.dto.auth.MagicLinkRequest;
 import com.farmsetu.model.dto.auth.OtpVerifyRequest;
 import com.farmsetu.model.dto.auth.RefreshTokenRequest;
 import com.farmsetu.model.dto.auth.RegisterRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -68,6 +70,17 @@ public class AuthController {
     @PostMapping("/google-login")
     public ApiResponse<Map<String, String>> googleLogin(@RequestBody Map<String, String> body) {
         return ApiResponse.ok(Map.of("message", "Wire Google OAuth in configuration"));
+    }
+
+    @PostMapping("/magic-link/send")
+    public ApiResponse<Map<String, String>> sendMagicLink(@Valid @RequestBody MagicLinkRequest request) {
+        authService.sendMagicLink(request.getEmail());
+        return ApiResponse.ok(Map.of("message", "Magic link sent to your email if the account exists"));
+    }
+
+    @GetMapping("/magic-link/verify")
+    public ApiResponse<AuthResponse> verifyMagicLink(@RequestParam String token) {
+        return ApiResponse.ok(authService.verifyMagicLink(token));
     }
 
     @GetMapping("/me")

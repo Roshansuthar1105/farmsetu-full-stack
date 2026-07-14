@@ -33,10 +33,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/marketplace/orders.component').then(m => m.OrdersComponent)
       },
       {
-        path: 'chat',
-        loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent)
-      },
-      {
         path: 'farm-chat',
         loadComponent: () => import('./features/chat/farm-chat.component').then(m => m.FarmChatComponent)
       },

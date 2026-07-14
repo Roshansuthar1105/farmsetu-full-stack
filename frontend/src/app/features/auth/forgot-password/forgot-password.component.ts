@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { OtpInputComponent } from '../shared/otp-input.component';
 import { AuthLayoutComponent } from '../shared/auth-layout.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'fs-forgot-password',
@@ -20,7 +21,7 @@ import { AuthService } from '../../../core/services/auth.service';
       </a>
 
       <!-- Icon & Header -->
-      <div class="text-center space-y-2 mb-6">
+      <div class="text-center space-y-1 mb-4">
         <div class="flex justify-center">
           <div class="w-14 h-14 bg-amber-50 dark:bg-amber-950/20 rounded-full flex items-center justify-center border border-amber-100 dark:border-amber-900/40">
             <span class="material-icons text-2xl text-amber-600 dark:text-amber-400">lock_reset</span>
@@ -35,7 +36,7 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
 
       <!-- Tab Switch -->
-      <div class="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-6 border border-gray-200/50 dark:border-gray-700/50">
+      <div class="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-4 border border-gray-200/50 dark:border-gray-700/50">
         @for (tab of ['Via OTP', 'Via Email']; track tab) {
           <button (click)="activeTab.set(tab)"
                   class="flex-1 py-2 rounded-lg text-xs font-bold transition-all duration-200"
@@ -49,12 +50,12 @@ import { AuthService } from '../../../core/services/auth.service';
 
       @switch (step()) {
         @case ('input') {
-          <form [formGroup]="form" (ngSubmit)="sendReset()" class="space-y-4">
+          <form [formGroup]="form" (ngSubmit)="submitIdentifier()" class="space-y-4">
             @if (activeTab() === 'Via OTP') {
               <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Mobile Number</label>
                 <input formControlName="phone" placeholder="Enter 10-digit mobile number"
-                       class="w-full px-4 py-3 text-sm rounded-xl
+                       class="w-full px-4 py-2.5 text-sm rounded-xl
                               border border-gray-300 dark:border-gray-700
                               bg-gray-50/50 dark:bg-gray-900
                               text-gray-900 dark:text-white placeholder-gray-400
@@ -65,7 +66,7 @@ import { AuthService } from '../../../core/services/auth.service';
               <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Email Address</label>
                 <input formControlName="email" placeholder="Enter registered email address"
-                       class="w-full px-4 py-3 text-sm rounded-xl
+                       class="w-full px-4 py-2.5 text-sm rounded-xl
                               border border-gray-300 dark:border-gray-700
                               bg-gray-50/50 dark:bg-gray-900
                               text-gray-900 dark:text-white placeholder-gray-400
@@ -83,14 +84,13 @@ import { AuthService } from '../../../core/services/auth.service';
             }
 
             <button type="submit"
-                    [disabled]="loading() || (activeTab() === 'Via OTP' ? !form.get('phone')?.value : !form.get('email')?.value)"
-                    class="w-full rounded-xl text-sm font-bold text-white
-                           bg-gradient-to-r from-amber-500 to-amber-600
-                           hover:from-amber-600 hover:to-amber-700
-                           disabled:opacity-50 disabled:cursor-not-allowed
-                           shadow-lg shadow-amber-500/10
-                           transition-all duration-200 flex items-center justify-center gap-2"
-                    style="height: 48px;">
+                    class="relative w-full rounded-xl text-sm font-bold text-white
+                           bg-amber-500 hover:bg-amber-400 active:bg-amber-600
+                           border border-amber-400/50 hover:border-amber-300
+                           shadow-[0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(245,158,11,0.3)]
+                           transition-all duration-200 ease-in-out
+                           flex items-center justify-center gap-2"
+                    style="height: 44px;">
               @if (loading()) {
                 <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -117,25 +117,43 @@ import { AuthService } from '../../../core/services/auth.service';
             <div class="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
               <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">New Password</label>
-                <input type="password" placeholder="Enter new password"
-                       class="w-full px-4 py-3 text-sm rounded-xl
-                              border border-gray-300 dark:border-gray-700
-                              bg-gray-50/50 dark:bg-gray-900
-                              text-gray-900 dark:text-white placeholder-gray-400
-                              focus:border-green-500 focus:ring-4 focus:ring-green-500/10
-                              transition-all duration-200 outline-none"
-                       [(ngModel)]="newPassword" />
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <span class="material-icons text-base text-gray-400">lock_outline</span>
+                  </div>
+                  <input [type]="showNewPassword() ? 'text' : 'password'" placeholder="Enter new password"
+                         class="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl
+                                border border-gray-300 dark:border-gray-700
+                                bg-gray-50/50 dark:bg-gray-900
+                                text-gray-900 dark:text-white placeholder-gray-400
+                                focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                                transition-all duration-200 outline-none"
+                         [(ngModel)]="newPassword" />
+                  <button type="button" (click)="showNewPassword.set(!showNewPassword())"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <span class="material-icons text-base">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
+                  </button>
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Confirm New Password</label>
-                <input type="password" placeholder="Confirm new password"
-                       class="w-full px-4 py-3 text-sm rounded-xl
-                              border border-gray-300 dark:border-gray-700
-                              bg-gray-50/50 dark:bg-gray-900
-                              text-gray-900 dark:text-white placeholder-gray-400
-                              focus:border-green-500 focus:ring-4 focus:ring-green-500/10
-                              transition-all duration-200 outline-none"
-                       [(ngModel)]="confirmNewPassword" />
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <span class="material-icons text-base text-gray-400">task_alt</span>
+                  </div>
+                  <input [type]="showConfirmPassword() ? 'text' : 'password'" placeholder="Confirm new password"
+                         class="w-full pl-10 pr-10 py-3 text-sm rounded-xl
+                                border border-gray-300 dark:border-gray-700
+                                bg-gray-50/50 dark:bg-gray-900
+                                text-gray-900 dark:text-white placeholder-gray-400
+                                focus:border-green-500 focus:ring-4 focus:ring-green-500/10
+                                transition-all duration-200 outline-none"
+                         [(ngModel)]="confirmNewPassword" />
+                  <button type="button" (click)="showConfirmPassword.set(!showConfirmPassword())"
+                          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <span class="material-icons text-base">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -148,13 +166,13 @@ import { AuthService } from '../../../core/services/auth.service';
             }
 
             <button (click)="resetPassword()"
-                    [disabled]="loading() || !newPassword || !confirmNewPassword"
-                    class="w-full rounded-xl text-sm font-bold text-white
-                           bg-gradient-to-r from-green-600 to-emerald-600
-                           disabled:opacity-50 disabled:cursor-not-allowed
-                           shadow-lg shadow-green-500/10
-                           transition-all duration-200 flex items-center justify-center gap-2"
-                    style="height: 48px;">
+                    class="relative w-full rounded-xl text-sm font-bold text-white
+                           bg-green-600 hover:bg-green-500 active:bg-green-700
+                           border border-green-500/50 hover:border-green-400
+                           shadow-[0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(22,163,74,0.3)]
+                           transition-all duration-200 ease-in-out
+                           flex items-center justify-center gap-2"
+                    style="height: 44px;">
               @if (loading()) {
                 <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -175,11 +193,14 @@ export class ForgotPasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastr = inject(ToastrService);
 
   readonly activeTab = signal('Via OTP');
   readonly step = signal<'input' | 'otp'>('input');
   readonly error = signal<string | null>(null);
   readonly loading = signal(false);
+  readonly showNewPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     phone: [''],
@@ -190,18 +211,18 @@ export class ForgotPasswordComponent {
   confirmNewPassword = '';
   otpEntered = '';
 
-  sendReset(): void {
-    if (this.form.invalid) return;
-    this.loading.set(true);
-    this.error.set(null);
+  submitIdentifier(): void {
     const isPhone = this.activeTab() === 'Via OTP';
     const identifier = isPhone ? this.form.get('phone')?.value : this.form.get('email')?.value;
     
     if (!identifier) {
-      this.error.set(isPhone ? 'Please enter your phone number' : 'Please enter your email');
-      this.loading.set(false);
+      this.toastr.error(`Please enter a valid ${isPhone ? 'mobile number' : 'email address'}.`);
       return;
     }
+    
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.error.set(null);
 
     this.auth.forgotPassword(identifier, isPhone ? 'phone' : 'email').subscribe({
       next: () => {
@@ -221,22 +242,23 @@ export class ForgotPasswordComponent {
 
   resetPassword(): void {
     if (!this.newPassword || !this.confirmNewPassword) {
-      this.error.set('Password fields are required');
+      this.toastr.error('Please enter both password fields.');
       return;
     }
     if (this.newPassword !== this.confirmNewPassword) {
-      this.error.set('Passwords do not match');
+      this.toastr.error('Passwords do not match.');
       return;
     }
     if (this.newPassword.length < 8) {
-      this.error.set('Password must be at least 8 characters long');
+      this.toastr.error('Password must be at least 8 characters long.');
       return;
     }
     if (!this.otpEntered) {
-      this.error.set('Please complete the verification code input');
+      this.toastr.error('Please complete the verification code input.');
       return;
     }
 
+    if (this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
     const isPhone = this.activeTab() === 'Via OTP';
@@ -245,7 +267,7 @@ export class ForgotPasswordComponent {
     this.auth.resetPassword(identifier, isPhone ? 'phone' : 'email', this.otpEntered, this.newPassword).subscribe({
       next: () => {
         this.loading.set(false);
-        alert('Password reset successfully! Please login with your new password.');
+        this.toastr.success('Password reset successfully! Please login with your new password.');
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {

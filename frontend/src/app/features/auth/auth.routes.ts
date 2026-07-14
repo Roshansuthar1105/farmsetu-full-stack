@@ -34,5 +34,10 @@ export const AUTH_ROUTES: Routes = [
     path: '2fa',
     loadComponent: () =>
       import('./two-factor/two-factor.component').then(m => m.TwoFactorComponent)
+  },
+  {
+    path: 'magic-link',
+    loadComponent: () =>
+      import('./magic-link/magic-link-verify.component').then(m => m.MagicLinkVerifyComponent)
   }
 ];

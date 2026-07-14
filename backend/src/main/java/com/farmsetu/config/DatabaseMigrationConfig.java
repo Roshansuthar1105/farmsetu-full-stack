@@ -44,24 +44,24 @@ public class DatabaseMigrationConfig {
             }
 
             // Seed AI Bot if not exists
-            boolean botExists = false;
-            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'ai.assistant@farmsetu.com'")) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    botExists = true;
-                }
-            }
-
-            if (!botExists) {
-                log.info("Seeding FarmSetu AI Assistant into 'users' table...");
-                stmt.execute(
-                    "INSERT INTO users (name, email, phone, password_hash, role, is_verified, is_active, is_ai, bio, profile_photo) " +
-                    "VALUES ('FarmSetu AI Assistant', 'ai.assistant@farmsetu.com', '9900990099', " +
-                    "'$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'EXPERT', true, true, true, " +
-                    "'Your AI Agricultural Assistant. Ask me anything about crop diseases, pest management, soil health, and market trends.', " +
-                    "'https://ui-avatars.com/api/?name=AI+Assistant&background=10b981&color=fff&bold=true&rounded=true')"
-                );
-                log.info("FarmSetu AI Assistant seeded successfully.");
-            }
+//            boolean botExists = false;
+//            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'ai.assistant@farmsetu.com'")) {
+//                if (rs.next() && rs.getInt(1) > 0) {
+//                    botExists = true;
+//                }
+//            }
+//
+//            if (!botExists) {
+////                log.info("Seeding FarmSetu AI Assistant into 'users' table...");
+////                stmt.execute(
+////                    "INSERT INTO users (name, email, phone, password_hash, role, is_verified, is_active, is_ai, bio, profile_photo) " +
+////                    "VALUES ('FarmSetu AI Assistant', 'ai.assistant@farmsetu.com', '9900990099', " +
+////                    "'$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'EXPERT', true, true, true, " +
+////                    "'Your AI Agricultural Assistant. Ask me anything about crop diseases, pest management, soil health, and market trends.', " +
+////                    "'https://ui-avatars.com/api/?name=AI+Assistant&background=10b981&color=fff&bold=true&rounded=true')"
+////                );
+//                log.info("FarmSetu AI Assistant seeded successfully.");
+//            }
         } catch (Exception e) {
             log.error("Failed to run custom database migrations: {}", e.getMessage(), e);
         }

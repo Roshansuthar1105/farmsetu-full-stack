@@ -94,7 +94,7 @@ export class DashboardComponent {
     { path: '/app/market-analysis', icon: 'auto_graph', label: 'Mandi Price Hub', desc: 'Live crop rates & analysis', color: 'text-amber-500' },
     { path: '/app/disease-detection', icon: 'center_focus_strong', label: 'AI Disease Scan', desc: 'Identify crop infections', color: 'text-emerald-500' },
     { path: '/app/marketplace', icon: 'storefront', label: 'Agri Marketplace', desc: 'Buy inputs, seeds & tools', color: 'text-green-500' },
-    { path: '/app/chat', icon: 'forum', label: 'Agronomist Chat', desc: 'Get live specialist guidance', color: 'text-indigo-500' },
+    { path: '/app/farm-chat', icon: 'forum', label: 'Agronomist Chat', desc: 'Get live specialist guidance', color: 'text-indigo-500' },
     { path: '/app/crop-calendar', icon: 'calendar_today', label: 'Cultivation Planner', desc: 'Task guides & checklists', color: 'text-teal-500' },
     { path: '/app/govt-schemes', icon: 'policy', label: 'Subsidies & Schemes', desc: 'Government support guides', color: 'text-rose-500' },
     { path: '/app/mandi-finder', icon: 'near_me', label: 'Mandi Finder', desc: 'Locate local market spaces', color: 'text-purple-500' }

@@ -7,6 +7,7 @@ import { WebsocketService } from '../../core/services/websocket.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 interface ChatMessage {
   id: number;
@@ -32,6 +33,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
   private readonly ws = inject(WebsocketService);
+  private readonly toastr = inject(ToastrService);
 
   @ViewChild('messageArea') private messageArea!: ElementRef;
   @ViewChild('fileInput') private fileInput!: ElementRef;
@@ -342,7 +344,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error uploading file:', err);
-        alert('File upload failed. Please try again.');
+        this.toastr.error('File upload failed. Please try again.');
       }
     });
   }
@@ -374,7 +376,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
       }, 1000);
     }).catch(err => {
       console.error('Microphone access denied:', err);
-      alert('Microphone access is required to record voice notes.');
+      this.toastr.warning('Microphone access is required to record voice notes.');
     });
   }
 
@@ -423,7 +425,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error uploading voice note:', err);
-        alert('Voice note upload failed. Please try again.');
+        this.toastr.error('Voice note upload failed. Please try again.');
       }
     });
   }

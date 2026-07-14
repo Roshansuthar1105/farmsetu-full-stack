@@ -14,11 +14,11 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      mergeMap(({ identifier, password }) =>
-        this.auth.login(identifier, password).pipe(
-          map((res) => AuthActions.loginSuccess({ user: res.user })),
+      mergeMap(({ identifier, password, rememberMe }) =>
+        this.auth.login(identifier, password, rememberMe).pipe(
+          map((res) => AuthActions.loginSuccess({ user: res.user, rememberMe })),
           catchError((err) =>
-            of(AuthActions.loginFailure({ error: err?.message ?? 'Login failed' }))
+            of(AuthActions.loginFailure({ error: err?.error?.message ?? err?.message ?? 'Login failed. Please try again.' }))
           )
         )
       )
@@ -29,6 +29,43 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
+        tap(() => this.router.navigate(['/app/dashboard']))
+      ),
+    { dispatch: false }
+  );
+
+  sendMagicLink$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.sendMagicLink),
+      mergeMap(({ email }) =>
+        this.auth.sendMagicLink(email).pipe(
+          map(() => AuthActions.sendMagicLinkSuccess()),
+          catchError((err) =>
+            of(AuthActions.sendMagicLinkFailure({ error: err?.error?.message ?? 'Failed to send magic link.' }))
+          )
+        )
+      )
+    )
+  );
+
+  verifyMagicLink$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.verifyMagicLink),
+      mergeMap(({ token }) =>
+        this.auth.verifyMagicLink(token).pipe(
+          map((res) => AuthActions.verifyMagicLinkSuccess({ user: res.user })),
+          catchError((err) =>
+            of(AuthActions.verifyMagicLinkFailure({ error: err?.error?.message ?? 'Invalid or expired magic link.' }))
+          )
+        )
+      )
+    )
+  );
+
+  verifyMagicLinkSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.verifyMagicLinkSuccess),
         tap(() => this.router.navigate(['/app/dashboard']))
       ),
     { dispatch: false }

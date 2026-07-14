@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,12 @@ public class User extends BaseEntity {
     @Column(name = "two_factor_enabled")
     @Builder.Default
     private Boolean twoFactorEnabled = false;
+
+    @Column(name = "magic_link_token")
+    private String magicLinkToken;
+
+    @Column(name = "magic_link_expiry")
+    private Instant magicLinkExpiry;
 
     @Column(name = "reputation_score")
     @Builder.Default

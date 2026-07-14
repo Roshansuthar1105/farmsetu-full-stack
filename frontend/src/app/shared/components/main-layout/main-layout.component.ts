@@ -151,7 +151,6 @@ export class MainLayoutComponent {
     { path: '/app/dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
     { path: '/app/marketplace', labelKey: 'nav.marketplace', icon: 'store' },
     { path: '/app/orders', labelKey: 'nav.orders', icon: 'receipt_long' },
-    { path: '/app/chat', labelKey: 'nav.chat', icon: 'chat' },
     { path: '/app/farm-chat', labelKey: 'nav.farmChat', icon: 'forum' },
     { path: '/app/community', labelKey: 'nav.community', icon: 'groups' },
     { path: '/app/profile', labelKey: 'nav.profile', icon: 'person' }

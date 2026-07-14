@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
+import { ToastrService } from 'ngx-toastr';
 import {
   LucidePlus,
   LucideSearch,
@@ -48,6 +49,7 @@ import {
 })
 export class CommunityComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly toastr = inject(ToastrService);
   
   readonly loading = signal(true);
   readonly posts = signal<any[]>([]);
@@ -310,7 +312,7 @@ export class CommunityComponent implements OnInit {
           this.uploadingStoryImg.set(false);
         },
         error: (err) => {
-          alert('Failed to upload image. Please try again.');
+          this.toastr.error('Failed to upload image. Please try again.');
           this.uploadingStoryImg.set(false);
         }
       });

@@ -32,7 +32,7 @@ import { ThemeService } from '../../../core/services/theme.service';
         <div class="relative z-10 my-auto space-y-12">
           <div class="space-y-4">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-green-300 text-xs font-bold uppercase tracking-wider">
-              🚜 Kheti Ki Nayi Duniya
+              <span class="material-icons text-sm">agriculture</span> Kheti Ki Nayi Duniya
             </span>
             <h2 class="text-3xl sm:text-4xl font-extrabold leading-tight text-white">
               Bridging traditional farming with modern technology.
@@ -83,7 +83,7 @@ import { ThemeService } from '../../../core/services/theme.service';
       </aside>
 
       <!-- Right Panel: Form Slot (Occupies remaining width) -->
-      <main class="flex-1 flex flex-col justify-between relative p-4 sm:p-12 overflow-y-auto">
+      <main class="flex-1 flex flex-col justify-between relative p-4 sm:px-12 sm:py-6 overflow-y-auto">
         <!-- Top row: Header elements -->
         <div class="flex items-center justify-between w-full max-w-md mx-auto mb-6 lg:mb-4 gap-4">
           <!-- Mobile logo display -->
@@ -118,7 +118,7 @@ import { ThemeService } from '../../../core/services/theme.service';
         <!-- Form Slot Container -->
         <div class="w-full max-w-md mx-auto my-auto py-2 sm:py-4">
           <!-- Always render a card, even on mobile, for contrast and shadow -->
-          <div class="bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/85 rounded-2xl shadow-xl p-5 sm:p-8 space-y-6 transition-all duration-300">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/85 rounded-2xl shadow-xl p-5 sm:px-8 sm:py-6 space-y-4 transition-all duration-300">
             <ng-content></ng-content>
           </div>
         </div>

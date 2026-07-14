@@ -13,6 +13,7 @@ import com.farmsetu.repository.UserRepository;
 import com.farmsetu.security.JwtService;
 import com.farmsetu.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,9 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+
+    @Value("${farmsetu.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -132,6 +138,52 @@ public class AuthService {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new BadRequestException("User not found"));
         return UserResponse.from(user);
+    }
+
+    // ─── Magic Link ────────────────────────────────────────────────────────
+
+    @Transactional
+    public void sendMagicLink(String email) {
+        // Always return success to prevent user enumeration
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String token = java.util.UUID.randomUUID().toString().replace("-", "");
+            user.setMagicLinkToken(token);
+            user.setMagicLinkExpiry(Instant.now().plusSeconds(15 * 60)); // 15 minutes
+            userRepository.save(user);
+
+            String link = frontendUrl + "/auth/magic-link?token=" + token;
+            String html = "<div style='font-family:sans-serif;max-width:480px;margin:auto;padding:32px;'>" +
+                "<h2 style='color:#16a34a;'>Login to FarmSetu</h2>" +
+                "<p>Click the button below to sign in. This link expires in <b>15 minutes</b>.</p>" +
+                "<a href='" + link + "' style='display:inline-block;margin:20px 0;padding:14px 28px;" +
+                "background:#16a34a;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;'>" +
+                "Login to FarmSetu</a>" +
+                "<p style='color:#9ca3af;font-size:12px;margin-top:24px;'>If you did not request this, you can safely ignore this email.</p>" +
+                "</div>";
+            emailService.sendHtmlEmail(user.getEmail(), "Your FarmSetu Login Link", html);
+        });
+    }
+
+    @Transactional
+    public AuthResponse verifyMagicLink(String token) {
+        User user = userRepository.findAll().stream()
+                .filter(u -> token.equals(u.getMagicLinkToken()))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Invalid or expired magic link"));
+
+        if (user.getMagicLinkExpiry() == null || Instant.now().isAfter(user.getMagicLinkExpiry())) {
+            user.setMagicLinkToken(null);
+            user.setMagicLinkExpiry(null);
+            userRepository.save(user);
+            throw new BadRequestException("Magic link has expired. Please request a new one.");
+        }
+
+        // Invalidate the token after use (one-time use)
+        user.setMagicLinkToken(null);
+        user.setMagicLinkExpiry(null);
+        userRepository.save(user);
+
+        return buildAuthResponse(user);
     }
 
     private AuthResponse buildAuthResponse(User user) {
