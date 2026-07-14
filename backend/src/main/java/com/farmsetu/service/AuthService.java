@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -73,8 +74,8 @@ public class AuthService {
 
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
             emailService.sendSimpleEmail(user.getEmail(), "Welcome to Farmsetu! 🌾",
-                "Hello " + user.getName() + ",\n\nWelcome to Farmsetu - Kheti ki nayi duniya!\n" +
-                "We are thrilled to have you join our community. You can now list products in the marketplace, read crop alerts, and interact with other farmers.\n\nBest regards,\nThe Farmsetu Team");
+                    "Hello " + user.getName() + ",\n\nWelcome to Farmsetu - Kheti ki nayi duniya!\n" +
+                            "We are thrilled to have you join our community. You can now list products in the marketplace, read crop alerts, and interact with other farmers.\n\nBest regards,\nThe Farmsetu Team");
         }
 
         return buildAuthResponse(user);
@@ -82,20 +83,20 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword()));
-//
-//        User user = userRepository.findByEmailOrPhone(request.getIdentifier(), request.getIdentifier())
-//                .orElseThrow(() -> new BadRequestException("User not found"));
-//        return buildAuthResponse(user);
+        // authenticationManager.authenticate(
+        // new UsernamePasswordAuthenticationToken(request.getIdentifier(),
+        // request.getPassword()));
+        //
+        // User user = userRepository.findByEmailOrPhone(request.getIdentifier(),
+        // request.getIdentifier())
+        // .orElseThrow(() -> new BadRequestException("User not found"));
+        // return buildAuthResponse(user);
         try {
             // ✅ FIXED: authentication is restored and works with email OR phone
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getIdentifier(),
-                            request.getPassword()
-                    )
-            );
+                            request.getPassword()));
 
             // ✅ FIXED: get UserPrincipal directly from authentication - no extra DB call
             UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
@@ -112,9 +113,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponse refreshToken(String refreshToken) {
-//        User user = userRepository.findById(principal.getId())
-//                .orElseThrow(() -> new BadRequestException("User not found"));
-//        return buildAuthResponse(user);
+        // User user = userRepository.findById(principal.getId())
+        // .orElseThrow(() -> new BadRequestException("User not found"));
+        // return buildAuthResponse(user);
         // ✅ FIXED: validate refresh token directly, no SecurityUtils needed
         try {
             String username = jwtService.extractUsername(refreshToken);
@@ -153,13 +154,15 @@ public class AuthService {
 
             String link = frontendUrl + "/auth/magic-link?token=" + token;
             String html = "<div style='font-family:sans-serif;max-width:480px;margin:auto;padding:32px;'>" +
-                "<h2 style='color:#16a34a;'>Login to FarmSetu</h2>" +
-                "<p>Click the button below to sign in. This link expires in <b>15 minutes</b>.</p>" +
-                "<a href='" + link + "' style='display:inline-block;margin:20px 0;padding:14px 28px;" +
-                "background:#16a34a;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;'>" +
-                "Login to FarmSetu</a>" +
-                "<p style='color:#9ca3af;font-size:12px;margin-top:24px;'>If you did not request this, you can safely ignore this email.</p>" +
-                "</div>";
+                    "<h2 style='color:#16a34a;'>Login to FarmSetu</h2>" +
+                    "<p>Click the button below to sign in. This link expires in <b>15 minutes</b>.</p>" +
+                    "<a href='" + link + "' style='display:inline-block;margin:20px 0;padding:14px 28px;" +
+                    "background:#16a34a;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;'>"
+                    +
+                    "Login to FarmSetu</a>" +
+                    "<p style='color:#9ca3af;font-size:12px;margin-top:24px;'>If you did not request this, you can safely ignore this email.</p>"
+                    +
+                    "</div>";
             emailService.sendHtmlEmail(user.getEmail(), "Your FarmSetu Login Link", html);
         });
     }

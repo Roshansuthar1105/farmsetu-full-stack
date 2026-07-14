@@ -20,10 +20,10 @@ public class EmailService {
     @Value("${brevo.api-key:}")
     private String apiKey;
 
-    @Value("${brevo.sender.email:no-reply@farmsetu.com}")
+    @Value("${brevo.sender.email:sroshan2931@gmail.com}")
     private String senderEmail;
 
-    @Value("${brevo.sender.name:FarmSetu}")
+    @Value("${brevo.sender.name:FarmSetu Platform}")
     private String senderName;
 
     public void sendSimpleEmail(String to, String subject, String body) {
