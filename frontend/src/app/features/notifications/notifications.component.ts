@@ -72,6 +72,7 @@ export class NotificationsComponent implements OnInit {
   readonly items = signal<LocalNotification[]>([]);
   readonly activeChannel = signal<'all' | 'weather' | 'market' | 'task' | 'marketplace' | 'system' | 'preferences'>('all');
   readonly searchQuery = signal<string>('');
+  readonly loading = signal<boolean>(true);
 
   // Preferences model
   readonly preferences = signal({
@@ -127,67 +128,20 @@ export class NotificationsComponent implements OnInit {
     };
   });
 
-  // Mock notifications fallback
-  readonly mockNotifications: LocalNotification[] = [
-    {
-      id: 101,
-      title: 'Severe Rain Warnings',
-      message: 'Severe rain showers predicted in your local district beginning 4:00 PM today. Ensure all harvested grains are moved to covered shelter.',
-      notificationType: 'WEATHER',
-      read: false,
-      timeAgo: '10 mins ago',
-      actionUrl: '/app/weather'
-    },
-    {
-      id: 102,
-      title: 'Mandi Rate Surge Alert',
-      message: 'Wheat wholesale price in Khanna Mandi has increased to ₹2,450 per quintal (+2.4% today). High trade volume reported.',
-      notificationType: 'PRICE',
-      read: false,
-      timeAgo: '2 hours ago',
-      actionUrl: '/app/market-analysis'
-    },
-    {
-      id: 103,
-      title: 'Smart Calendar Reminder',
-      message: 'Time to apply organic Nitrogen fertilizer to Plot A (Wheat). Sowing is currently in the vegetative stage.',
-      notificationType: 'TASK',
-      read: false,
-      timeAgo: '4 hours ago',
-      actionUrl: '/app/crop-calendar'
-    },
-    {
-      id: 104,
-      title: 'Kheti Chaupal Forum Reply',
-      message: 'Dr. Ramesh Verma (Agronomist) has answered your crop health thread on leaf rust treatment.',
-      notificationType: 'COMMUNITY',
-      read: true,
-      timeAgo: '1 day ago',
-      actionUrl: '/app/community'
-    },
-    {
-      id: 105,
-      title: 'Machinery Lease Request Confirmed',
-      message: 'Your rental reservation request for Mahindra Tractor 575 from owner G. Singh has been approved.',
-      notificationType: 'MARKETPLACE',
-      read: true,
-      timeAgo: '2 days ago',
-      actionUrl: '/app/machinery'
-    }
-  ];
-
   ngOnInit(): void {
     this.loadNotifications();
+    this.loadPreferences();
   }
 
   loadNotifications(): void {
     const userId = this.auth.currentUser()?.id;
     if (!userId) {
-      // Offline/Guest fallback
-      this.items.set(this.mockNotifications);
+      this.items.set([]);
+      this.loading.set(false);
       return;
     }
 
+    this.loading.set(true);
     this.api.getPage<any>(`/api/notifications/${userId}`).subscribe({
       next: (p: PageResponse<any>) => {
         const backendItems = (p.content || []).map((n: any) => ({
@@ -200,14 +154,32 @@ export class NotificationsComponent implements OnInit {
           timeAgo: n.createdAt ? this.formatTime(n.createdAt) : 'Recently'
         }));
 
-        if (backendItems.length === 0) {
-          this.items.set(this.mockNotifications);
-        } else {
-          this.items.set(backendItems);
-        }
+        this.items.set(backendItems);
+        this.loading.set(false);
       },
       error: () => {
-        this.items.set(this.mockNotifications);
+        this.items.set([]);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadPreferences(): void {
+    const userId = this.auth.currentUser()?.id;
+    if (!userId) return;
+
+    this.api.get<any>('/api/notifications/preferences').subscribe({
+      next: (prefs) => {
+        if (prefs) {
+          this.preferences.set({
+            emailAlerts: prefs.emailAlerts ?? true,
+            smsAlerts: prefs.smsAlerts ?? true,
+            whatsappAlerts: prefs.whatsappAlerts ?? false,
+            weatherWarnings: prefs.weatherWarnings ?? true,
+            priceSurges: prefs.priceSurges ?? true,
+            taskReminders: prefs.taskReminders ?? true
+          });
+        }
       }
     });
   }
@@ -217,32 +189,26 @@ export class NotificationsComponent implements OnInit {
     const cleanTitle = (title || '').toLowerCase();
     const cleanMsg = (message || '').toLowerCase();
 
-    // 1. If WEATHER or related weather alerts
     if (rawType === 'WEATHER' || rawType === 'PEST_ALERT' || cleanTitle.includes('weather') || cleanTitle.includes('rain') || cleanTitle.includes('storm')) {
       return 'WEATHER';
     }
 
-    // 2. If PRICE_ALERT or price/market index related
     if (rawType === 'PRICE_ALERT' || rawType === 'PRICE' || cleanTitle.includes('price') || cleanTitle.includes('mandi') || cleanTitle.includes('rate') || cleanTitle.includes('quintal')) {
       return 'PRICE';
     }
 
-    // 3. If TASK_REMINDER or HARVEST_REMINDER or crop calendar tasks
     if (rawType === 'TASK_REMINDER' || rawType === 'HARVEST_REMINDER' || rawType === 'TASK' || cleanTitle.includes('water slot') || cleanTitle.includes('canal') || cleanTitle.includes('slot') || cleanTitle.includes('calendar') || cleanTitle.includes('fertilizer') || cleanTitle.includes('sow') || cleanTitle.includes('irrigation')) {
       return 'TASK';
     }
 
-    // 4. If MARKETPLACE or lease/rent/booking/jobs
     if (rawType === 'MARKETPLACE' || cleanTitle.includes('booking') || cleanTitle.includes('labor') || cleanTitle.includes('job') || cleanTitle.includes('tractor') || cleanMsg.includes('rent') || cleanMsg.includes('lease') || cleanMsg.includes('tractor') || cleanMsg.includes('booking') || cleanMsg.includes('machinery')) {
       return 'MARKETPLACE';
     }
 
-    // 5. If COMMUNITY or discussion forum
     if (rawType === 'COMMUNITY' || cleanTitle.includes('reply') || cleanTitle.includes('forum') || cleanTitle.includes('comment') || cleanTitle.includes('chaupal')) {
       return 'COMMUNITY';
     }
 
-    // 6. If SCHEME_DEADLINE or INSURANCE or SYSTEM/GENERAL
     if (rawType === 'SCHEME_DEADLINE' || rawType === 'INSURANCE' || rawType === 'GENERAL' || rawType === 'SYSTEM') {
       return 'SYSTEM';
     }
@@ -290,6 +256,9 @@ export class NotificationsComponent implements OnInit {
 
   setChannel(channel: 'all' | 'weather' | 'market' | 'task' | 'marketplace' | 'system' | 'preferences'): void {
     this.activeChannel.set(channel);
+    if (channel === 'preferences') {
+      this.loadPreferences();
+    }
   }
 
   updateSearch(e: Event): void {
@@ -307,7 +276,10 @@ export class NotificationsComponent implements OnInit {
   savePrefs(): void {
     this.api.post('/api/notifications/preferences', this.preferences()).subscribe({
       next: () => {
-        this.toastr.success('Alert settings saved');
+        this.toastr.success('Alert settings saved successfully');
+      },
+      error: () => {
+        this.toastr.error('Failed to save alert settings');
       }
     });
   }

@@ -4,8 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ApiService } from '../../../core/services/api.service';
+import { PageResponse } from '../../../core/models/user.model';
 import { AdminPageHeaderComponent } from '../shared/admin-page-header/admin-page-header.component';
-import { Subscription } from 'rxjs';
 
 export interface AdminNotification {
   id: string;
@@ -22,7 +23,7 @@ export interface AdminNotification {
   imports: [CommonModule, FormsModule, AdminPageHeaderComponent],
   template: `
     <div class="space-y-6">
-      <fs-admin-page-header title="System Notifications" subtitle="Real-time logs, activity updates, and critical system alerts.">
+      <fs-admin-page-header title="System Notifications" subtitle="Real-time logs, user alert dispatches, activity updates, and system alerts.">
         <div class="flex items-center gap-2">
           <button (click)="markAllAsRead()" class="px-3.5 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             Mark all read
@@ -130,17 +131,12 @@ export interface AdminNotification {
 export class AdminNotificationsComponent implements OnInit, OnDestroy {
   private readonly ws = inject(WebsocketService);
   private readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
   private readonly toastr = inject(ToastrService);
 
   private wsUnsub?: () => void;
 
-  readonly notifications = signal<AdminNotification[]>([
-    { id: '1', title: 'New Seller Registration', message: 'Seller Ramesh Kumar applied for shop verification.', type: 'USER', read: false, createdAt: new Date(Date.now() - 300000) },
-    { id: '2', title: 'Order Completed', message: 'Order #4102 has been successfully delivered and paid.', type: 'ORDER', read: false, createdAt: new Date(Date.now() - 3600000) },
-    { id: '3', title: 'High CPU Utilization', message: 'Server instance API usage peaked above 90% threshold.', type: 'ALERT', read: true, createdAt: new Date(Date.now() - 7200000) },
-    { id: '4', title: 'System Database Backup', message: 'Automated midnight backup completed successfully.', type: 'SYSTEM', read: true, createdAt: new Date(Date.now() - 86400000) }
-  ]);
-
+  readonly notifications = signal<AdminNotification[]>([]);
   readonly activeCategory = signal<string>('ALL');
 
   readonly categories = [
@@ -154,15 +150,33 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const user = this.auth.currentUser();
     if (user) {
+      // 1. Fetch initial admin notification logs from DB
+      this.api.getPage<any>(`/api/notifications/${user.id}`).subscribe({
+        next: (p: PageResponse<any>) => {
+          const content = p.content || [];
+          if (content.length > 0) {
+            const mapped: AdminNotification[] = content.map((n: any) => ({
+              id: String(n.id),
+              title: n.title,
+              message: n.message,
+              type: this.mapCategory(n.notificationType, n.title),
+              read: n.read,
+              createdAt: n.createdAt ? new Date(n.createdAt) : new Date()
+            }));
+            this.notifications.set(mapped);
+          }
+        }
+      });
+
+      // 2. Connect to WebSocket & subscribe to real-time admin channel
       this.ws.connect(user.id);
-      // Subscribe to real-time admin notification channel
-      this.wsUnsub = this.ws.subscribe('/topic/admin.notifications', (data) => {
+      this.wsUnsub = this.ws.subscribe('/topic/admin.notifications', (data: any) => {
         this.toastr.info(data.message || 'New system update', data.title || 'Notification');
         this.addNotification({
-          id: Math.random().toString(36).substr(2, 9),
+          id: String(data.id || Math.random().toString(36).substr(2, 9)),
           title: data.title || 'System Notification',
           message: data.message || String(data),
-          type: data.type || 'SYSTEM',
+          type: (data.type as any) || 'SYSTEM',
           read: false,
           createdAt: new Date()
         });
@@ -172,6 +186,22 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.wsUnsub?.();
+  }
+
+  private mapCategory(rawType: string, title: string): 'SYSTEM' | 'USER' | 'ORDER' | 'ALERT' {
+    const t = (rawType || '').toUpperCase();
+    const cleanTitle = (title || '').toLowerCase();
+
+    if (t === 'ALERT' || t === 'WEATHER' || t === 'PEST_ALERT' || t === 'PRICE_ALERT' || cleanTitle.includes('alert') || cleanTitle.includes('surge') || cleanTitle.includes('warning')) {
+      return 'ALERT';
+    }
+    if (t === 'ORDER' || t === 'MARKETPLACE' || cleanTitle.includes('order') || cleanTitle.includes('trade') || cleanTitle.includes('booking')) {
+      return 'ORDER';
+    }
+    if (t === 'USER' || cleanTitle.includes('user') || cleanTitle.includes('farmer') || cleanTitle.includes('seller') || cleanTitle.includes('registration')) {
+      return 'USER';
+    }
+    return 'SYSTEM';
   }
 
   private addNotification(n: AdminNotification): void {
@@ -195,12 +225,17 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
     this.notifications.update(list =>
       list.map(n => n.id === id ? { ...n, read: true } : n)
     );
+    this.api.put(`/api/notifications/${id}/read`, {}).subscribe();
   }
 
   markAllAsRead(): void {
+    const userId = this.auth.currentUser()?.id;
     this.notifications.update(list =>
       list.map(n => ({ ...n, read: true }))
     );
+    if (userId) {
+      this.api.put(`/api/notifications/read-all?userId=${userId}`, {}).subscribe();
+    }
     this.toastr.success('All notifications marked as read');
   }
 
@@ -208,6 +243,7 @@ export class AdminNotificationsComponent implements OnInit, OnDestroy {
     this.notifications.update(list =>
       list.filter(n => n.id !== id)
     );
+    this.api.delete(`/api/notifications/${id}`).subscribe();
   }
 
   clearAll(): void {

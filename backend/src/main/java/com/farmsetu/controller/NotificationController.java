@@ -1,7 +1,7 @@
 package com.farmsetu.controller;
 
 import com.farmsetu.model.dto.common.ApiResponse;
-import com.farmsetu.model.entity.Notification;
+import com.farmsetu.security.SecurityUtils;
 import com.farmsetu.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,9 +43,16 @@ public class NotificationController {
         return ApiResponse.ok(null);
     }
 
+    @GetMapping("/preferences")
+    public ApiResponse<Map<String, Object>> getPreferences() {
+        Long userId = SecurityUtils.currentUserId();
+        return ApiResponse.ok(notificationService.getPreferences(userId));
+    }
+
     @PostMapping("/preferences")
     public ApiResponse<Map<String, Object>> preferences(@RequestBody Map<String, Object> prefs) {
-        return ApiResponse.ok(notificationService.savePreferences(prefs));
+        Long userId = SecurityUtils.currentUserId();
+        return ApiResponse.ok(notificationService.savePreferences(userId, prefs));
     }
 
     @DeleteMapping("/{id}")

@@ -7,6 +7,7 @@ import com.farmsetu.model.dto.auth.RegisterRequest;
 import com.farmsetu.model.dto.user.UserResponse;
 import com.farmsetu.model.entity.FarmerProfile;
 import com.farmsetu.model.entity.User;
+import com.farmsetu.model.enums.NotificationType;
 import com.farmsetu.model.enums.UserRole;
 import com.farmsetu.repository.FarmerProfileRepository;
 import com.farmsetu.repository.UserRepository;
@@ -35,6 +36,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Value("${farmsetu.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -70,6 +72,17 @@ public class AuthService {
                     .soilType(request.getSoilType())
                     .farmingExperience(request.getFarmingExperience())
                     .build());
+        }
+
+        // Send Welcome Onboarding System Notification
+        try {
+            notificationService.create(user.getId(),
+                    "Welcome to FarmSetu! 🌾",
+                    "Complete your farmer profile to get localized weather forecasts and mandi price alerts for your village.",
+                    NotificationType.SYSTEM,
+                    "/app/profile");
+        } catch (Exception e) {
+            // Log & continue
         }
 
         if (user.getEmail() != null && !user.getEmail().isBlank()) {

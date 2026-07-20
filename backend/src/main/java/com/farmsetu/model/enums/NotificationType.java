@@ -10,5 +10,6 @@ public enum NotificationType {
     MARKETPLACE,
     INSURANCE,
     TASK_REMINDER,
+    SYSTEM,
     GENERAL
 }
