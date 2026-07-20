@@ -16,6 +16,7 @@ import {
 } from '@lucide/angular';
 import { I18nService } from '../../core/services/i18n.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface CropConfig {
   name: string;
@@ -49,6 +50,7 @@ interface CropConfig {
 export class LandingComponent {
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
+  readonly auth = inject(AuthService);
   isScrolled = signal(false);
   readonly currentYear = new Date().getFullYear();
 
