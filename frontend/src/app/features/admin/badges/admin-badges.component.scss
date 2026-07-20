@@ -1,0 +1,32 @@
+.modal-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background-color: rgba(248, 250, 252, 0.6);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #10b981;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  }
+}
+
+:host-context(.dark) {
+  .modal-input {
+    border-color: rgba(51, 65, 85, 0.8);
+    background-color: rgba(15, 23, 42, 0.6);
+    color: #f8fafc;
+
+    &:focus {
+      border-color: #10b981;
+      background-color: #0f172a;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+  }
+}

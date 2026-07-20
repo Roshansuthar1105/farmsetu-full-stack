@@ -335,37 +335,126 @@
           </div>
         </div>
 
-        <!-- TAB 4: ACHIEVEMENTS & BADGES -->
-        <div *ngIf="activeTab() === 'badges'" class="animate-slide-up space-y-5 h-full">
-          <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 font-display">
-            <svg lucideAward size="14" class="text-emerald-500 stroke-[2.5]"></svg>
-            <span>Achievements & Gamification Badges</span>
-            <span class="text-xs font-semibold text-slate-400 font-mono">({{ badges().length }} earned)</span>
-          </h3>
+        <!-- TAB 4: ACHIEVEMENTS & BADGES (LeetCode Style) -->
+        <div *ngIf="activeTab() === 'badges'" class="animate-slide-up space-y-6 h-full font-display">
           
-          @if (badges().length) {
-            <div class="grid sm:grid-cols-2 gap-4">
-              @for (ub of badges(); track ub.id) {
-                <div class="badge-card flex items-start gap-4">
-                  <div class="w-12 h-12 bg-amber-500/10 text-amber-550 rounded-xl border border-amber-500/20 flex items-center justify-center text-2xl shrink-0 shadow-sm animate-pulse" style="animation-duration: 3s;">
-                    🏆
-                  </div>
-                  <div class="space-y-1 font-display">
-                    <h4 class="font-extrabold text-slate-950 dark:text-white text-xs">{{ ub.badge?.name }}</h4>
-                    <p class="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed font-semibold">{{ ub.badge?.description }}</p>
-                    <span class="inline-block text-[8px] font-black text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/15 px-2.5 py-0.5 rounded-full mt-1.5 font-mono uppercase tracking-wider">
-                      {{ ub.badge?.badgeType || 'STANDARD' }}
+          <!-- Badges Banner & Progress Summary -->
+          <div class="profile-card p-5 relative overflow-hidden bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-emerald-500/20 text-white space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+                    <svg lucideAward size="18" class="stroke-[2.5]"></svg>
+                  </span>
+                  <h3 class="text-base font-black tracking-tight text-white">Farmer Achievements & Gamification Badges</h3>
+                </div>
+                <p class="text-xs text-emerald-200/80 pl-9">अनलॉक करें कृषि बैज, अपनी प्रतिष्ठा अंक बढ़ाएं और भारत के शीर्ष डिजिटल किसान बनें!</p>
+              </div>
+
+              <!-- Badges Stats Counter -->
+              <div class="flex items-center gap-3 bg-white/10 dark:bg-black/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10">
+                <div class="text-center">
+                  <span class="block text-lg font-black font-mono text-amber-400">{{ getEarnedBadgesCount() }}/{{ badges().length }}</span>
+                  <span class="text-[8px] uppercase font-bold text-slate-300 tracking-wider">Badges Earned</span>
+                </div>
+                <div class="w-px h-8 bg-white/20"></div>
+                <div class="text-center">
+                  <span class="block text-lg font-black font-mono text-emerald-400">+{{ user()?.reputationScore ?? 0 }}</span>
+                  <span class="text-[8px] uppercase font-bold text-slate-300 tracking-wider">Reputation</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-white/10 relative z-10 text-xs font-bold">
+              <button 
+                *ngFor="let cat of ['ALL', 'SOIL', 'FARM', 'CROP', 'EQUIPMENT', 'COMMUNITY', 'MILESTONE']"
+                (click)="badgeFilterCategory.set(cat)"
+                [ngClass]="badgeFilterCategory() === cat ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-300'"
+                class="px-3 py-1.5 rounded-xl transition hover:bg-emerald-600/50 active:scale-95 text-[11px]"
+              >
+                {{ cat === 'ALL' ? 'All (सभी)' : cat }}
+              </button>
+            </div>
+          </div>
+
+          <!-- LeetCode Badge Cards Grid -->
+          <div *ngIf="getFilteredBadges().length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            @for (b of getFilteredBadges(); track b.id) {
+              <div 
+                (click)="openBadgeModal(b)"
+                [class.locked-badge-card]="!b.isUnlocked"
+                [class.unlocked-badge-card]="b.isUnlocked"
+                class="badge-item-card group relative overflow-hidden rounded-3xl p-5 border cursor-pointer transition-all duration-300 hover:scale-[1.03] shadow-md flex flex-col justify-between"
+              >
+                <!-- Background Gradient & Emblem Glow -->
+                <div class="absolute inset-0 bg-gradient-to-br opacity-20 pointer-events-none transition duration-300 group-hover:opacity-35"
+                     [ngClass]="b.gradientStyle || 'from-emerald-600 to-teal-800'"></div>
+
+                <div class="space-y-4 relative z-10">
+                  <!-- Header row: Rarity & Status -->
+                  <div class="flex justify-between items-center">
+                    <span [ngClass]="getRarityBadgeClass(b.rarity)" class="text-[8px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border font-mono">
+                      {{ b.rarity || 'BRONZE' }}
                     </span>
+
+                    <!-- Status Pill -->
+                    @if (b.isUnlocked) {
+                      <span class="px-2 py-0.5 text-[9px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 rounded-lg flex items-center gap-1 font-mono">
+                        <svg lucideCheck size="10" class="stroke-[3]"></svg> Unlocked
+                      </span>
+                    } @else if (b.isEligible) {
+                      <span class="px-2 py-0.5 text-[9px] font-black text-amber-300 bg-amber-500/20 border border-amber-500/40 rounded-lg animate-pulse flex items-center gap-1 font-mono">
+                        <svg lucideZap size="10" class="stroke-[3]"></svg> Ready to Claim
+                      </span>
+                    } @else {
+                      <span class="px-2 py-0.5 text-[9px] font-bold text-slate-400 bg-slate-800/60 border border-slate-700 rounded-lg flex items-center gap-1 font-mono">
+                        <svg lucideLock size="10" class="stroke-[2.5]"></svg> Locked (बंद)
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Central Badge Graphic / Icon -->
+                  <div class="relative w-20 h-20 mx-auto flex items-center justify-center">
+                    <!-- Shiny Outer Ring -->
+                    <div [class.grayscale]="!b.isUnlocked" [class.opacity-60]="!b.isUnlocked" class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/20 border border-white/20 flex items-center justify-center text-4xl shadow-inner transition duration-300 group-hover:rotate-3">
+                      {{ getBadgeIconEmoji(b) }}
+                    </div>
+
+                    <!-- Faded Lock Icon Overlay for Locked Badges -->
+                    <div *ngIf="!b.isUnlocked" class="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center text-slate-300 border border-white/10 transition duration-300 group-hover:bg-slate-950/40">
+                      <svg lucideLock size="22" class="text-amber-400 stroke-[2.5] drop-shadow-md animate-bounce" style="animation-duration: 3s;"></svg>
+                    </div>
+                  </div>
+
+                  <!-- Badge Titles & Details -->
+                  <div class="text-center space-y-1">
+                    <h4 class="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-emerald-400 transition font-display">
+                      {{ b.hindiName || b.name }}
+                    </h4>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold line-clamp-2 leading-relaxed">
+                      {{ b.hindiDescription || b.description }}
+                    </p>
                   </div>
                 </div>
-              }
-            </div>
-          } @else {
-            <div class="profile-card border-dashed text-center text-slate-500 dark:text-slate-400 py-12 space-y-3">
-              <span class="text-3xl block animate-bounce" style="animation-duration: 4s;">⭐</span>
-              <p class="text-xs font-black font-display max-w-xs mx-auto">Complete calendar tasks, list lease equipment, and verify expert advisory status to unlock farmer badges!</p>
-            </div>
-          }
+
+                <!-- Footer Stats & Points Reward -->
+                <div class="pt-3 border-t border-slate-200/50 dark:border-slate-800/60 flex justify-between items-center text-[10px] font-mono mt-3 relative z-10">
+                  <span class="text-emerald-600 dark:text-emerald-400 font-black bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                    +{{ b.pointsRequired || 50 }} Rep
+                  </span>
+                  
+                  <span class="text-slate-400 font-bold">
+                    {{ b.isUnlocked ? (b.earnedAt | date:'dd MMM yyyy') : ((b.currentProgress || 0) + '/' + (b.thresholdValue || 1)) }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div *ngIf="getFilteredBadges().length === 0" class="profile-card border-dashed text-center text-slate-400 py-12">
+            <p class="text-xs font-bold font-display">No badges found in this category.</p>
+          </div>
         </div>
 
       </div>
@@ -374,6 +463,109 @@
 
   </div>
 </div>
+
+<!-- LEETCODE BADGE DETAIL MODAL -->
+@if (selectedBadgeModal(); as b) {
+  <div class="modal-overlay">
+    <div class="modal-card animate-scale-up max-w-lg overflow-hidden border-2 border-emerald-500/30">
+      
+      <!-- Modal Top Banner -->
+      <div class="relative p-6 text-center space-y-4 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white border-b border-slate-800">
+        <!-- Close Button -->
+        <button (click)="closeBadgeModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white transition p-1 bg-white/10 rounded-full">
+          <svg lucideX size="18" class="stroke-[2.5]"></svg>
+        </button>
+
+        <!-- Big Emblem Artwork -->
+        <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+          <div [class.grayscale]="!b.isUnlocked" [class.opacity-70]="!b.isUnlocked" class="w-full h-full rounded-3xl bg-gradient-to-br from-amber-500/30 to-emerald-500/30 border-2 border-amber-400/50 flex items-center justify-center text-6xl shadow-2xl shadow-emerald-500/20">
+            {{ getBadgeIconEmoji(b) }}
+          </div>
+
+          @if (!b.isUnlocked) {
+            <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px] rounded-3xl flex flex-col items-center justify-center text-amber-400 border border-white/20">
+              <svg lucideLock size="32" class="stroke-[2.5] animate-pulse"></svg>
+              <span class="text-[9px] font-black font-mono tracking-widest uppercase mt-1">LOCKED</span>
+            </div>
+          }
+        </div>
+
+        <!-- Badge Titles -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-center gap-2">
+            <span [ngClass]="getRarityBadgeClass(b.rarity)" class="text-[9px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full border font-mono">
+              {{ b.rarity || 'BRONZE' }} BADGE
+            </span>
+          </div>
+          <h2 class="text-xl font-black font-display tracking-tight text-white">{{ b.hindiName || b.name }}</h2>
+          <p class="text-xs text-emerald-400 font-bold font-mono">({{ b.name }})</p>
+        </div>
+
+        <!-- Reputation Reward Pill -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 to-emerald-500/20 border border-amber-400/40 rounded-full font-mono text-xs font-black text-amber-300">
+          <svg lucideZap size="14" class="fill-amber-400 stroke-none"></svg>
+          <span>Reward: +{{ b.pointsRequired || 50 }} Reputation Points (प्रतिष्ठा अंक)</span>
+        </div>
+      </div>
+
+      <!-- Modal Body Content -->
+      <div class="p-6 space-y-5 text-xs font-display bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+        
+        <!-- Description -->
+        <div class="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-2">
+          <span class="text-[10px] uppercase font-black font-mono text-emerald-600 dark:text-emerald-400 tracking-wider block">
+            Unlock Requirements (अनलॉक करने का नियम)
+          </span>
+          <p class="font-bold leading-relaxed text-sm text-slate-900 dark:text-white">
+            {{ b.hindiDescription || b.description }}
+          </p>
+          <p class="text-xs text-slate-400 italic">
+            {{ b.description }}
+          </p>
+        </div>
+
+        <!-- Progress Tracker Bar -->
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs font-extrabold font-mono">
+            <span>Unlock Progress</span>
+            <span class="text-emerald-500">{{ b.isUnlocked ? '100%' : ((b.currentProgress || 0) + ' / ' + (b.thresholdValue || 1)) }}</span>
+          </div>
+          <div class="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
+            <div 
+              class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
+              [style.width]="b.isUnlocked ? '100%' : (((b.currentProgress || 0) / (b.thresholdValue || 1)) * 100 + '%')"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Status Action Footer -->
+        <div class="pt-2">
+          @if (b.isUnlocked) {
+            <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded-xl font-extrabold text-center flex items-center justify-center gap-2 font-mono text-xs">
+              <svg lucideCheckCircle2 size="16" class="stroke-[2.5]"></svg>
+              <span>Unlocked on {{ b.earnedAt | date:'dd MMMM yyyy' }}!</span>
+            </div>
+          } @else if (b.isEligible) {
+            <button 
+              (click)="claimBadge(b)"
+              [disabled]="claimingBadgeId() === b.id"
+              class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/25 transition active:scale-95 flex items-center justify-center gap-2 text-sm border-0 font-display"
+            >
+              <svg lucideSparkles size="16" class="animate-spin" style="animation-duration: 4s;"></svg>
+              <span>{{ claimingBadgeId() === b.id ? 'Claiming Badge...' : 'Claim Badge & +' + (b.pointsRequired || 50) + ' Rep (बैज अनलॉक करें)' }}</span>
+            </button>
+          } @else {
+            <div class="p-3 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl font-bold text-center flex items-center justify-center gap-2 text-xs">
+              <svg lucideLock size="14"></svg>
+              <span>Locked - Complete criteria to unlock badge</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
 
 <!-- MODAL 1: EDIT PERSONAL PROFILE INFO -->
 @if (showEditModal()) {

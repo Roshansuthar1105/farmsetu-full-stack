@@ -1,0 +1,124 @@
+<div class="space-y-6 font-display">
+  <!-- Admin Header -->
+  <fs-admin-page-header
+    title="Manage Achievements & Badges"
+    subtitle="Configure system badges, Hindi titles, rarity tiers, criteria rules, and reputation rewards">
+    <button (click)="openCreateModal()" class="fs-btn-primary flex items-center space-x-2 text-sm">
+      <span>+ Create New Badge</span>
+    </button>
+  </fs-admin-page-header>
+
+  <!-- Data Table -->
+  <fs-admin-data-table
+    [columns]="columns"
+    [data]="badges()"
+    [rowActions]="rowActions"
+    [filters]="filters"
+    [loading]="loading()"
+    [totalElements]="totalElements()"
+    [page]="page()"
+    [pageSize]="size()"
+    (rowActionEvent)="onActionClick($event)"
+    (pageChange)="onPageChange($event)">
+  </fs-admin-data-table>
+
+  <!-- Modal: Create / Edit Badge -->
+  <fs-admin-modal
+    [open]="showEditModal()"
+    [title]="isEditMode() ? 'Edit Badge Definition' : 'Create New Badge'"
+    (close)="showEditModal.set(false)"
+  >
+    <form (ngSubmit)="saveBadge()" class="space-y-4 text-xs font-bold text-slate-600 dark:text-slate-300">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">English Badge Name *</label>
+          <input type="text" [(ngModel)]="badgeForm.name" name="name" required placeholder="e.g. Soil Testing Master" class="modal-input" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Hindi Badge Title (हिंदी नाम)</label>
+          <input type="text" [(ngModel)]="badgeForm.hindiName" name="hindiName" placeholder="उदा: मृदा परीक्षण विशेषज्ञ" class="modal-input" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">English Description</label>
+          <textarea [(ngModel)]="badgeForm.description" name="description" rows="2" placeholder="Unlock rules description in English" class="modal-input resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Hindi Description (हिंदी विवरण)</label>
+          <textarea [(ngModel)]="badgeForm.hindiDescription" name="hindiDescription" rows="2" placeholder="अनलॉक करने का नियम हिंदी में" class="modal-input resize-none"></textarea>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Category</label>
+          <select [(ngModel)]="badgeForm.category" name="category" class="modal-input">
+            <option value="SOIL">SOIL (मृदा)</option>
+            <option value="FARM">FARM (भूमि)</option>
+            <option value="CROP">CROP (फसल)</option>
+            <option value="EQUIPMENT">EQUIPMENT (उपकरण)</option>
+            <option value="COMMUNITY">COMMUNITY (समुदाय)</option>
+            <option value="MILESTONE">MILESTONE (उपलब्धि)</option>
+            <option value="SPECIAL">SPECIAL (विशेष)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Rarity Tier</label>
+          <select [(ngModel)]="badgeForm.rarity" name="rarity" class="modal-input">
+            <option value="BRONZE">BRONZE (कांस्य)</option>
+            <option value="SILVER">SILVER (रजत)</option>
+            <option value="GOLD">GOLD (स्वर्ण)</option>
+            <option value="PLATINUM">PLATINUM (प्लेटिनम)</option>
+            <option value="LEGENDARY">LEGENDARY (महानायक)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Reputation Bonus (+Points) *</label>
+          <input type="number" [(ngModel)]="badgeForm.pointsRequired" name="pointsRequired" required min="10" step="10" class="modal-input" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Criteria Rule Type</label>
+          <select [(ngModel)]="badgeForm.criteriaType" name="criteriaType" class="modal-input">
+            <option value="PROFILE_COMPLETE">PROFILE_COMPLETE (प्रोफाइल पूर्ण)</option>
+            <option value="SOIL_RECORD">SOIL_RECORD (मृदा विवरण)</option>
+            <option value="FARM_COUNT">FARM_COUNT (फार्म संख्या)</option>
+            <option value="EQUIPMENT_LEASE">EQUIPMENT_LEASE (उपकरण लिस्टिंग)</option>
+            <option value="REPUTATION_THRESHOLD">REPUTATION_THRESHOLD (प्रतिष्ठा अंक)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-wider mb-1 font-mono">Threshold Target Value</label>
+          <input type="number" [(ngModel)]="badgeForm.thresholdValue" name="thresholdValue" min="1" class="modal-input" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <button type="button" (click)="showEditModal.set(false)" class="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          Cancel
+        </button>
+        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md transition">
+          Save Badge Definition
+        </button>
+      </div>
+    </form>
+  </fs-admin-modal>
+
+  <!-- Delete Confirm Dialog -->
+  <fs-admin-confirm-dialog
+    [open]="showDeleteDialog()"
+    title="Delete Badge Definition"
+    [message]="'Are you sure you want to delete badge `' + (selectedBadge()?.name || '') + '`? This action cannot be undone.'"
+    (confirm)="confirmDelete()"
+    (cancel)="showDeleteDialog.set(false)">
+  </fs-admin-confirm-dialog>
+</div>

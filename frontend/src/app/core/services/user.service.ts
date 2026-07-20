@@ -16,7 +16,11 @@ export class UserService {
   }
 
   getBadges(): Observable<any[]> {
-    return this.api.get<any[]>('/api/users/me/badges');
+    return this.api.get<any[]>('/api/badges');
+  }
+
+  claimBadge(badgeId: number): Observable<any> {
+    return this.api.post<any>(`/api/badges/${badgeId}/claim`, null);
   }
 
   updateProfilePhoto(userId: number, photoUrl: string): Observable<User> {

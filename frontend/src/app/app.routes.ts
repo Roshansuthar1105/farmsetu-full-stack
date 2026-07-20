@@ -204,6 +204,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent)
       },
       {
+        path: 'badges',
+        title: 'Admin | Badges',
+        loadComponent: () => import('./features/admin/badges/admin-badges.component').then(m => m.AdminBadgesComponent)
+      },
+      {
         path: 'farms',
         title: 'Admin | Farms',
         loadComponent: () => import('./features/admin/farms/admin-farms.component').then(m => m.AdminFarmsComponent)

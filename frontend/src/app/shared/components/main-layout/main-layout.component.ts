@@ -43,7 +43,8 @@ import {
   LucideX,
   LucideHelpCircle,
   LucideSearch,
-  LucideLanguages
+  LucideLanguages,
+  LucideAward
 } from '@lucide/angular';
 
 interface NavItem {
@@ -97,7 +98,8 @@ interface NavItem {
     LucideX,
     LucideHelpCircle,
     LucideSearch,
-    LucideLanguages
+    LucideLanguages,
+    LucideAward
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -186,6 +188,7 @@ export class MainLayoutComponent {
     { path: '/admin/mandis', labelKey: 'nav.adminMandis', icon: 'storefront' },
     { path: '/admin/market-prices', labelKey: 'nav.adminMarketPrices', icon: 'upload_file' },
     { path: '/admin/email', labelKey: 'nav.adminEmail', icon: 'forward_to_inbox' },
+    { path: '/admin/badges', labelKey: 'nav.adminBadges', icon: 'award' },
     { path: '/admin/orders', labelKey: 'nav.adminOrders', icon: 'local_shipping' },
     { path: '/admin/water-queue', labelKey: 'nav.adminWaterQueue', icon: 'water_drop' },
     { path: '/admin/schemes', labelKey: 'nav.adminSchemes', icon: 'account_balance' },

@@ -12,5 +12,7 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
 
     List<Equipment> findByOwnerIdOrderByCreatedAtDesc(Long ownerId);
 
+    long countByOwnerId(Long ownerId);
+
     List<Equipment> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(EquipmentCategory category);
 }

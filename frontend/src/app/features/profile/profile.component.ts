@@ -30,7 +30,14 @@ import {
   LucideCompass,
   LucideDroplet,
   LucideBeaker,
-  LucideX
+  LucideX,
+  LucideLock,
+  LucideCheckCircle2,
+  LucideSparkles,
+  LucideZap,
+  LucideCheck,
+  LucideInfo,
+  LucideShieldAlert
 } from '@lucide/angular';
 
 interface FarmData {
@@ -78,7 +85,14 @@ interface FarmData {
     LucideCompass,
     LucideDroplet,
     LucideBeaker,
-    LucideX
+    LucideX,
+    LucideLock,
+    LucideCheckCircle2,
+    LucideSparkles,
+    LucideZap,
+    LucideCheck,
+    LucideInfo,
+    LucideShieldAlert
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
@@ -102,6 +116,11 @@ export class ProfileComponent implements OnInit {
   readonly showFarmerProfileModal = signal(false);
   readonly showFarmModal = signal(false);
   readonly isAddingNewFarm = signal(false);
+
+  // Badge detail modal & filter controls
+  readonly selectedBadgeModal = signal<any | null>(null);
+  readonly badgeFilterCategory = signal<string>('ALL');
+  readonly claimingBadgeId = signal<number | null>(null);
 
   // Loading indicator for photo uploads
   readonly uploadingPhoto = signal(false);
@@ -369,5 +388,93 @@ export class ProfileComponent implements OnInit {
       },
       error: () => this.toastr.error('Failed to remove farm land')
     });
+  }
+
+  // ── Badge Helpers & Handlers ──────────────────────────
+  openBadgeModal(badge: any): void {
+    this.selectedBadgeModal.set(badge);
+  }
+
+  closeBadgeModal(): void {
+    this.selectedBadgeModal.set(null);
+  }
+
+  claimBadge(badge: any): void {
+    if (!badge || badge.isUnlocked || !badge.isEligible) return;
+
+    this.claimingBadgeId.set(badge.id);
+    this.userService.claimBadge(badge.id).subscribe({
+      next: (res) => {
+        this.claimingBadgeId.set(null);
+        this.toastr.success(`🏆 Badges Unlocked! +${res.pointsRequired || 50} Reputation Points added!`);
+
+        // Update local user reputation score
+        const currentU = this.user();
+        if (currentU) {
+          const updatedU = {
+            ...currentU,
+            reputationScore: (currentU.reputationScore || 0) + (res.pointsRequired || 50)
+          };
+          this.user.set(updatedU);
+          this.auth.updateCurrentUser(updatedU);
+        }
+
+        // Update badges array
+        const updatedBadges = this.badges().map(b => {
+          if (b.id === badge.id) {
+            return { ...b, isUnlocked: true, earnedAt: res.earnedAt || new Date().toISOString() };
+          }
+          return b;
+        });
+        this.badges.set(updatedBadges);
+
+        // Update modal state
+        if (this.selectedBadgeModal()?.id === badge.id) {
+          this.selectedBadgeModal.set({
+            ...this.selectedBadgeModal(),
+            isUnlocked: true,
+            earnedAt: res.earnedAt || new Date().toISOString()
+          });
+        }
+      },
+      error: (err) => {
+        this.claimingBadgeId.set(null);
+        this.toastr.error(err.error?.message || 'Failed to claim badge');
+      }
+    });
+  }
+
+  getEarnedBadgesCount(): number {
+    return this.badges().filter(b => b.isUnlocked).length;
+  }
+
+  getFilteredBadges(): any[] {
+    const filter = this.badgeFilterCategory();
+    const all = this.badges();
+    if (filter === 'ALL') return all;
+    return all.filter(b => b.category === filter || b.badgeType === filter);
+  }
+
+  getBadgeIconEmoji(badge: any): string {
+    const cat = badge.category || badge.badgeType || '';
+    switch (cat.toUpperCase()) {
+      case 'SOIL': return '🌱';
+      case 'FARM': return '🚜';
+      case 'CROP': return '🌾';
+      case 'EQUIPMENT': return '⚙️';
+      case 'COMMUNITY': return '🤝';
+      case 'SPECIAL': return '👑';
+      default: return '⭐';
+    }
+  }
+
+  getRarityBadgeClass(rarity: string): string {
+    switch ((rarity || 'BRONZE').toUpperCase()) {
+      case 'LEGENDARY': return 'border-amber-400 bg-amber-500/10 text-amber-300 shadow-amber-500/20';
+      case 'PLATINUM': return 'border-purple-400 bg-purple-500/10 text-purple-300 shadow-purple-500/20';
+      case 'GOLD': return 'border-yellow-400 bg-yellow-500/10 text-yellow-300 shadow-yellow-500/20';
+      case 'SILVER': return 'border-slate-300 bg-slate-400/10 text-slate-200 shadow-slate-400/20';
+      default: return 'border-amber-700 bg-amber-800/10 text-amber-400';
+    }
   }
 }
