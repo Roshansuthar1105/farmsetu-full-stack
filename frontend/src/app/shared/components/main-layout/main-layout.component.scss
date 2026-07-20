@@ -178,21 +178,29 @@ aside.w-20 {
     }
 
     /* Footer expanded padding & hover layouts */
-    .p-4.border-t {
+    .sidebar-footer {
       padding: 16px;
 
-      button, a {
-        justify-content: flex-start;
-        padding-left: 12px;
-        padding-right: 12px;
-        gap: 12px;
-        width: 100%;
-        border-radius: 12px;
+      .lang-dropdown {
+        left: 16px;
+        right: 16px;
+        width: auto;
+      }
 
-        .nav-label {
-          opacity: 1;
-          max-width: 180px;
-          transform: translateX(0);
+      .footer-buttons {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+
+        button, a {
+          flex: 1 1 0%;
+          height: 40px;
+          width: auto;
+          margin: 0;
+          padding: 0 10px;
+          justify-content: center;
+          border-radius: 12px;
         }
       }
     }
@@ -238,26 +246,36 @@ aside.w-20 {
     }
 
     /* Footer collapsed padding & centered items */
-    .p-4.border-t {
-      padding: 16px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .sidebar-footer {
+      padding: 12px 6px;
 
-      button, a {
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        margin: 0 auto;
-        padding: 0;
-        gap: 0;
-        border-radius: 12px;
+      .lang-dropdown {
+        left: 12px;
+        right: auto;
+        width: 220px;
+      }
 
-        .nav-label {
-          opacity: 0;
-          max-width: 0;
-          transform: translateX(-10px);
-          pointer-events: none;
+      .footer-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+
+        button, a {
+          flex: none;
+          width: 40px;
+          height: 40px;
+          margin: 0 auto;
+          padding: 0;
+          justify-content: center;
+          border-radius: 12px;
+
+          .nav-label {
+            opacity: 0;
+            max-width: 0;
+            transform: translateX(-10px);
+            pointer-events: none;
+          }
         }
       }
     }

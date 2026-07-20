@@ -34,7 +34,7 @@
       </div>
 
       @for (item of filteredPrimaryNavItems(); track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active-nav-link"
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link" title="{{ t(item.labelKey) }}"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
           class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
@@ -61,7 +61,7 @@
       </div>
 
       @for (item of filteredAdminNavItems(); track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active-nav-link"
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link" title="{{ t(item.labelKey) }}"
         [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
@@ -100,7 +100,7 @@
       </div>
 
       @for (item of filteredSecondaryNavItems(); track item.path) {
-      <a [routerLink]="item.path" routerLinkActive="active-nav-link"
+      <a [routerLink]="item.path" routerLinkActive="active-nav-link" title="{{ t(item.labelKey) }}"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
           class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
@@ -131,12 +131,12 @@
 
     <!-- Sidebar Footer (Desktop) -->
     <div
-      class="relative p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10 transition-all duration-300">
+      class="sidebar-footer relative p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10 transition-all duration-300">
 
       <!-- Language Dropdown Menu -->
       @if (showLangDropdown()) {
       <div
-        class="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
+        class="lang-dropdown absolute bottom-full left-2 right-2 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
         <div class="p-2">
           <p
             class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
@@ -155,7 +155,7 @@
       </div>
       }
 
-      <div class="flex gap-2 w-full justify-center">
+      <div class="footer-buttons flex gap-2 w-full justify-center">
         <button type="button" (click)="theme.toggleDark()" title="{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}"
           class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-green-650 dark:hover:text-green-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none">
           @if (theme.darkMode()) {
@@ -409,188 +409,190 @@
   <div class="fixed inset-0 z-50 lg:hidden overflow-hidden">
     <!-- Backdrop -->
     <div (click)="showMobileDrawer.set(false)"
-      class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300"></div>
+      class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity duration-300"></div>
 
     <!-- Drawer Content -->
     <div
-      class="absolute inset-y-0 left-0 max-w-xs w-full bg-white dark:bg-slate-900 shadow-2xl p-6 flex flex-col justify-between transform transition duration-300 ease-out translate-x-0 border-r border-slate-105 dark:border-slate-800/80">
+      class="absolute inset-y-0 left-0 max-w-[280px] xs:max-w-xs w-full bg-white dark:bg-slate-900 shadow-2xl p-5 flex flex-col justify-between transform transition duration-300 ease-out translate-x-0 border-r border-slate-200/80 dark:border-slate-800/80 font-sans">
 
-      <div class="space-y-6">
-        <div class="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-          <span class="font-extrabold text-sm text-slate-850 dark:text-white uppercase tracking-wider font-display">All
-            Services</span>
+      <!-- Upper section: Header + Search + Scrollable Nav -->
+      <div class="flex flex-col flex-1 min-h-0 space-y-4">
+        
+        <!-- Header Row -->
+        <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <span class="font-extrabold text-sm text-slate-850 dark:text-white uppercase tracking-wider font-display">All Services</span>
           <button (click)="showMobileDrawer.set(false)"
-            class="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none">
-            <svg lucideX size="16" class="stroke-[2.5]"></svg>
+            class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none">
+            <svg lucideX size="18" class="stroke-[2.5]"></svg>
           </button>
-          <!-- Search (Mobile) -->
-          <div class="relative mt-2 mb-4">
-            <svg lucideSearch size="14"
-              class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 stroke-[2]"></svg>
-            <input type="text" placeholder="Search nav..." [value]="searchQuery()"
-              (input)="searchQuery.set($any($event.target).value)"
-              class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all">
-          </div>
-
-          <!-- Links (Mobile Slide-over Drawer) -->
-          <nav class="space-y-1 overflow-y-auto max-h-[60vh] pr-1 scrollbar-thin">
-            <!-- Main Features (Mobile) -->
-            <p [class.hidden]="filteredPrimaryNavItems().length === 0"
-              class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
-              Main Features</p>
-            @for (item of filteredPrimaryNavItems(); track item.path) {
-            <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
-              class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
-              <span
-                class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
-                @switch (item.icon) {
-                @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
-                @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
-                @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
-                @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }
-                @case ('forum') { <svg lucideMessagesSquare size="16" class="stroke-[2]"></svg> }
-                @case ('groups') { <svg lucideUsers size="16" class="stroke-[2]"></svg> }
-                @case ('person') { <svg lucideUser size="16" class="stroke-[2]"></svg> }
-                }
-              </span>
-              <span class="transition duration-200">{{ t(item.labelKey) }}</span>
-            </a>
-            }
-
-            <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"
-              [class.hidden]="filteredSecondaryNavItems().length === 0"></div>
-
-            <!-- Services & Advisory (Mobile) -->
-            <p [class.hidden]="filteredSecondaryNavItems().length === 0"
-              class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
-              Services & Advisory</p>
-            @for (item of filteredSecondaryNavItems(); track item.path) {
-            <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
-              class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
-              <span
-                class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
-                @switch (item.icon) {
-                @case ('agriculture') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
-                @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
-                @case ('cloud') { <svg lucideCloud size="16" class="stroke-[2]"></svg> }
-                @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
-                @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
-                @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
-                @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
-                @case ('eco') { <svg lucideSprout size="16" class="stroke-[2]"></svg> }
-                @case ('calendar_month') { <svg lucideCalendar size="16" class="stroke-[2]"></svg> }
-                @case ('biotech') { <svg lucideFlaskConical size="16" class="stroke-[2]"></svg> }
-                @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
-                @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
-                @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
-                @case ('machinery') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
-                @case ('payments') { <svg lucideCoins size="16" class="stroke-[2]"></svg> }
-                @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
-                @case ('help_circle') { <svg lucideHelpCircle size="16" class="stroke-[2]"></svg> }
-                }
-              </span>
-              <span class="transition duration-200">{{ t(item.labelKey) }}</span>
-            </a>
-            }
-
-            @if (auth.currentUser()?.role === 'ADMIN') {
-            <div class="h-px bg-slate-100 dark:bg-slate-800 my-4 mx-2"
-              [class.hidden]="filteredAdminNavItems().length === 0"></div>
-            <p [class.hidden]="filteredAdminNavItems().length === 0"
-              class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
-              Admin Control Panel</p>
-            @for (item of filteredAdminNavItems(); track item.path) {
-            <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
-              [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
-              class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
-              <span
-                class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
-                @switch (item.icon) {
-                @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
-                @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
-                @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
-                @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
-                @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
-                @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
-                @case ('forward_to_inbox') { <svg lucideMail size="16" class="stroke-[2]"></svg> }
-                @case ('local_shipping') { <svg lucideTruck size="16" class="stroke-[2]"></svg> }
-                @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
-                @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
-                @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
-                @case ('package') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
-                @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
-                @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
-                @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
-                @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
-                @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
-                }
-              </span>
-              <span class="transition duration-200">{{ t(item.labelKey) }}</span>
-            </a>
-            }
-            }
-          </nav>
         </div>
 
-        <!-- Drawer Footer (Mobile) -->
-        <div
-          class="relative pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 transition-all duration-300">
+        <!-- Search (Mobile) -->
+        <div class="relative shrink-0">
+          <svg lucideSearch size="14"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 stroke-[2]"></svg>
+          <input type="text" placeholder="Search nav..." [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value)"
+            class="w-full bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all">
+        </div>
 
-          <!-- Language Dropdown Menu (Mobile) -->
-          @if (showLangDropdown()) {
-          <div
-            class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
-            <div class="p-2">
-              <p
-                class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
-                Select Language</p>
-              @for (lang of availableLanguages; track lang.code) {
-              <button (click)="setLanguage(lang.code); showMobileDrawer.set(false);"
-                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between group"
-                [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'">
-                <span>{{ lang.label }}</span>
-                @if (i18n.lang() === lang.code) {
-                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                }
-              </button>
+        <!-- Links (Mobile Slide-over Drawer) -->
+        <nav class="flex-1 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+          <!-- Main Features (Mobile) -->
+          <p [class.hidden]="filteredPrimaryNavItems().length === 0"
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Main Features</p>
+          @for (item of filteredPrimaryNavItems(); track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
+            class="mobile-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span
+              class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
+              @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
+              @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }
+              @case ('forum') { <svg lucideMessagesSquare size="16" class="stroke-[2]"></svg> }
+              @case ('groups') { <svg lucideUsers size="16" class="stroke-[2]"></svg> }
+              @case ('person') { <svg lucideUser size="16" class="stroke-[2]"></svg> }
               }
-            </div>
-          </div>
+            </span>
+            <span class="transition duration-200 font-medium">{{ t(item.labelKey) }}</span>
+          </a>
           }
 
-          <div class="flex gap-2 w-full justify-center">
-            <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
-              title="{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}"
-              class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-green-650 dark:hover:text-green-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none">
-              @if (theme.darkMode()) {
-              <svg lucideSun size="16" class="stroke-[2]"></svg>
-              } @else {
-              <svg lucideMoon size="16" class="stroke-[2]"></svg>
+          <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"
+            [class.hidden]="filteredSecondaryNavItems().length === 0"></div>
+
+          <!-- Services & Advisory (Mobile) -->
+          <p [class.hidden]="filteredSecondaryNavItems().length === 0"
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Services & Advisory</p>
+          @for (item of filteredSecondaryNavItems(); track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
+            class="mobile-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span
+              class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('agriculture') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+              @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+              @case ('cloud') { <svg lucideCloud size="16" class="stroke-[2]"></svg> }
+              @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+              @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+              @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+              @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+              @case ('eco') { <svg lucideSprout size="16" class="stroke-[2]"></svg> }
+              @case ('calendar_month') { <svg lucideCalendar size="16" class="stroke-[2]"></svg> }
+              @case ('biotech') { <svg lucideFlaskConical size="16" class="stroke-[2]"></svg> }
+              @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
+              @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+              @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+              @case ('machinery') { <svg lucideTractor size="16" class="stroke-[2]"></svg> }
+              @case ('payments') { <svg lucideCoins size="16" class="stroke-[2]"></svg> }
+              @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+              @case ('help_circle') { <svg lucideHelpCircle size="16" class="stroke-[2]"></svg> }
+              }
+            </span>
+            <span class="transition duration-200 font-medium">{{ t(item.labelKey) }}</span>
+          </a>
+          }
+
+          @if (auth.currentUser()?.role === 'ADMIN') {
+          <div class="h-px bg-slate-100 dark:bg-slate-800 my-4 mx-2"
+            [class.hidden]="filteredAdminNavItems().length === 0"></div>
+          <p [class.hidden]="filteredAdminNavItems().length === 0"
+            class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
+            Admin Control Panel</p>
+          @for (item of filteredAdminNavItems(); track item.path) {
+          <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
+            [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
+            class="mobile-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
+            <span
+              class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
+              @switch (item.icon) {
+              @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
+              @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
+              @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
+              @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
+              @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
+              @case ('forward_to_inbox') { <svg lucideMail size="16" class="stroke-[2]"></svg> }
+              @case ('local_shipping') { <svg lucideTruck size="16" class="stroke-[2]"></svg> }
+              @case ('water_drop') { <svg lucideDroplet size="16" class="stroke-[2]"></svg> }
+              @case ('account_balance') { <svg lucideLandmark size="16" class="stroke-[2]"></svg> }
+              @case ('health_and_safety') { <svg lucideShieldCheck size="16" class="stroke-[2]"></svg> }
+              @case ('package') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
+              @case ('article') { <svg lucideNewspaper size="16" class="stroke-[2]"></svg> }
+              @case ('school') { <svg lucideBookOpen size="16" class="stroke-[2]"></svg> }
+              @case ('trending_up') { <svg lucideTrendingUp size="16" class="stroke-[2]"></svg> }
+              @case ('engineering') { <svg lucideWrench size="16" class="stroke-[2]"></svg> }
+              @case ('notifications') { <svg lucideBell size="16" class="stroke-[2]"></svg> }
+              }
+            </span>
+            <span class="transition duration-200 font-medium">{{ t(item.labelKey) }}</span>
+          </a>
+          }
+          }
+        </nav>
+      </div>
+
+      <!-- Drawer Footer (Mobile) -->
+      <div
+        class="relative pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 shrink-0">
+
+        <!-- Language Dropdown Menu (Mobile) -->
+        @if (showLangDropdown()) {
+        <div
+          class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
+          <div class="p-2">
+            <p
+              class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
+              Select Language</p>
+            @for (lang of availableLanguages; track lang.code) {
+            <button (click)="setLanguage(lang.code); showMobileDrawer.set(false);"
+              class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between group"
+              [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'">
+              <span>{{ lang.label }}</span>
+              @if (i18n.lang() === lang.code) {
+              <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
               }
             </button>
-
-            <button type="button" (click)="toggleLangDropdown()" title="Switch Language"
-              class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
-              [class.bg-slate-100]="showLangDropdown()" [class.dark:bg-slate-800]="showLangDropdown()"
-              [class.text-blue-500]="showLangDropdown()" [class.dark:text-blue-400]="showLangDropdown()">
-              <svg lucideLanguages size="16" class="stroke-[2]"></svg>
-            </button>
-
-            @if (auth.isAuthenticated()) {
-            <button type="button" (click)="logout(); showMobileDrawer.set(false);" title="Logout"
-              class="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
-              <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
-            </button>
-            } @else {
-            <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)" title="Login"
-              class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
-              <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
-            </a>
             }
           </div>
         </div>
-      </div>
+        }
 
+        <div class="flex gap-2 w-full justify-center">
+          <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
+            title="{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-green-650 dark:hover:text-green-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none">
+            @if (theme.darkMode()) {
+            <svg lucideSun size="16" class="stroke-[2]"></svg>
+            } @else {
+            <svg lucideMoon size="16" class="stroke-[2]"></svg>
+            }
+          </button>
+
+          <button type="button" (click)="toggleLangDropdown()" title="Switch Language"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
+            [class.bg-slate-100]="showLangDropdown()" [class.dark:bg-slate-800]="showLangDropdown()"
+            [class.text-blue-500]="showLangDropdown()" [class.dark:text-blue-400]="showLangDropdown()">
+            <svg lucideLanguages size="16" class="stroke-[2]"></svg>
+          </button>
+
+          @if (auth.isAuthenticated()) {
+          <button type="button" (click)="logout(); showMobileDrawer.set(false);" title="Logout"
+            class="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+            <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
+          </button>
+          } @else {
+          <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)" title="Login"
+            class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+            <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
+          </a>
+          }
+        </div>
+      </div>
     </div>
   </div>
   }
