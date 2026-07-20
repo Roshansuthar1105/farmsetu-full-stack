@@ -301,5 +301,13 @@ public class AdminController {
         adminService.deleteResource(id);
         return ApiResponse.ok(null);
     }
+
+    // Farms
+    @GetMapping("/farms")
+    public ApiResponse<Map<String, Object>> listFarms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
+        return ApiResponse.ok(adminService.listFarms(page, size));
+    }
 }
 

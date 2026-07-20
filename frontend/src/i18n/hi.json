@@ -117,5 +117,6 @@
   "waterQueue.preferredTime": "पसंदीदा समय",
   "waterQueue.waterSupplied": "आपूर्ति किया गया पानी (अनुमानित)",
   "waterQueue.flowRate": "प्रवाह दर",
-  "waterQueue.liters": "लीटर"
+  "waterQueue.liters": "लीटर",
+  "nav.adminFarms": "खेत प्रबंधित करें"
 }

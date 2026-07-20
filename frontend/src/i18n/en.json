@@ -117,5 +117,6 @@
   "waterQueue.preferredTime": "Preferred Start Time",
   "waterQueue.waterSupplied": "Supplied Water (Est.)",
   "waterQueue.flowRate": "Flow Rate",
-  "waterQueue.liters": "Liters"
+  "waterQueue.liters": "Liters",
+  "nav.adminFarms": "Manage Farms"
 }

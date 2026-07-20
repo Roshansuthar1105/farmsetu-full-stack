@@ -159,6 +159,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/admin-users.component').then(m => m.AdminUsersComponent)
       },
       {
+        path: 'farms',
+        title: 'Admin | Farms',
+        loadComponent: () => import('./features/admin/farms/admin-farms.component').then(m => m.AdminFarmsComponent)
+      },
+      {
         path: 'crops',
         title: 'Admin | Crops',
         loadComponent: () => import('./features/admin/crops/admin-crops.component').then(m => m.AdminCropsComponent)

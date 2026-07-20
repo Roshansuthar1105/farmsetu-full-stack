@@ -14,16 +14,25 @@
         class="logo-mini h-8 w-8 object-contain transition-all duration-300">
     </div>
 
+    <!-- Search (Desktop) -->
+    <div class="px-3 py-2 transition-all duration-300" [class.hidden]="!showSidebar()">
+      <div class="relative">
+        <svg lucideSearch size="14" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 stroke-[2]"></svg>
+        <input type="text" placeholder="Search nav..." [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+          class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all">
+      </div>
+    </div>
+
     <!-- Navigation items (Desktop) -->
     <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-1.5 scrollbar-thin transition-all duration-300">
-      <div class="nav-section-header">
+      <div class="nav-section-header" [class.hidden]="filteredPrimaryNavItems().length === 0">
         <p
           class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
           Main Features</p>
         <div class="nav-divider h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
       </div>
 
-      @for (item of primaryNavItems; track item.path) {
+      @for (item of filteredPrimaryNavItems(); track item.path) {
       <a [routerLink]="item.path" routerLinkActive="active-nav-link"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
@@ -43,14 +52,14 @@
       }
 
       @if (auth.currentUser()?.role === 'ADMIN') {
-      <div class="nav-section-header">
-        <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+      <div class="nav-section-header" [class.hidden]="filteredAdminNavItems().length === 0">
+        <div class="nav-divider h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
         <p
           class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
           Admin Control Panel</p>
       </div>
 
-      @for (item of adminNavItems; track item.path) {
+      @for (item of filteredAdminNavItems(); track item.path) {
       <a [routerLink]="item.path" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
@@ -58,6 +67,7 @@
           @switch (item.icon) {
           @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
           @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
+          @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
           @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
           @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
           @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
@@ -79,14 +89,14 @@
       }
       }
 
-      <div class="nav-section-header">
-        <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+      <div class="nav-section-header" [class.hidden]="filteredSecondaryNavItems().length === 0">
+        <div class="nav-divider h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
         <p
           class="nav-header text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3.5 mb-2 transition-all duration-300">
-          Services & Advisory</p>
+          More</p>
       </div>
 
-      @for (item of secondaryNavItems; track item.path) {
+      @for (item of filteredSecondaryNavItems(); track item.path) {
       <a [routerLink]="item.path" routerLinkActive="active-nav-link"
         class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition duration-250 group relative">
         <span
@@ -117,37 +127,60 @@
     </nav>
 
     <!-- Sidebar Footer (Desktop) -->
-    <div
-      class="p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10 space-y-3 transition-all duration-300">
-      <button type="button" (click)="theme.toggleDark()"
-        class="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-650 dark:text-slate-350 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.98] relative group focus:outline-none">
-        <span
-          class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
-          @if (theme.darkMode()) {
-          <svg lucideSun size="16" class="stroke-[2]"></svg>
-          } @else {
-          <svg lucideMoon size="16" class="stroke-[2]"></svg>
-          }
-        </span>
-        <span class="nav-label whitespace-nowrap">{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
-      </button>
-      @if (auth.isAuthenticated()) {
-        <button type="button" (click)="logout()"
-          class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
-          <span class="text-red-650 dark:text-red-400 transition duration-200">
-            <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
-          </span>
-          <span class="nav-label whitespace-nowrap">Logout</span>
-        </button>
-      } @else {
-        <a routerLink="/auth/login"
-          class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 relative group focus:outline-none">
-          <span>
-            <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
-          </span>
-          <span class="nav-label whitespace-nowrap">Login / Register</span>
-        </a>
+    <div class="relative p-4 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/10 transition-all duration-300">
+      
+      <!-- Language Dropdown Menu -->
+      @if (showLangDropdown()) {
+        <div class="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
+          <div class="p-2">
+            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">Select Language</p>
+            @for (lang of availableLanguages; track lang.code) {
+              <button (click)="setLanguage(lang.code)"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between group"
+                [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'">
+                <span>{{ lang.label }}</span>
+                @if (i18n.lang() === lang.code) {
+                  <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                }
+              </button>
+            }
+          </div>
+        </div>
       }
+
+      <div class="flex gap-2 w-full justify-center">
+        <button type="button" (click)="theme.toggleDark()"
+          title="{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-green-650 dark:hover:text-green-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none">
+            @if (theme.darkMode()) {
+            <svg lucideSun size="16" class="stroke-[2]"></svg>
+            } @else {
+            <svg lucideMoon size="16" class="stroke-[2]"></svg>
+            }
+        </button>
+
+        <button type="button" (click)="toggleLangDropdown()"
+          title="Switch Language"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
+          [class.bg-slate-100]="showLangDropdown()"
+          [class.dark:bg-slate-800]="showLangDropdown()"
+          [class.text-blue-500]="showLangDropdown()"
+          [class.dark:text-blue-400]="showLangDropdown()">
+            <svg lucideLanguages size="16" class="stroke-[2]"></svg>
+        </button>
+
+        @if (auth.isAuthenticated()) {
+          <button type="button" (click)="logout()" title="Logout"
+            class="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+              <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
+          </button>
+        } @else {
+          <a routerLink="/auth/login" title="Login"
+            class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+              <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
+          </a>
+        }
+      </div>
     </div>
   </aside>
 
@@ -374,15 +407,20 @@
             class="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition focus:outline-none">
             <svg lucideX size="16" class="stroke-[2.5]"></svg>
           </button>
+        <!-- Search (Mobile) -->
+        <div class="relative mt-2 mb-4">
+          <svg lucideSearch size="14" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 stroke-[2]"></svg>
+          <input type="text" placeholder="Search nav..." [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+            class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-green-500 transition-all">
         </div>
 
         <!-- Links (Mobile Slide-over Drawer) -->
         <nav class="space-y-1 overflow-y-auto max-h-[60vh] pr-1 scrollbar-thin">
           <!-- Main Features (Mobile) -->
-          <p
+          <p [class.hidden]="filteredPrimaryNavItems().length === 0"
             class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
             Main Features</p>
-          @for (item of primaryNavItems; track item.path) {
+          @for (item of filteredPrimaryNavItems(); track item.path) {
           <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
             class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
             <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
@@ -400,13 +438,13 @@
           </a>
           }
 
-          <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2"></div>
+          <div class="h-px bg-slate-100 dark:bg-slate-800/60 my-4 mx-2" [class.hidden]="filteredSecondaryNavItems().length === 0"></div>
 
           <!-- Services & Advisory (Mobile) -->
-          <p
+          <p [class.hidden]="filteredSecondaryNavItems().length === 0"
             class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
             Services & Advisory</p>
-          @for (item of secondaryNavItems; track item.path) {
+          @for (item of filteredSecondaryNavItems(); track item.path) {
           <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link"
             class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
             <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
@@ -435,17 +473,18 @@
           }
 
           @if (auth.currentUser()?.role === 'ADMIN') {
-          <div class="h-px bg-slate-100 dark:bg-slate-800 my-4 mx-2"></div>
-          <p
+          <div class="h-px bg-slate-100 dark:bg-slate-800 my-4 mx-2" [class.hidden]="filteredAdminNavItems().length === 0"></div>
+          <p [class.hidden]="filteredAdminNavItems().length === 0"
             class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2 font-display">
             Admin Control Panel</p>
-          @for (item of adminNavItems; track item.path) {
+          @for (item of filteredAdminNavItems(); track item.path) {
           <a [routerLink]="item.path" (click)="showMobileDrawer.set(false)" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="item.path === '/admin' ? { exact: true } : { exact: false }"
             class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-650 dark:text-slate-350 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition group">
             <span class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
               @switch (item.icon) {
               @case ('admin_panel_settings') { <svg lucideShieldAlert size="16" class="stroke-[2]"></svg> }
               @case ('manage_accounts') { <svg lucideUserCheck size="16" class="stroke-[2]"></svg> }
+              @case ('map') { <svg lucideMap size="16" class="stroke-[2]"></svg> }
               @case ('gavel') { <svg lucideGavel size="16" class="stroke-[2]"></svg> }
               @case ('storefront') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
               @case ('upload_file') { <svg lucideFileUp size="16" class="stroke-[2]"></svg> }
@@ -470,31 +509,61 @@
       </div>
 
       <!-- Drawer Footer (Mobile) -->
-      <div class="pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 space-y-2">
-        <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
-          class="w-full py-2.5 rounded-xl border border-slate-250 dark:border-slate-800 text-xs font-semibold text-slate-650 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-850 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.98] focus:outline-none">
-          <span class="text-slate-400">
-            @if (theme.darkMode()) {
-            <svg lucideSun size="14" class="stroke-[2]"></svg>
-            } @else {
-            <svg lucideMoon size="14" class="stroke-[2]"></svg>
-            }
-          </span>
-          <span>{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
-        </button>
-        @if (auth.isAuthenticated()) {
-          <button type="button" (click)="logout(); showMobileDrawer.set(false);"
-            class="w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 text-xs font-bold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
-            <svg lucideLogOut size="14" class="stroke-[2.25]"></svg>
-            <span>Logout</span>
-          </button>
-        } @else {
-          <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)"
-            class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 focus:outline-none">
-            <svg lucideUserCheck size="14" class="stroke-[2.25]"></svg>
-            <span>Login / Register</span>
-          </a>
+      <div class="relative pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 transition-all duration-300">
+        
+        <!-- Language Dropdown Menu (Mobile) -->
+        @if (showLangDropdown()) {
+          <div class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-64 overflow-y-auto scrollbar-thin">
+            <div class="p-2">
+              <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">Select Language</p>
+              @for (lang of availableLanguages; track lang.code) {
+                <button (click)="setLanguage(lang.code); showMobileDrawer.set(false);"
+                  class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-between group"
+                  [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'">
+                  <span>{{ lang.label }}</span>
+                  @if (i18n.lang() === lang.code) {
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                  }
+                </button>
+              }
+            </div>
+          </div>
         }
+
+        <div class="flex gap-2 w-full justify-center">
+          <button type="button" (click)="theme.toggleDark(); showMobileDrawer.set(false);"
+            title="{{ theme.darkMode() ? 'Light Mode' : 'Dark Mode' }}"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-green-650 dark:hover:text-green-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none">
+              @if (theme.darkMode()) {
+              <svg lucideSun size="16" class="stroke-[2]"></svg>
+              } @else {
+              <svg lucideMoon size="16" class="stroke-[2]"></svg>
+              }
+          </button>
+
+          <button type="button" (click)="toggleLangDropdown()"
+            title="Switch Language"
+            class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
+            [class.bg-slate-100]="showLangDropdown()"
+            [class.dark:bg-slate-800]="showLangDropdown()"
+            [class.text-blue-500]="showLangDropdown()"
+            [class.dark:text-blue-400]="showLangDropdown()">
+              <svg lucideLanguages size="16" class="stroke-[2]"></svg>
+          </button>
+
+          @if (auth.isAuthenticated()) {
+            <button type="button" (click)="logout(); showMobileDrawer.set(false);" title="Logout"
+              class="flex-1 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/30 text-red-650 dark:text-red-400 transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+                <svg lucideLogOut size="16" class="stroke-[2.25]"></svg>
+            </button>
+          } @else {
+            <a routerLink="/auth/login" (click)="showMobileDrawer.set(false)" title="Login"
+              class="flex-1 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white transition duration-200 active:scale-[0.98] flex items-center justify-center focus:outline-none">
+                <svg lucideUserCheck size="16" class="stroke-[2.25]"></svg>
+            </a>
+          }
+        </div>
+      </div>
       </div>
 
     </div>

@@ -41,7 +41,9 @@ import {
   LucideMenu,
   LucideShoppingCart,
   LucideX,
-  LucideHelpCircle
+  LucideHelpCircle,
+  LucideSearch,
+  LucideLanguages
 } from '@lucide/angular';
 
 interface NavItem {
@@ -93,7 +95,9 @@ interface NavItem {
     LucideMenu,
     LucideShoppingCart,
     LucideX,
-    LucideHelpCircle
+    LucideHelpCircle,
+    LucideSearch,
+    LucideLanguages
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -105,6 +109,23 @@ export class MainLayoutComponent {
   private readonly router = inject(Router);
 
   readonly currentUrl = signal<string>('');
+  readonly searchQuery = signal<string>('');
+  readonly showLangDropdown = signal(false);
+
+  readonly availableLanguages = [
+    { code: 'en', label: 'English' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'mr', label: 'मराठी (Marathi)' },
+    { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
+    { code: 'te', label: 'తెలుగు (Telugu)' },
+    { code: 'ta', label: 'தமிழ் (Tamil)' },
+    { code: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+    { code: 'ml', label: 'മലയാളം (Malayalam)' },
+    { code: 'bn', label: 'বাংলা (Bengali)' },
+    { code: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)' },
+    { code: 'or', label: 'ଓଡ଼ିଆ (Odia)' },
+    { code: 'as', label: 'অসমীয়া (Assamese)' }
+  ];
 
   constructor() {
     this.currentUrl.set(this.router.url);
@@ -159,6 +180,7 @@ export class MainLayoutComponent {
   readonly adminNavItems: NavItem[] = [
     { path: '/admin', labelKey: 'nav.adminDashboard', icon: 'admin_panel_settings' },
     { path: '/admin/users', labelKey: 'nav.adminUsers', icon: 'manage_accounts' },
+    { path: '/admin/farms', labelKey: 'nav.adminFarms', icon: 'map' },
     { path: '/admin/products', labelKey: 'nav.adminProducts', icon: 'package' },
     { path: '/admin/crops', labelKey: 'nav.adminCrops', icon: 'gavel' },
     { path: '/admin/mandis', labelKey: 'nav.adminMandis', icon: 'storefront' },
@@ -199,7 +221,43 @@ export class MainLayoutComponent {
     return this.i18n.t(key);
   }
 
+  readonly filteredPrimaryNavItems = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    if (!q) return this.primaryNavItems;
+    return this.primaryNavItems.filter(item => 
+      this.t(item.labelKey).toLowerCase().includes(q) || 
+      item.labelKey.toLowerCase().includes(q)
+    );
+  });
+
+  readonly filteredSecondaryNavItems = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    if (!q) return this.secondaryNavItems;
+    return this.secondaryNavItems.filter(item => 
+      this.t(item.labelKey).toLowerCase().includes(q) || 
+      item.labelKey.toLowerCase().includes(q)
+    );
+  });
+
+  readonly filteredAdminNavItems = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    if (!q) return this.adminNavItems;
+    return this.adminNavItems.filter(item => 
+      this.t(item.labelKey).toLowerCase().includes(q) || 
+      item.labelKey.toLowerCase().includes(q)
+    );
+  });
+
   logout(): void {
     this.auth.logout();
+  }
+
+  toggleLangDropdown(): void {
+    this.showLangDropdown.update(v => !v);
+  }
+
+  setLanguage(lang: string): void {
+    this.i18n.setLang(lang as any);
+    this.showLangDropdown.set(false);
   }
 }

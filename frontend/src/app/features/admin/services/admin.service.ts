@@ -166,6 +166,13 @@ export class AdminService {
     return this.api.get('/api/admin/reports');
   }
 
+  // ── Farms ──────────────────────────────────────────────
+  getFarms(page = 0, size = 100): Observable<AdminPageResponse<any>> {
+    return this.api.get<AdminPageResponse<any>>('/api/admin/farms', { page, size }).pipe(
+      catchError(() => of({ content: [], page: 0, size, totalElements: 0, totalPages: 0, last: true }))
+    );
+  }
+
   // ── Generic CRUD helpers ───────────────────────────────
   list<T>(endpoint: string, page = 0, size = 20, params?: Record<string, string | number | boolean>): Observable<AdminPageResponse<T>> {
     return this.api.get<AdminPageResponse<T>>(endpoint, { page, size, ...params });

@@ -32,6 +32,7 @@ public class AdminService {
     private final NewsRepository newsRepository;
     private final ResourceRepository resourceRepository;
     private final FarmerProfileRepository farmerProfileRepository;
+    private final FarmRepository farmRepository;
 
     public Map<String, Object> dashboard() {
         Map<String, Object> stats = new HashMap<>();
@@ -730,6 +731,50 @@ public class AdminService {
     @Transactional
     public void deleteResource(Long id) {
         resourceRepository.deleteById(id);
+    }
+
+    // Farms CRUD for Admin
+    @Transactional(readOnly = true)
+    public Map<String, Object> listFarms(int page, int size) {
+        Page<Farm> farms = farmRepository.findAll(PageRequest.of(page, size));
+        long totalElements = farmRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        List<Map<String, Object>> mappedContent = farms.stream().map(f -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", f.getId());
+            map.put("name", f.getName());
+            map.put("farmArea", f.getFarmArea());
+            map.put("calculatedArea", f.getCalculatedArea());
+            map.put("soilType", f.getSoilType());
+            map.put("soilPh", f.getSoilPh());
+            map.put("waterSource", f.getWaterSource());
+            map.put("farmingType", f.getFarmingType());
+            map.put("farmBoundary", f.getFarmBoundary());
+            map.put("latitude", f.getLatitude());
+            map.put("longitude", f.getLongitude());
+            
+            if (f.getUser() != null) {
+                Map<String, Object> userMap = new HashMap<>();
+                userMap.put("id", f.getUser().getId());
+                userMap.put("name", f.getUser().getName());
+                userMap.put("email", f.getUser().getEmail());
+                userMap.put("phone", f.getUser().getPhone());
+                map.put("user", userMap);
+            } else {
+                map.put("user", null);
+            }
+            return map;
+        }).collect(Collectors.toList());
+
+        return Map.of(
+            "content", mappedContent,
+            "page", page,
+            "size", size,
+            "totalElements", totalElements,
+            "totalPages", totalPages,
+            "last", (page + 1) * size >= totalElements
+        );
     }
 }
 
