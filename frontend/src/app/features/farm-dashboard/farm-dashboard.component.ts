@@ -80,7 +80,7 @@ export class FarmDashboardComponent implements OnInit {
   private mainPolygon: L.Polygon | null = null;
   private mainMarker: L.Marker | null = null;
 
-  private modalPolygon: L.Polygon | null = null;
+  modalPolygon: L.Polygon | null = null;
   private modalMarker: L.Marker | null = null;
   modalDrawnPoints: L.LatLng[] = [];
   private modalPolyline: L.Polyline | null = null;
@@ -498,13 +498,50 @@ export class FarmDashboardComponent implements OnInit {
     // Calculate predicted area from geodesic points
     const predictedArea = this.calculateAreaInAcres(this.modalDrawnPoints);
 
+    // Auto-center marker to polygon centroid
+    const center = this.modalPolygon.getBounds().getCenter();
+    const centerLat = Number(center.lat.toFixed(6));
+    const centerLng = Number(center.lng.toFixed(6));
+
+    if (this.modalMarker) {
+      this.modalMarker.setLatLng(center);
+    }
+
     this.editForm.patchValue({
       farmBoundary: JSON.stringify(boundaryCoords),
-      calculatedArea: predictedArea
+      calculatedArea: predictedArea,
+      latitude: centerLat,
+      longitude: centerLng
     });
 
+    // Fit map to show the full polygon
+    this.modalMap?.fitBounds(this.modalPolygon.getBounds(), { padding: [30, 30] });
+
     this.isDrawingMode = false;
-    this.toastr.success(`Farm boundary shape closed. Calculated Area: ${predictedArea} Acres`, 'Success');
+    this.toastr.success(`Farm boundary closed. Pin centered to area. Calculated Area: ${predictedArea} Acres`, 'Success');
+  }
+
+  centerPinToPolygon(): void {
+    if (!this.modalPolygon) {
+      this.toastr.info('Draw and close a boundary first to center the pin.', 'No Boundary');
+      return;
+    }
+
+    const center = this.modalPolygon.getBounds().getCenter();
+    const centerLat = Number(center.lat.toFixed(6));
+    const centerLng = Number(center.lng.toFixed(6));
+
+    if (this.modalMarker) {
+      this.modalMarker.setLatLng(center);
+    }
+
+    this.editForm.patchValue({
+      latitude: centerLat,
+      longitude: centerLng
+    });
+
+    this.modalMap?.setView(center, this.modalMap.getZoom());
+    this.toastr.info(`Pin moved to area center (${centerLat}, ${centerLng})`, 'Centered');
   }
 
   clearBoundaryDrawing(): void {
