@@ -55,6 +55,20 @@
         </div>
         
         <div class="flex flex-wrap items-center gap-3 pr-1 py-1">
+          <!-- All Farms Tab -->
+          <button (click)="selectAllFarms()" type="button"
+                  [class.farm-tab-active]="selectedFarm() === null"
+                  class="farm-tab flex items-center gap-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-4 py-3 rounded-2xl shadow-sm hover:shadow-md transition text-left shrink-0">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center transition"
+                 [ngClass]="selectedFarm() === null ? 'bg-white text-green-600' : 'bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400'">
+              <span class="material-icons text-lg">dashboard</span>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-gray-800 dark:text-white">All Farms</h4>
+              <p class="text-[9px] text-gray-400 font-medium mt-0.5">{{ farms().length }} Farms</p>
+            </div>
+          </button>
+
           @for (farm of farms(); track farm.id) {
             <button (click)="selectFarm(farm)" type="button"
                     [class.farm-tab-active]="selectedFarm()?.id === farm.id"
@@ -79,7 +93,8 @@
       </div>
 
       <!-- MAIN GRID CONTENT -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      @if (selectedFarm()) {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- LEFT & MIDDLE COLUMNS (METRICS AND MAPS) -->
         <div class="lg:col-span-2 space-y-6">
@@ -362,7 +377,61 @@
 
         </div>
 
-      </div>
+        </div>
+      } @else {
+        <!-- ALL FARMS VIEW -->
+        <div class="space-y-6">
+          <!-- All Farms Map -->
+          <div class="fs-card space-y-4">
+            <div class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 pb-3">
+              <span class="material-icons text-green-600 dark:text-green-400">public</span>
+              <h3 class="font-bold text-sm text-gray-800 dark:text-white uppercase tracking-wider">All Farms Map Overview</h3>
+            </div>
+            <div class="relative w-full h-[400px] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-inner">
+              <div id="allFarmsMap" class="w-full h-full z-10"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (farm of farms(); track farm.id) {
+            <div class="fs-card space-y-4 hover:border-green-500/50 transition group cursor-pointer" (click)="selectFarm(farm)">
+              <div class="flex justify-between items-start border-b border-gray-100 dark:border-gray-700 pb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 flex items-center justify-center group-hover:scale-105 transition">
+                    <span class="material-icons text-xl">landscape</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm text-gray-800 dark:text-white">{{ farm.name || 'Primary Farm' }}</h3>
+                    <p class="text-[10px] text-gray-500">{{ farm.farmArea ? (farm.farmArea + ' Acres') : '--' }}</p>
+                  </div>
+                </div>
+                <button type="button" class="text-[10px] bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded font-bold transition">
+                  View
+                </button>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Soil Type</p>
+                  <p class="text-xs font-bold text-gray-800 dark:text-white mt-0.5 capitalize">{{ farm.soilType || '--' }}</p>
+                </div>
+                <div>
+                  <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Water Source</p>
+                  <p class="text-xs font-bold text-gray-800 dark:text-white mt-0.5 capitalize">{{ farm.waterSource || '--' }}</p>
+                </div>
+                <div>
+                  <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Farming Type</p>
+                  <p class="text-xs font-bold text-gray-800 dark:text-white mt-0.5 capitalize">{{ farm.farmingType || '--' }}</p>
+                </div>
+                <div>
+                  <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Soil pH</p>
+                  <p class="text-xs font-bold text-gray-800 dark:text-white mt-0.5">{{ farm.soilPh || '--' }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        </div>
+      }
     }
   </div>
 }
@@ -552,7 +621,7 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-850/50 rounded-b-3xl">
+        <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-b-3xl">
           <button (click)="closeEditModal()" type="button"
                   class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 transition active:scale-95">
             Cancel

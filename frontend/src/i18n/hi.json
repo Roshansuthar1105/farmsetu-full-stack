@@ -1,6 +1,7 @@
 {
   "app.name": "फार्मसेतु",
   "nav.dashboard": "डैशबोर्ड",
+  "nav.farmDashboard": "फार्म डैशबोर्ड",
   "nav.marketplace": "बाज़ार",
   "nav.orders": "मेरे ऑर्डर",
   "nav.chat": "चैट",

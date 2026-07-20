@@ -176,7 +176,7 @@ export class MainLayoutComponent {
   ];
 
   readonly secondaryNavItems: NavItem[] = [
-    { path: '/app/farm-dashboard', labelKey: 'nav.dashboard', icon: 'agriculture' },
+    { path: '/app/farm-dashboard', labelKey: 'nav.farmDashboard', icon: 'agriculture' },
     { path: '/app/market-analysis', labelKey: 'nav.market', icon: 'trending_up' },
     { path: '/app/weather', labelKey: 'nav.weather', icon: 'cloud' },
     { path: '/app/news', labelKey: 'nav.news', icon: 'article' },

@@ -63,7 +63,7 @@ export class FarmDashboardComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly dashboardData = signal<DashboardResponse | null>(null);
-  
+
   // Multi-Farm state signals
   readonly farms = signal<FarmData[]>([]);
   readonly selectedFarm = signal<FarmData | null>(null);
@@ -84,6 +84,8 @@ export class FarmDashboardComponent implements OnInit {
   private modalMarker: L.Marker | null = null;
   modalDrawnPoints: L.LatLng[] = [];
   private modalPolyline: L.Polyline | null = null;
+  
+  private allFarmsMap: L.Map | null = null;
 
   // Map drawing state
   isDrawingMode = false;
@@ -118,20 +120,25 @@ export class FarmDashboardComponent implements OnInit {
     this.api.get<DashboardResponse>(`/api/dashboard/${userId}`).subscribe({
       next: (res) => {
         this.dashboardData.set(res);
-        
+
         const currentFarms = res.farms || [];
         this.farms.set(currentFarms);
 
-        // Retain previous selection or default to first
+        // Retain previous selection or default to All Farms (null)
         const previouslySelected = this.selectedFarm();
         const updatedSelected = previouslySelected ? currentFarms.find(f => f.id === previouslySelected.id) : null;
-        this.selectedFarm.set(updatedSelected || (currentFarms.length > 0 ? currentFarms[0] : null));
+        this.selectedFarm.set(updatedSelected ?? null);
+
 
         this.loading.set(false);
 
         // Wait for DOM to render map element
         setTimeout(() => {
-          this.initMainMap();
+          if (this.selectedFarm()) {
+            this.initMainMap();
+          } else {
+            this.initAllFarmsMap();
+          }
         }, 100);
       },
       error: (err) => {
@@ -169,6 +176,85 @@ export class FarmDashboardComponent implements OnInit {
     setTimeout(() => {
       this.initMainMap();
     }, 100);
+  }
+
+  selectAllFarms(): void {
+    this.selectedFarm.set(null);
+    if (this.mainMap) {
+      this.mainMap.remove();
+      this.mainMap = null;
+    }
+    setTimeout(() => {
+      this.initAllFarmsMap();
+    }, 100);
+  }
+
+  private initAllFarmsMap(): void {
+    if (this.allFarmsMap) {
+      this.allFarmsMap.remove();
+      this.allFarmsMap = null;
+    }
+
+    const currentFarms = this.farms();
+    if (currentFarms.length === 0) return;
+
+    // Use first farm as center, or a default
+    let defaultLat = 20.5937;
+    let defaultLng = 78.9629;
+    
+    if (currentFarms[0]?.latitude && currentFarms[0]?.longitude) {
+       defaultLat = currentFarms[0].latitude;
+       defaultLng = currentFarms[0].longitude;
+    }
+
+    const mapElement = document.getElementById('allFarmsMap');
+    if (!mapElement) return;
+
+    this.allFarmsMap = L.map('allFarmsMap').setView([defaultLat, defaultLng], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.allFarmsMap);
+
+    const bounds = L.latLngBounds([]);
+
+    currentFarms.forEach(farm => {
+      const lat = farm.latitude;
+      const lng = farm.longitude;
+      const hasLocation = !!lat && !!lng;
+
+      if (hasLocation) {
+        const marker = L.marker([lat, lng])
+          .addTo(this.allFarmsMap!)
+          .bindPopup(`<b>${farm.name || 'Farm Center'}</b>`);
+        
+        bounds.extend([lat, lng]);
+      }
+
+      if (farm.farmBoundary) {
+        try {
+          const coords = JSON.parse(farm.farmBoundary);
+          if (Array.isArray(coords) && coords.length > 0) {
+            const polygon = L.polygon(coords, {
+              color: '#16a34a',
+              fillColor: '#22c55e',
+              fillOpacity: 0.35,
+              weight: 3
+            }).addTo(this.allFarmsMap!);
+            
+            polygon.bindPopup(`<b>${farm.name || 'Farm'} Area</b><br/>${farm.farmArea ? farm.farmArea + ' Acres' : ''}`);
+            bounds.extend(polygon.getBounds());
+          }
+        } catch (e) {
+          console.error('Failed to parse farm boundary coordinates for farm', farm.id, e);
+        }
+      }
+    });
+
+    if (bounds.isValid()) {
+      this.allFarmsMap.fitBounds(bounds, { padding: [30, 30] });
+    }
   }
 
   private initMainMap(): void {
@@ -350,7 +436,7 @@ export class FarmDashboardComponent implements OnInit {
         const coords = JSON.parse(boundaryStr);
         if (Array.isArray(coords) && coords.length > 0) {
           this.modalDrawnPoints = coords.map((c: any) => L.latLng(c[0], c[1]));
-          
+
           this.modalPolygon = L.polygon(coords, {
             color: '#16a34a',
             fillColor: '#22c55e',
@@ -408,7 +494,7 @@ export class FarmDashboardComponent implements OnInit {
 
     // Save boundary coordinates JSON
     const boundaryCoords = this.modalDrawnPoints.map(p => [Number(p.lat.toFixed(6)), Number(p.lng.toFixed(6))]);
-    
+
     // Calculate predicted area from geodesic points
     const predictedArea = this.calculateAreaInAcres(this.modalDrawnPoints);
 
@@ -477,7 +563,7 @@ export class FarmDashboardComponent implements OnInit {
     request$.subscribe({
       next: (res) => {
         this.toastr.success(isAdd ? 'Farm created successfully' : 'Farm details updated successfully', 'Success');
-        
+
         if (isAdd) {
           // Temporarily set to null so loadDashboardData selects the new one
           this.selectedFarm.set(null);
@@ -518,22 +604,22 @@ export class FarmDashboardComponent implements OnInit {
 
   calculateAreaInAcres(coords: L.LatLng[]): number {
     if (coords.length < 3) return 0;
-    
+
     let area = 0;
     const R = 6378137; // Earth's mean radius in meters
-    
+
     for (let i = 0; i < coords.length; i++) {
       const p1 = coords[i];
       const p2 = coords[(i + 1) % coords.length];
-      
+
       const lat1 = p1.lat * Math.PI / 180;
       const lat2 = p2.lat * Math.PI / 180;
       const lon1 = p1.lng * Math.PI / 180;
       const lon2 = p2.lng * Math.PI / 180;
-      
+
       area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
     }
-    
+
     const areaM2 = Math.abs(area * R * R / 2);
     const areaAcres = areaM2 / 4046.85642;
     return Number(areaAcres.toFixed(2));

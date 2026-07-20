@@ -1,6 +1,7 @@
 {
   "app.name": "FarmSetu",
   "nav.dashboard": "Dashboard",
+  "nav.farmDashboard": "Farm Dashboard",
   "nav.marketplace": "Marketplace",
   "nav.orders": "My Orders",
   "nav.chat": "Chat",

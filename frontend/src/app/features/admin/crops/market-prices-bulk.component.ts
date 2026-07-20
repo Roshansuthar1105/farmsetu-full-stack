@@ -251,7 +251,7 @@ import { ApiService } from '../../../core/services/api.service';
             </div>
 
             <!-- Footer -->
-            <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-850/50 rounded-b-3xl">
+            <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-900/50 rounded-b-3xl">
               <button (click)="closeModal()" type="button" class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 transition active:scale-95">
                 Cancel
               </button>
