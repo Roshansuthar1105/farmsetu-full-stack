@@ -129,7 +129,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
             next: (msgs) => {
               if (msgs && msgs.length > 0) {
                 const last = msgs[0];
-                c.lastMessage = last.messageText || (last.messageType === 'IMAGE' ? '📷 Photo' : last.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
+                c.lastMessage = last.messageText || (last.messageType === 'IMAGE' ? 'Photo' : last.messageType === 'VOICE' ? 'Voice note' : 'File');
                 c.lastMessageTime = last.createdAt;
 
                 // Count unread
@@ -230,7 +230,7 @@ export class FarmChatComponent implements OnInit, OnDestroy {
       this.contacts.update(list => {
         return list.map(c => {
           if (c.id === msg.senderId || c.id === msg.receiverId) {
-            c.lastMessage = msg.messageText || (msg.messageType === 'IMAGE' ? '📷 Photo' : msg.messageType === 'VOICE' ? '🎤 Voice note' : '📎 File');
+            c.lastMessage = msg.messageText || (msg.messageType === 'IMAGE' ? 'Photo' : msg.messageType === 'VOICE' ? 'Voice note' : 'File');
             c.lastMessageTime = msg.createdAt;
             if (msg.senderId === c.id && (!activeContact || activeContact.id !== c.id)) {
               c.unreadCount++;

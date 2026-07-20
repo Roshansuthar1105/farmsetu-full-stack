@@ -537,7 +537,7 @@
                   {{ isSeller() ? 'Orders Received for Listing' : 'Your Order Purchase Info' }}
                 </h3>
               </div>
-              <button (click)="closeOrdersModal()" class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-white flex items-center justify-center transition active:scale-95">✕</button>
+              <button (click)="closeOrdersModal()" class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-white flex items-center justify-center transition active:scale-95"><svg lucideX size="16"></svg></button>
             </div>
 
             <!-- Modal Body -->
@@ -758,7 +758,7 @@
                 </div>
                 Edit Product Listing
               </h3>
-              <button (click)="closeEditModal()" class="w-8 h-8 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-white transition flex items-center justify-center">✕</button>
+              <button (click)="closeEditModal()" class="w-8 h-8 rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-white transition flex items-center justify-center"><svg lucideX size="16"></svg></button>
             </div>
 
             <form (ngSubmit)="submitProductEdit()" class="space-y-4 text-xs sm:text-sm">

@@ -166,7 +166,7 @@
               <div class="info-cell space-y-1 sm:col-span-2">
                 <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px] font-mono">Registered Address Details</span>
                 <p class="font-extrabold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-1.5">
-                  🏡 {{ u.village || 'N/A' }} (Village) &bull; {{ u.district || 'N/A' }} (District) &bull; {{ u.state || 'N/A' }} (State)
+                  <span class="material-icons text-emerald-500 text-xs">home</span> {{ u.village || 'N/A' }} (Village) &bull; {{ u.district || 'N/A' }} (District) &bull; {{ u.state || 'N/A' }} (State)
                 </p>
               </div>
             </div>
@@ -247,7 +247,10 @@
               <div class="space-y-4">
                 <div class="flex justify-between items-start gap-2 pl-2">
                   <div>
-                    <h4 class="font-black text-slate-900 dark:text-white text-base font-display">🚜 {{ farm.name }}</h4>
+                    <h4 class="font-black text-slate-900 dark:text-white text-base font-display flex items-center gap-1.5">
+                      <span class="material-icons text-emerald-500 text-lg">agriculture</span>
+                      {{ farm.name }}
+                    </h4>
                     <p class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 dark:text-slate-500 mt-0.5 font-mono">
                       Soil Profile: {{ farm.soilType }} (pH {{ farm.soilPh }} &bull; {{ farm.soilPh < 7 ? 'Acidic' : (farm.soilPh > 7 ? 'Alkaline' : 'Neutral') }})
                     </p>
@@ -418,7 +421,7 @@
                   <div class="relative w-20 h-20 mx-auto flex items-center justify-center">
                     <!-- Shiny Outer Ring -->
                     <div [class.grayscale]="!b.isUnlocked" [class.opacity-60]="!b.isUnlocked" class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/20 border border-white/20 flex items-center justify-center text-4xl shadow-inner transition duration-300 group-hover:rotate-3">
-                      {{ getBadgeIconEmoji(b) }}
+                      <span class="material-icons text-3xl text-amber-400">{{ getBadgeIconName(b) }}</span>
                     </div>
 
                     <!-- Faded Lock Icon Overlay for Locked Badges -->
@@ -479,7 +482,7 @@
         <!-- Big Emblem Artwork -->
         <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
           <div [class.grayscale]="!b.isUnlocked" [class.opacity-70]="!b.isUnlocked" class="w-full h-full rounded-3xl bg-gradient-to-br from-amber-500/30 to-emerald-500/30 border-2 border-amber-400/50 flex items-center justify-center text-6xl shadow-2xl shadow-emerald-500/20">
-            {{ getBadgeIconEmoji(b) }}
+            <span class="material-icons text-5xl text-amber-400">{{ getBadgeIconName(b) }}</span>
           </div>
 
           @if (!b.isUnlocked) {

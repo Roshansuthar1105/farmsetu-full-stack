@@ -406,7 +406,7 @@ export class ProfileComponent implements OnInit {
     this.userService.claimBadge(badge.id).subscribe({
       next: (res) => {
         this.claimingBadgeId.set(null);
-        this.toastr.success(`🏆 Badges Unlocked! +${res.pointsRequired || 50} Reputation Points added!`);
+        this.toastr.success(`Badges Unlocked! +${res.pointsRequired || 50} Reputation Points added!`);
 
         // Update local user reputation score
         const currentU = this.user();
@@ -455,16 +455,16 @@ export class ProfileComponent implements OnInit {
     return all.filter(b => b.category === filter || b.badgeType === filter);
   }
 
-  getBadgeIconEmoji(badge: any): string {
+  getBadgeIconName(badge: any): string {
     const cat = badge.category || badge.badgeType || '';
     switch (cat.toUpperCase()) {
-      case 'SOIL': return '🌱';
-      case 'FARM': return '🚜';
-      case 'CROP': return '🌾';
-      case 'EQUIPMENT': return '⚙️';
-      case 'COMMUNITY': return '🤝';
-      case 'SPECIAL': return '👑';
-      default: return '⭐';
+      case 'SOIL': return 'grass';
+      case 'FARM': return 'agriculture';
+      case 'CROP': return 'park';
+      case 'EQUIPMENT': return 'settings';
+      case 'COMMUNITY': return 'groups';
+      case 'SPECIAL': return 'workspace_premium';
+      default: return 'stars';
     }
   }
 

@@ -188,7 +188,7 @@ import { ToastrService } from 'ngx-toastr';
                   <span class="material-icons text-green-600">receipt</span> Order Details #{{ detail.id }}
                 </h3>
               </div>
-              <button (click)="closeDetailsModal()" class="w-8 h-8 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-650 dark:hover:text-white flex items-center justify-center transition active:scale-95">✕</button>
+              <button (click)="closeDetailsModal()" class="w-8 h-8 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-650 dark:hover:text-white flex items-center justify-center transition active:scale-95"><span class="material-icons text-sm">close</span></button>
             </div>
 
             <!-- Modal Body Grid -->

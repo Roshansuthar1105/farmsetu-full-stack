@@ -170,7 +170,7 @@ import { ApiService } from '../../../core/services/api.service';
                 </h2>
               </div>
               <button (click)="closeModal()" type="button" class="p-1 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                ✕
+                <span class="material-icons text-sm">close</span>
               </button>
             </div>
             

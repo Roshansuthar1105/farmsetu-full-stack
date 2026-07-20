@@ -74,7 +74,7 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
           </svg>
           <span>Verifying...</span>
         } @else {
-          <span>Verify ✓</span>
+          <span>Verify</span>
         }
       </button>
 

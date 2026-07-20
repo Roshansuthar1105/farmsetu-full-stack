@@ -103,7 +103,7 @@ interface ForecastDay {
                 <div class="space-y-2 relative z-10">
                   <div class="flex items-center gap-3">
                     <span class="text-5xl font-black">{{ current()?.temp }}°C</span>
-                    <span class="text-4xl">{{ getWeatherIcon(current()?.description || '') }}</span>
+                    <span class="material-icons text-4xl text-amber-300">{{ getWeatherIcon(current()?.description || '') }}</span>
                   </div>
                   <p class="text-xs font-bold capitalize tracking-wide">{{ current()?.description }}</p>
                 </div>
@@ -181,7 +181,7 @@ interface ForecastDay {
                         </div>
                         
                         <span class="text-gray-400 flex items-center gap-1">
-                          <span>💧 Rain:</span>
+                          <span class="material-icons text-blue-400 text-xs">water_drop</span>
                           <span class="font-extrabold text-white">{{ day.rainMm }} mm</span>
                         </span>
                       </div>
@@ -198,8 +198,8 @@ interface ForecastDay {
           </div>
         } @else {
           <!-- Empty loading state -->
-          <div class="bg-[#1e293b]/20 rounded-3xl p-16 text-center text-gray-500 border border-gray-800 shadow-md">
-            <div class="animate-bounce text-4xl mb-3">☁️</div>
+          <div class="bg-[#1e293b]/20 rounded-3xl p-16 text-center text-gray-500 border border-gray-800 shadow-md flex flex-col items-center">
+            <span class="material-icons text-4xl text-blue-400 animate-bounce mb-3">cloud</span>
             <p class="text-xs">Connecting to meteorological weather stations...</p>
           </div>
         }
@@ -331,12 +331,12 @@ export class WeatherComponent implements OnInit {
 
   getWeatherIcon(description: string): string {
     const desc = description.toLowerCase();
-    if (desc.includes('sun') || desc.includes('clear')) return '☀️';
-    if (desc.includes('cloud') || desc.includes('overcast')) return '🌤️';
-    if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) return '🌧️';
-    if (desc.includes('thunder') || desc.includes('storm')) return '⛈️';
-    if (desc.includes('snow') || desc.includes('ice')) return '❄️';
-    if (desc.includes('fog') || desc.includes('mist')) return '🌫️';
-    return '🌤️';
+    if (desc.includes('sun') || desc.includes('clear')) return 'wb_sunny';
+    if (desc.includes('cloud') || desc.includes('overcast')) return 'cloud';
+    if (desc.includes('rain') || desc.includes('drizzle') || desc.includes('shower')) return 'water_drop';
+    if (desc.includes('thunder') || desc.includes('storm')) return 'thunderstorm';
+    if (desc.includes('snow') || desc.includes('ice')) return 'ac_unit';
+    if (desc.includes('fog') || desc.includes('mist')) return 'thermostat';
+    return 'cloud';
   }
 }
