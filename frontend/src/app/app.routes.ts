@@ -14,6 +14,26 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'privacy-policy',
+    title: 'Privacy Policy',
+    loadComponent: () => import('./features/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)
+  },
+  {
+    path: 'terms-of-service',
+    title: 'Terms of Service',
+    loadComponent: () => import('./features/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
+  },
+  {
+    path: 'contact',
+    title: 'Contact Us',
+    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
+  },
+  {
+    path: 'help',
+    redirectTo: 'app/help',
+    pathMatch: 'full'
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
@@ -31,6 +51,26 @@ export const routes: Routes = [
         path: 'farm-dashboard',
         title: 'Farm Dashboard',
         loadComponent: () => import('./features/farm-dashboard/farm-dashboard.component').then(m => m.FarmDashboardComponent)
+      },
+      {
+        path: 'privacy-policy',
+        title: 'Privacy Policy',
+        loadComponent: () => import('./features/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)
+      },
+      {
+        path: 'terms-of-service',
+        title: 'Terms of Service',
+        loadComponent: () => import('./features/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
+      },
+      {
+        path: 'contact',
+        title: 'Contact Us',
+        loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
+      },
+      {
+        path: 'help',
+        title: 'Help & Support',
+        loadComponent: () => import('./features/help/help.component').then(m => m.HelpComponent)
       },
       {
         path: 'marketplace',

@@ -126,11 +126,11 @@ import { ThemeService } from '../../../core/services/theme.service';
         <!-- Bottom alignment/footer elements -->
         <div class="hidden lg:block w-full max-w-md mx-auto text-center mt-6 text-[10px] text-gray-400 dark:text-gray-500 font-medium">
           <div class="flex items-center justify-center gap-4">
-            <a href="#" class="hover:text-gray-600 dark:hover:text-gray-350">Privacy Policy</a>
+            <a routerLink="/privacy-policy" class="hover:text-gray-600 dark:hover:text-gray-350">Privacy Policy</a>
             <span class="text-gray-200 dark:text-gray-800">|</span>
-            <a href="#" class="hover:text-gray-600 dark:hover:text-gray-350">Terms of Service</a>
+            <a routerLink="/terms-of-service" class="hover:text-gray-600 dark:hover:text-gray-350">Terms of Service</a>
             <span class="text-gray-200 dark:text-gray-800">|</span>
-            <a href="#" class="hover:text-gray-600 dark:hover:text-gray-350">Contact Us</a>
+            <a routerLink="/contact" class="hover:text-gray-600 dark:hover:text-gray-350">Contact Us</a>
           </div>
         </div>
       </main>
