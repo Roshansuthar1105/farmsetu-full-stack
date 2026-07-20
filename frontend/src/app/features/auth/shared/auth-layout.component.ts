@@ -124,7 +124,7 @@ import { ThemeService } from '../../../core/services/theme.service';
         </div>
 
         <!-- Bottom alignment/footer elements -->
-        <div class="w-full max-w-md mx-auto text-center mt-6 text-[10px] text-gray-400 dark:text-gray-500 font-medium">
+        <div class="hidden lg:block w-full max-w-md mx-auto text-center mt-6 text-[10px] text-gray-400 dark:text-gray-500 font-medium">
           <div class="flex items-center justify-center gap-4">
             <a href="#" class="hover:text-gray-600 dark:hover:text-gray-350">Privacy Policy</a>
             <span class="text-gray-200 dark:text-gray-800">|</span>
