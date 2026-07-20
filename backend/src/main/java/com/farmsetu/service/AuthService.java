@@ -41,7 +41,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
+        if (request.getEmail() != null && userRepository.existsByEmailIgnoreCase(request.getEmail())) {
             throw new BadRequestException("Email already registered");
         }
         if (request.getPhone() != null && userRepository.existsByPhone(request.getPhone())) {
@@ -51,7 +51,7 @@ public class AuthService {
         UserRole role = request.getRole() != null ? request.getRole() : UserRole.FARMER;
         User user = User.builder()
                 .name(request.getName())
-                .email(request.getEmail())
+                .email(request.getEmail() != null ? request.getEmail().toLowerCase() : null)
                 .phone(request.getPhone())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
@@ -146,7 +146,8 @@ public class AuthService {
     @Transactional
     public void sendMagicLink(String email) {
         // Always return success to prevent user enumeration
-        userRepository.findByEmail(email).ifPresent(user -> {
+//        userRepository.getUsersByEmailId(email);
+        userRepository.getUsersByEmailId(email.toLowerCase()).ifPresent(user -> {
             String token = java.util.UUID.randomUUID().toString().replace("-", "");
             user.setMagicLinkToken(token);
             user.setMagicLinkExpiry(Instant.now().plusSeconds(15 * 60)); // 15 minutes

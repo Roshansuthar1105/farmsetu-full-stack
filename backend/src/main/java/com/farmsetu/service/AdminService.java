@@ -227,7 +227,8 @@ public class AdminService {
     public User updateUserDetails(Long id, Map<String, Object> body) {
         User user = getUser(id);
         if (body.containsKey("name")) user.setName((String) body.get("name"));
-        if (body.containsKey("email")) user.setEmail((String) body.get("email"));
+        if (body.containsKey("email") && body.get("email") != null) user.setEmail(((String) body.get("email")).toLowerCase());
+        else if (body.containsKey("email")) user.setEmail(null);
         if (body.containsKey("phone")) user.setPhone((String) body.get("phone"));
         if (body.containsKey("bio")) user.setBio((String) body.get("bio"));
         if (body.containsKey("preferredLanguage")) user.setPreferredLanguage((String) body.get("preferredLanguage"));
