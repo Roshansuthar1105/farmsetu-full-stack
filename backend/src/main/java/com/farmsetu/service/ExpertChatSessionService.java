@@ -14,6 +14,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.farmsetu.model.entity.AiChatMessage;
+import com.farmsetu.model.entity.ChatMessage;
+import com.farmsetu.model.enums.MessageType;
+import com.farmsetu.repository.AiChatMessageRepository;
+import com.farmsetu.repository.ChatMessageRepository;
+import com.farmsetu.repository.ExpertChatSessionRepository;
+import com.farmsetu.repository.UserRepository;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +35,8 @@ public class ExpertChatSessionService {
 
     private final ExpertChatSessionRepository sessionRepository;
     private final UserRepository userRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final AiChatMessageRepository aiChatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
@@ -41,10 +51,7 @@ public class ExpertChatSessionService {
 
         log.info("User found: name={}, role={}, isAi={}", farmer.getName(), farmer.getRole(), farmer.isAi());
 
-        if (farmer.getRole() != UserRole.FARMER) {
-            log.warn("Start session denied: User ID {} has role {}, only FARMER is allowed", farmerId, farmer.getRole());
-            throw new BadRequestException("Only farmers can start chat sessions");
-        }
+        // Allow any authenticated user to start an AI chat session
 
         // Check for existing active session
         var existing = sessionRepository.findActiveSessionByFarmerId(farmerId);
@@ -84,18 +91,43 @@ public class ExpertChatSessionService {
             throw new BadRequestException("Not authorized to escalate this session");
         }
 
-        if (session.getStatus() != ChatSessionStatus.AI_ACTIVE) {
-            log.warn("Escalation denied: Session ID {} is in state {}, not AI_ACTIVE", sessionId, session.getStatus());
-            throw new BadRequestException("Session is not in AI_ACTIVE state");
+        if (session.getStatus() == ChatSessionStatus.WAITING_FOR_EXPERT) {
+            log.info("Session ID {} is already in WAITING_FOR_EXPERT queue. Updating summary...", sessionId);
+            if (reason != null && !reason.isBlank()) {
+                session.setEscalationReason(reason);
+            }
+            session.setAiSummary(generateHandoverSummary(session));
+            session = sessionRepository.save(session);
+            broadcastQueueUpdate();
+            return toMap(session);
+        }
+
+        // If previous session is EXPERT_ACTIVE, RESOLVED, or CLOSED, archive it and start a NEW escalation request
+        if (session.getStatus() == ChatSessionStatus.EXPERT_ACTIVE || session.getStatus() == ChatSessionStatus.RESOLVED || session.getStatus() == ChatSessionStatus.CLOSED) {
+            log.info("Current active session ID {} has status {}, archiving and creating new escalation session.", session.getId(), session.getStatus());
+            session.setStatus(ChatSessionStatus.RESOLVED);
+            session.setResolvedAt(Instant.now());
+            sessionRepository.save(session);
+
+            // Create new session for this escalation
+            session = ExpertChatSession.builder()
+                    .farmer(session.getFarmer())
+                    .status(ChatSessionStatus.WAITING_FOR_EXPERT)
+                    .aiMessageCount(0)
+                    .topic(truncate(reason, 100))
+                    .escalationReason(reason != null ? reason : "Farmer requested new human agronomist review")
+                    .build();
+            session.setAiSummary(generateHandoverSummary(session));
+            session = sessionRepository.save(session);
+
+            log.info("Successfully created new escalation session ID {} for farmer ID {}", session.getId(), currentUserId);
+            broadcastQueueUpdate();
+            return toMap(session);
         }
 
         session.setStatus(ChatSessionStatus.WAITING_FOR_EXPERT);
         session.setEscalationReason(reason != null ? reason : "Farmer requested human expert");
-
-        // Generate a simple AI summary if not already set
-        if (session.getAiSummary() == null || session.getAiSummary().isEmpty()) {
-            session.setAiSummary(generateHandoverSummary(session));
-        }
+        session.setAiSummary(generateHandoverSummary(session));
 
         session = sessionRepository.save(session);
         log.info("Successfully escalated session ID {} to expert queue", sessionId);
@@ -137,6 +169,38 @@ public class ExpertChatSessionService {
         session.setExpert(expert);
         session.setStatus(ChatSessionStatus.EXPERT_ACTIVE);
         session = sessionRepository.save(session);
+
+        // Auto-create initial ChatMessage from Farmer -> Expert containing the AI summary
+        String summaryText = "### 📋 AI Chatbot Handoff Summary\n\n" +
+                "**Farmer**: " + session.getFarmer().getName() + "\n" +
+                "**Topic**: " + (session.getTopic() != null ? session.getTopic() : "General Consultation") + "\n" +
+                "**Escalation Reason**: " + (session.getEscalationReason() != null ? session.getEscalationReason() : "Direct Handover Request") + "\n\n" +
+                "**AI Conversation Summary**:\n" +
+                (session.getAiSummary() != null && !session.getAiSummary().isBlank() ? session.getAiSummary() : "Farmer initiated chat handover from Setu AI Chatbot.");
+
+        ChatMessage summaryMsg = ChatMessage.builder()
+                .sender(session.getFarmer())
+                .receiver(expert)
+                .messageText(summaryText)
+                .messageType(MessageType.TEXT)
+                .read(false)
+                .pinned(true)
+                .build();
+        summaryMsg = chatMessageRepository.save(summaryMsg);
+
+        // Broadcast summary message to farmer & expert
+        Map<String, Object> msgPayload = new HashMap<>();
+        msgPayload.put("id", summaryMsg.getId());
+        msgPayload.put("senderId", session.getFarmer().getId());
+        msgPayload.put("receiverId", expertId);
+        msgPayload.put("messageText", summaryText);
+        msgPayload.put("messageType", "TEXT");
+        msgPayload.put("read", false);
+        msgPayload.put("pinned", true);
+        msgPayload.put("createdAt", summaryMsg.getCreatedAt() != null ? summaryMsg.getCreatedAt().toString() : Instant.now().toString());
+
+        messagingTemplate.convertAndSend("/topic/messages/" + session.getFarmer().getId(), msgPayload);
+        messagingTemplate.convertAndSend("/topic/messages/" + expertId, msgPayload);
 
         // Notify farmer that an expert has joined
         Map<String, Object> notification = new HashMap<>();
@@ -264,22 +328,34 @@ public class ExpertChatSessionService {
 
     private String generateHandoverSummary(ExpertChatSession session) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Farmer: ").append(session.getFarmer().getName()).append("\n");
-        if (session.getFarmer().getState() != null) {
-            sb.append("Location: ").append(session.getFarmer().getDistrict())
-                    .append(", ").append(session.getFarmer().getState()).append("\n");
+        sb.append("### 🌾 Farmer Handoff Briefing\n");
+        sb.append("- **Farmer Name**: ").append(session.getFarmer().getName()).append("\n");
+        if (session.getFarmer().getState() != null || session.getFarmer().getDistrict() != null) {
+            sb.append("- **Location**: ")
+                    .append(session.getFarmer().getDistrict() != null ? session.getFarmer().getDistrict() + ", " : "")
+                    .append(session.getFarmer().getState() != null ? session.getFarmer().getState() : "").append("\n");
         }
-        sb.append("Messages exchanged with AI: ").append(session.getAiMessageCount()).append("\n");
-        if (session.getTopic() != null) {
-            sb.append("Topic: ").append(session.getTopic()).append("\n");
+        sb.append("- **Primary Topic**: ").append(session.getTopic() != null ? session.getTopic() : "Agricultural Consultation").append("\n");
+        sb.append("- **Escalation Reason**: ").append(session.getEscalationReason() != null ? session.getEscalationReason() : "Farmer requested expert review").append("\n\n");
+
+        // Fetch saved AI chat messages for this farmer to construct conversation transcript
+        List<AiChatMessage> messages = aiChatMessageRepository.findByFarmerIdOrderByCreatedAtAsc(session.getFarmer().getId());
+        if (!messages.isEmpty()) {
+            sb.append("#### 📝 Summary of Recent AI Conversation:\n");
+            int start = Math.max(0, messages.size() - 6);
+            for (int i = start; i < messages.size(); i++) {
+                AiChatMessage msg = messages.get(i);
+                String sender = msg.isFromBot() ? "🤖 **Setu AI**" : "👨‍🌾 **Farmer**";
+                String text = msg.getMessageText();
+                if (text != null && text.length() > 300) {
+                    text = text.substring(0, 297) + "...";
+                }
+                sb.append(sender).append(": ").append(text).append("\n\n");
+            }
+        } else if (session.getAiSummary() != null && !session.getAiSummary().isEmpty()) {
+            sb.append("#### 📝 Summary:\n").append(session.getAiSummary());
         }
-        if (session.getEscalationReason() != null) {
-            sb.append("Escalation reason: ").append(session.getEscalationReason()).append("\n");
-        }
-        if (session.getAiSummary() != null && !session.getAiSummary().isEmpty()) {
-            sb.append("\n--- Conversation Summary ---\n");
-            sb.append(session.getAiSummary());
-        }
+
         return sb.toString();
     }
 

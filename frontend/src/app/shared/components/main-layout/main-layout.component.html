@@ -40,6 +40,7 @@
           class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition duration-200">
           @switch (item.icon) {
           @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
+          @case ('bot') { <svg lucideBot size="16" class="stroke-[2]"></svg> }
           @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
           @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
           @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }
@@ -391,6 +392,12 @@
       <span class="text-[9px] uppercase tracking-wider mt-0.5">Chaupal</span>
     </a>
 
+    <a routerLink="/app/ai-chatbot" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
+      class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
+      <svg lucideBot size="18" class="stroke-[2.25]"></svg>
+      <span class="text-[9px] uppercase tracking-wider mt-0.5">AI Bot</span>
+    </a>
+
     <a routerLink="/app/farm-chat" routerLinkActive="text-green-650 dark:text-green-400 font-bold"
       class="flex flex-col items-center gap-0.5 text-slate-455 hover:text-green-650 dark:hover:text-green-400 transition duration-200 active:scale-95">
       <svg lucideMessagesSquare size="18" class="stroke-[2.25]"></svg>
@@ -449,6 +456,7 @@
               class="nav-icon text-slate-400 group-hover:text-green-650 dark:group-hover:text-green-400 transition">
               @switch (item.icon) {
               @case ('dashboard') { <svg lucideLayoutDashboard size="16" class="stroke-[2]"></svg> }
+              @case ('bot') { <svg lucideBot size="16" class="stroke-[2]"></svg> }
               @case ('store') { <svg lucideStore size="16" class="stroke-[2]"></svg> }
               @case ('receipt_long') { <svg lucideReceipt size="16" class="stroke-[2]"></svg> }
               @case ('chat') { <svg lucideMessageSquare size="16" class="stroke-[2]"></svg> }

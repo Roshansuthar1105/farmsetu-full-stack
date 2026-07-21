@@ -44,7 +44,9 @@ import {
   LucideHelpCircle,
   LucideSearch,
   LucideLanguages,
-  LucideAward
+  LucideAward,
+  LucideBot,
+  LucideSparkles
 } from '@lucide/angular';
 
 interface NavItem {
@@ -99,7 +101,9 @@ interface NavItem {
     LucideHelpCircle,
     LucideSearch,
     LucideLanguages,
-    LucideAward
+    LucideAward,
+    LucideBot,
+    LucideSparkles
   ],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss'
@@ -172,6 +176,7 @@ export class MainLayoutComponent {
 
   readonly primaryNavItems: NavItem[] = [
     { path: '/app/dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
+    { path: '/app/ai-chatbot', labelKey: 'nav.aiChatbot', icon: 'bot' },
     { path: '/app/marketplace', labelKey: 'nav.marketplace', icon: 'store' },
     { path: '/app/orders', labelKey: 'nav.orders', icon: 'receipt_long' },
     { path: '/app/farm-chat', labelKey: 'nav.farmChat', icon: 'forum' },

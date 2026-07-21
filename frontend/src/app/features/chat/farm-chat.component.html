@@ -23,16 +23,81 @@
           placeholder="Search contacts..."
           class="w-full pl-9 pr-4 py-2 text-xs bg-gray-100 dark:bg-gray-800 border-0 rounded-xl focus:ring-2 focus:ring-green-600 text-gray-900 dark:text-white">
       </div>
-    </div>
 
-    <!-- Contact Lists -->
-    <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800/50 scrollbar-thin">
-      @if (filteredContacts.length === 0) {
-      <div class="flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500 space-y-2">
-        <span class="material-icons text-3xl">chat_bubble_outline</span>
-        <p class="text-xs">No contacts found</p>
+      <!-- Expert Mode Tab Switcher -->
+      @if (isExpertOrAdmin) {
+      <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        <button type="button" (click)="activeTab.set('chats')"
+          class="flex-1 py-1.5 text-xs font-bold rounded-lg transition"
+          [ngClass]="activeTab() === 'chats' ? 'bg-white dark:bg-gray-700 text-green-700 dark:text-green-400 shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'">
+          Chats
+        </button>
+        <button type="button" (click)="activeTab.set('expert-queue')"
+          class="flex-1 py-1.5 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5"
+          [ngClass]="activeTab() === 'expert-queue' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-gray-500 hover:text-amber-500'">
+          <span>Expert Queue</span>
+          @if (expertQueue().length > 0) {
+          <span class="px-1.5 py-0.2 bg-red-600 text-white text-[10px] font-black rounded-full animate-pulse">
+            {{ expertQueue().length }}
+          </span>
+          }
+        </button>
       </div>
       }
+    </div>
+
+    <!-- Sidebar Body: Contacts OR Expert Queue -->
+    <div class="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800/50 scrollbar-thin">
+      
+      <!-- EXPERT QUEUE TAB VIEW -->
+      @if (activeTab() === 'expert-queue' && isExpertOrAdmin) {
+        @if (expertQueue().length === 0) {
+        <div class="flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500 space-y-2">
+          <span class="material-icons text-3xl text-emerald-500">verified_user</span>
+          <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">No Farmers Waiting</p>
+          <p class="text-[11px] text-gray-400">Escalated farmer queries from Setu AI Chatbot will appear here in real time.</p>
+        </div>
+        }
+
+        @for (q of expertQueue(); track q.id) {
+        <div class="p-4 bg-amber-50/40 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <img [src]="q.farmerPhoto || 'assets/default-avatar.png'" class="w-8 h-8 rounded-full object-cover">
+              <div>
+                <h4 class="text-xs font-bold text-gray-900 dark:text-white">{{ q.farmerName || 'Farmer' }}</h4>
+                <span class="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">{{ q.farmerState || 'India' }}</span>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 px-2 py-0.5 rounded-full">WAITING</span>
+          </div>
+
+          <div class="text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800/80 p-2.5 rounded-xl border border-amber-200/60 dark:border-amber-800/60 space-y-1">
+            <p><strong class="text-amber-600 dark:text-amber-400">Topic:</strong> {{ q.topic || 'Agricultural Query' }}</p>
+            <p><strong class="text-gray-500">Reason:</strong> {{ q.escalationReason || 'Transfer to expert requested' }}</p>
+            @if (q.aiSummary) {
+            <details class="mt-1 cursor-pointer">
+              <summary class="text-[11px] text-green-600 dark:text-green-400 font-bold hover:underline">View AI Chat Summary</summary>
+              <div class="mt-1.5 p-2.5 bg-gray-50 dark:bg-gray-900/80 rounded-xl text-xs leading-relaxed text-gray-800 dark:text-gray-200 border border-gray-200/60 dark:border-gray-800" [innerHTML]="formatMarkdown(q.aiSummary)"></div>
+            </details>
+            }
+          </div>
+
+          <button (click)="acceptExpertSession(q)"
+            class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow transition active:scale-95 flex items-center justify-center gap-1.5">
+            <span class="material-icons text-sm">support_agent</span>
+            <span>Accept & Start Live Chat</span>
+          </button>
+        </div>
+        }
+      } @else {
+        <!-- REGULAR CONTACTS TAB VIEW -->
+        @if (filteredContacts.length === 0) {
+        <div class="flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500 space-y-2">
+          <span class="material-icons text-3xl">chat_bubble_outline</span>
+          <p class="text-xs">No contacts found</p>
+        </div>
+        }
       @for (c of filteredContacts; track c.id) {
       <button (click)="selectContact(c)"
         [ngClass]="selectedContact()?.id === c.id ? 'bg-green-50/50 dark:bg-green-950/20' : ''"
@@ -69,6 +134,7 @@
         </div>
       </button>
       }
+      }
     </div>
   </div>
 
@@ -102,6 +168,15 @@
 
       <!-- Toolbar Actions -->
       <div class="flex items-center gap-2">
+        @if (isExpertOrAdmin) {
+        <button (click)="resolveCurrentSession()" type="button"
+          class="px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-extrabold text-xs transition shadow active:scale-95 flex items-center gap-1.5 focus:outline-none"
+          title="Resolve and close this active expert chat session">
+          <span class="material-icons text-sm">check_circle</span>
+          <span>End Session</span>
+        </button>
+        }
+
         <button (click)="showChatSearch.set(!showChatSearch())"
           class="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-600 transition"
           title="Search messages">
@@ -168,7 +243,7 @@
           <div class="text-xs md:text-sm break-words leading-relaxed pr-1">
             @switch (msg.messageType) {
             @case ('TEXT') {
-            <p class="whitespace-pre-line inline">{{ msg.messageText }}</p>
+            <div [innerHTML]="formatMarkdown(msg.messageText)"></div>
             }
             @case ('IMAGE') {
             <div class="rounded-xl overflow-hidden mb-1.5 max-h-64 border border-gray-150 dark:border-gray-800">

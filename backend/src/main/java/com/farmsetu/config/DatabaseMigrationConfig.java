@@ -19,49 +19,61 @@ public class DatabaseMigrationConfig {
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
             
-            // Check if column is_ai exists on users table (check both lowercase and uppercase name for safety)
+            // 1. Check & add column 'is_ai' on 'users' table
             DatabaseMetaData metaData = conn.getMetaData();
-            boolean columnExists = false;
+            boolean isAiColumnExists = false;
             try (ResultSet rs = metaData.getColumns(null, null, "users", "is_ai")) {
-                if (rs.next()) {
-                    columnExists = true;
-                }
+                if (rs.next()) isAiColumnExists = true;
             }
-            if (!columnExists) {
+            if (!isAiColumnExists) {
                 try (ResultSet rs = metaData.getColumns(null, null, "USERS", "IS_AI")) {
-                    if (rs.next()) {
-                        columnExists = true;
-                    }
+                    if (rs.next()) isAiColumnExists = true;
                 }
             }
-            
-            if (!columnExists) {
+            if (!isAiColumnExists) {
                 log.info("Adding column 'is_ai' to 'users' table...");
                 stmt.execute("ALTER TABLE users ADD COLUMN is_ai BOOLEAN NOT NULL DEFAULT FALSE");
-                log.info("Column 'is_ai' added successfully.");
-            } else {
-                log.info("Column 'is_ai' already exists in 'users' table.");
             }
 
-            // Seed AI Bot if not exists
-//            boolean botExists = false;
-//            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM users WHERE email = 'ai.assistant@farmsetu.com'")) {
-//                if (rs.next() && rs.getInt(1) > 0) {
-//                    botExists = true;
-//                }
-//            }
-//
-//            if (!botExists) {
-////                log.info("Seeding FarmSetu AI Assistant into 'users' table...");
-////                stmt.execute(
-////                    "INSERT INTO users (name, email, phone, password_hash, role, is_verified, is_active, is_ai, bio, profile_photo) " +
-////                    "VALUES ('FarmSetu AI Assistant', 'ai.assistant@farmsetu.com', '9900990099', " +
-////                    "'$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'EXPERT', true, true, true, " +
-////                    "'Your AI Agricultural Assistant. Ask me anything about crop diseases, pest management, soil health, and market trends.', " +
-////                    "'https://ui-avatars.com/api/?name=AI+Assistant&background=10b981&color=fff&bold=true&rounded=true')"
-////                );
-//                log.info("FarmSetu AI Assistant seeded successfully.");
-//            }
+            // 2. Check & create 'ai_chats' table
+            log.info("Ensuring 'ai_chats' table and columns exist...");
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS ai_chats (" +
+                "    id BIGSERIAL PRIMARY KEY," +
+                "    farmer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE," +
+                "    bot_id INTEGER NOT NULL DEFAULT 1," +
+                "    message_text TEXT," +
+                "    is_from_bot BOOLEAN NOT NULL DEFAULT FALSE," +
+                "    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()," +
+                "    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()" +
+                ")"
+            );
+
+            // Ensure updated_at exists on ai_chats if created without it
+            try {
+                stmt.execute("ALTER TABLE ai_chats ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()");
+                stmt.execute("ALTER TABLE ai_chats ADD COLUMN IF NOT EXISTS is_from_bot BOOLEAN NOT NULL DEFAULT FALSE");
+            } catch (Exception ignored) {}
+
+            // 3. Check & create 'expert_chat_sessions' table
+            log.info("Ensuring 'expert_chat_sessions' table exists...");
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS expert_chat_sessions (" +
+                "    id BIGSERIAL PRIMARY KEY," +
+                "    farmer_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE," +
+                "    expert_id BIGINT REFERENCES users(id)," +
+                "    status VARCHAR(30) NOT NULL DEFAULT 'AI_ACTIVE'," +
+                "    topic VARCHAR(500)," +
+                "    ai_summary TEXT," +
+                "    ai_message_count INTEGER NOT NULL DEFAULT 0," +
+                "    escalation_reason VARCHAR(500)," +
+                "    resolved_at TIMESTAMPTZ," +
+                "    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()," +
+                "    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()" +
+                ")"
+            );
+
+            log.info("Custom database migrations completed successfully.");
         } catch (Exception e) {
             log.error("Failed to run custom database migrations: {}", e.getMessage(), e);
         }

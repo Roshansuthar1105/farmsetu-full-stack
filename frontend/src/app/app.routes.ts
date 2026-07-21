@@ -87,6 +87,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/chat/farm-chat.component').then(m => m.FarmChatComponent)
       },
       {
+        path: 'ai-chatbot',
+        title: 'Setu AI Agronomist',
+        loadComponent: () => import('./features/ai-chatbot/ai-chatbot.component').then(m => m.AiChatbotComponent)
+      },
+      {
         path: 'community',
         title: 'Community',
         loadComponent: () => import('./features/community/community.component').then(m => m.CommunityComponent)

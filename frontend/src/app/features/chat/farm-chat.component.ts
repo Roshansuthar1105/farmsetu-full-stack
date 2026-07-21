@@ -49,6 +49,8 @@ export class FarmChatComponent implements OnInit, OnDestroy {
   readonly onlineUserIds = signal<Set<number>>(new Set());
   readonly selectedContact = signal<any | null>(null);
   readonly messages = signal<ChatMessage[]>([]);
+  readonly expertQueue = signal<any[]>([]);
+  readonly activeTab = signal<'chats' | 'expert-queue'>('chats');
 
   readonly searchQuery = signal('');
   readonly chatSearchQuery = signal('');
@@ -68,9 +70,15 @@ export class FarmChatComponent implements OnInit, OnDestroy {
   // Connection
   private unsubscribeMessages: (() => void) | null = null;
   private unsubscribeStatus: (() => void) | null = null;
+  private unsubscribeQueue: (() => void) | null = null;
 
   get currentUser() {
     return this.auth.currentUser();
+  }
+
+  get isExpertOrAdmin(): boolean {
+    const role = this.currentUser?.role;
+    return role === 'EXPERT' || role === 'ADMIN';
   }
 
   constructor() {
@@ -97,6 +105,18 @@ export class FarmChatComponent implements OnInit, OnDestroy {
         this.handleStatusUpdate(statusPayload);
       });
 
+      // Subscribe to expert queue if expert or admin
+      if (this.isExpertOrAdmin) {
+        this.unsubscribeQueue = this.ws.subscribe('/topic/expert-queue', (queuePayload) => {
+          if (queuePayload && queuePayload.queue) {
+            this.expertQueue.set(queuePayload.queue);
+          } else {
+            this.loadExpertQueue();
+          }
+        });
+        this.loadExpertQueue();
+      }
+
       // Load contacts & online status
       this.loadContacts();
       this.loadOnlineUsers();
@@ -106,7 +126,79 @@ export class FarmChatComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.unsubscribeMessages) this.unsubscribeMessages();
     if (this.unsubscribeStatus) this.unsubscribeStatus();
+    if (this.unsubscribeQueue) this.unsubscribeQueue();
     this.stopRecordingTimer();
+  }
+
+  loadExpertQueue(): void {
+    this.api.get<any[]>('/api/expert-chat/queue').subscribe({
+      next: (queue) => {
+        this.expertQueue.set(queue || []);
+      },
+      error: (err) => {
+        console.error('Error loading expert queue:', err);
+      }
+    });
+  }
+
+  acceptExpertSession(session: any): void {
+    this.api.put<any>(`/api/expert-chat/sessions/${session.id}/accept`, {}).subscribe({
+      next: (updatedSession) => {
+        this.toastr.success(`Accepted session for farmer ${session.farmerName || 'Farmer'}`);
+        this.loadExpertQueue();
+
+        // Switch to chats tab
+        this.activeTab.set('chats');
+
+        // Check if contact already exists in list, else create temporary contact entry
+        const existing = this.contacts().find(c => c.id === session.farmerId);
+        if (existing) {
+          this.selectContact(existing);
+        } else {
+          const newContact = {
+            id: session.farmerId,
+            name: session.farmerName || 'Farmer',
+            profilePhoto: session.farmerPhoto || 'assets/default-avatar.png',
+            lastMessage: session.topic || 'Expert Chat Accepted',
+            lastMessageTime: new Date().toISOString(),
+            unreadCount: 0
+          };
+          this.contacts.update(list => [newContact, ...list]);
+          this.selectContact(newContact);
+        }
+      },
+      error: (err) => {
+        console.error('Error accepting expert session:', err);
+        this.toastr.error(err?.error?.message || 'Failed to accept chat session.');
+      }
+    });
+  }
+
+  resolveCurrentSession(): void {
+    const contact = this.selectedContact();
+    if (!contact) return;
+
+    this.api.get<any[]>('/api/expert-chat/active-sessions').subscribe({
+      next: (sessions) => {
+        const activeSession = sessions?.find(s => s.farmerId === contact.id);
+        if (activeSession) {
+          this.api.put(`/api/expert-chat/sessions/${activeSession.id}/resolve`, {}).subscribe({
+            next: () => {
+              this.toastr.success(`Session with ${contact.name} marked as RESOLVED.`);
+              this.loadExpertQueue();
+            },
+            error: (err) => {
+              this.toastr.error('Failed to resolve session.');
+            }
+          });
+        } else {
+          this.toastr.info('No active expert session found for this conversation.');
+        }
+      },
+      error: (err) => {
+        console.error('Error resolving session:', err);
+      }
+    });
   }
 
   loadContacts(): void {
@@ -474,5 +566,62 @@ export class FarmChatComponent implements OnInit, OnDestroy {
     } catch (err) {
       // ignore
     }
+  }
+
+  formatMarkdown(text: string): string {
+    if (!text) return '';
+
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // 1. Code blocks
+    html = html.replace(/```([\s\S]*?)```/gim, (match, p1) => {
+      const code = p1.trim();
+      return `<pre class="my-2 p-2.5 bg-slate-900 text-emerald-400 font-mono text-xs rounded-xl overflow-x-auto border border-slate-800"><code>${code}</code></pre>`;
+    });
+
+    // 2. Inline code
+    html = html.replace(/`([^`]+)`/gim, '<code class="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-mono text-xs rounded-md border border-slate-200 dark:border-slate-700">$1</code>');
+
+    // 3. Tables
+    html = html.replace(/^\|(.+)\|$/gim, (match) => {
+      const cols = match.split('|').filter(c => c.trim() !== '');
+      if (cols.every(c => c.trim().startsWith('---') || c.trim().startsWith(':---') || c.trim().startsWith('---:'))) {
+        return '';
+      }
+      const cells = cols.map(c => `<td class="border border-slate-200 dark:border-slate-700 px-2.5 py-1 text-xs">${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    });
+    html = html.replace(/(<tr>[\s\S]*?<\/tr>)/gim, '<div class="my-2 overflow-x-auto"><table class="w-full border-collapse border border-slate-200 dark:border-slate-700 text-left rounded-xl overflow-hidden">$1</table></div>');
+
+    // 4. Headers (###### down to #)
+    html = html.replace(/^###### (.*$)/gim, '<h6 class="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1.5 mb-1 font-display">$1</h6>');
+    html = html.replace(/^##### (.*$)/gim, '<h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1.5 mb-1 font-display">$1</h5>');
+    html = html.replace(/^#### (.*$)/gim, '<h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 mt-2 mb-1 font-display">$1</h4>');
+    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xs font-bold text-slate-900 dark:text-white mt-2 mb-1 font-display">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 class="text-sm font-extrabold text-slate-900 dark:text-white mt-2.5 mb-1 font-display">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 class="text-base font-black text-slate-900 dark:text-white mt-3 mb-1.5 font-display">$1</h1>');
+
+    // 5. Blockquotes
+    html = html.replace(/^&gt;\s?(.*$)/gim, '<blockquote class="border-l-4 border-emerald-500 pl-2.5 my-1.5 text-slate-600 dark:text-slate-350 italic">$1</blockquote>');
+
+    // 6. Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-emerald-600 dark:text-emerald-400 font-bold underline hover:text-emerald-700">$1</a>');
+
+    // 7. Bold & Italic
+    html = html.replace(/\*\*\*(.*?)\*\*\*/gim, '<strong class="font-bold italic text-slate-900 dark:text-slate-100">$1</strong>');
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-slate-900 dark:text-slate-100">$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>');
+
+    // 8. Bullet Lists
+    html = html.replace(/^[\-*] (.*$)/gim, '<li class="ml-3 list-disc text-slate-700 dark:text-slate-300 my-0.5">$1</li>');
+    html = html.replace(/((?:<li class="ml-3 list-disc.*<\/li>\n?)+)/gim, '<ul class="my-1 space-y-0.5">$1</ul>');
+
+    // 9. Line breaks
+    html = html.replace(/\n/gim, '<br>');
+
+    return html;
   }
 }
