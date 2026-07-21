@@ -103,6 +103,7 @@ export class TwoFactorComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
 
   readonly phone = signal<string | null>(null);
+  readonly email = signal<string | null>(null);
   readonly code = signal('');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -110,6 +111,7 @@ export class TwoFactorComponent implements OnInit {
 
   ngOnInit(): void {
     this.phone.set(this.route.snapshot.queryParamMap.get('phone'));
+    this.email.set(this.route.snapshot.queryParamMap.get('email'));
   }
 
   onCodeEntered(otp: string): void {
@@ -125,20 +127,28 @@ export class TwoFactorComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    const phoneNo = this.phone() || '9178787878';
-    this.auth.verifyOtp(phoneNo, this.code()).subscribe({
+    const identifier = this.email() || this.phone() || '';
+    this.auth.verifyOtp(identifier, this.code()).subscribe({
       next: () => {
         this.loading.set(false);
         this.router.navigate(['/app/dashboard']);
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.message ?? 'Invalid OTP code. Please try again.');
+        this.error.set(err?.error?.message ?? err?.message ?? 'Invalid OTP code. Please try again.');
       }
     });
   }
 
   sendPhoneOtp(): void {
-    this.toastr.success('OTP has been resent successfully!');
+    const identifier = this.email() || this.phone() || '';
+    if (!identifier) {
+      this.toastr.error('No email or phone available to send OTP.');
+      return;
+    }
+    this.auth.sendOtp(identifier).subscribe({
+      next: () => this.toastr.success('OTP has been resent to your email!'),
+      error: () => this.toastr.error('Failed to resend OTP. Please try again.')
+    });
   }
 }

@@ -37,6 +37,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final OtpService otpService;
 
     @Value("${farmsetu.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -201,6 +202,26 @@ public class AuthService {
         userRepository.save(user);
 
         return buildAuthResponse(user);
+    }
+
+    // ─── Reset Password with OTP ────────────────────────────────────────
+
+    @Transactional
+    public void resetPasswordWithOtp(String identifier, String otp, String newPassword) {
+        // 1. Verify OTP
+        boolean valid = otpService.verifyOtp(identifier, otp);
+        if (!valid) {
+            throw new BadRequestException("Invalid or expired OTP code");
+        }
+
+        // 2. Locate user by email or phone
+        User user = userRepository.findByEmailIgnoreCase(identifier)
+                .or(() -> userRepository.findByPhone(identifier))
+                .orElseThrow(() -> new BadRequestException("No account found with this identifier"));
+
+        // 3. Encode & save new password
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     private AuthResponse buildAuthResponse(User user) {

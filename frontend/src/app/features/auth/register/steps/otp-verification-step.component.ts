@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { OtpInputComponent } from '../../shared/otp-input.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'fs-otp-verification-step',
@@ -18,10 +19,10 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
       <!-- Heading -->
       <div class="space-y-1">
         <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">
-          Verify Your Number
+          Verify Your Email
         </h2>
         <p class="text-gray-400 text-xs">
-          OTP sent to <span class="font-bold text-gray-700 dark:text-gray-300">+91 {{ maskedPhone }}</span>
+          OTP sent to <span class="font-bold text-gray-700 dark:text-gray-300">{{ maskedEmail }}</span>
         </p>
       </div>
 
@@ -86,7 +87,7 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
         </button>
         <button (click)="changeNumber.emit()"
                 class="text-amber-600 dark:text-amber-400 hover:text-amber-700 font-bold transition">
-          Change Number
+          Change Email
         </button>
       </div>
     </div>
@@ -94,9 +95,12 @@ import { OtpInputComponent } from '../../shared/otp-input.component';
 })
 export class OtpVerificationStepComponent implements OnInit, OnDestroy {
   @Input() phone = '';
+  @Input() email = '';
   @Output() verified = new EventEmitter<string>();
   @Output() back = new EventEmitter<void>();
   @Output() changeNumber = new EventEmitter<void>();
+
+  private readonly authService = inject(AuthService);
 
   readonly timerSeconds = signal(45);
   readonly enteredOtp = signal('');
@@ -105,11 +109,19 @@ export class OtpVerificationStepComponent implements OnInit, OnDestroy {
 
   private timerInterval?: ReturnType<typeof setInterval>;
 
-  get maskedPhone(): string {
+  get maskedEmail(): string {
+    if (this.email && this.email.includes('@')) {
+      const [local, domain] = this.email.split('@');
+      if (local.length > 2) {
+        return local.slice(0, 2) + '***@' + domain;
+      }
+      return '***@' + domain;
+    }
+    // Fallback to phone masking
     if (this.phone.length >= 10) {
       return 'XXXXXX' + this.phone.slice(-4);
     }
-    return this.phone;
+    return this.phone || this.email;
   }
 
   ngOnInit(): void {
@@ -129,17 +141,33 @@ export class OtpVerificationStepComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      this.loading.set(false);
-      this.verified.emit(this.enteredOtp());
-    }, 1500);
+    const identifier = this.email || this.phone;
+    this.authService.verifyOtp(identifier, this.enteredOtp()).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.verified.emit(this.enteredOtp());
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err?.error?.message || err?.message || 'Invalid or expired OTP. Please try again.');
+      }
+    });
   }
 
   resendOtp(): void {
-    this.timerSeconds.set(45);
-    this.startTimer();
-    // Call resend OTP API
+    const identifier = this.email || this.phone;
+    if (!identifier) return;
+
+    this.authService.sendOtp(identifier).subscribe({
+      next: () => {
+        this.timerSeconds.set(45);
+        this.startTimer();
+        this.error.set(null);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.message || 'Failed to resend OTP. Please try again.');
+      }
+    });
   }
 
   formatTime(seconds: number): string {
@@ -166,3 +194,4 @@ export class OtpVerificationStepComponent implements OnInit, OnDestroy {
     }
   }
 }
+

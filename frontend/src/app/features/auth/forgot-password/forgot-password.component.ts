@@ -231,7 +231,7 @@ export class ForgotPasswordComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.message || 'Verification code failed to send.');
+        this.error.set(err?.error?.message || err?.message || 'Verification code failed to send.');
       }
     });
   }
@@ -272,7 +272,7 @@ export class ForgotPasswordComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.message || 'Failed to reset password. Please check your verification code.');
+        this.error.set(err?.error?.message || err?.message || 'Failed to reset password. Please check your verification code.');
       }
     });
   }

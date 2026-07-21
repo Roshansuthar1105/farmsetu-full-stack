@@ -46,8 +46,12 @@ export class AuthService {
     );
   }
 
-  verifyOtp(phone: string, otp: string) {
-    return this.api.post<any>('/api/auth/verify-otp', { phone, otp }).pipe(
+  sendOtp(email: string) {
+    return this.api.post<{ message: string }>('/api/auth/send-otp', { email });
+  }
+
+  verifyOtp(email: string, otp: string) {
+    return this.api.post<any>('/api/auth/verify-otp', { email, otp }).pipe(
       tap((res) => {
         if (res && res.accessToken) {
           this.setSession(res, false);
@@ -75,6 +79,11 @@ export class AuthService {
       ? { phone: identifier, otp, password }
       : { email: identifier, otp, password };
     return this.api.post<any>('/api/auth/reset-password', payload);
+  }
+
+  /** Send OTP specifically for registration verification */
+  sendRegistrationOtp(email: string) {
+    return this.sendOtp(email);
   }
 
   logout(expired = false): void {
