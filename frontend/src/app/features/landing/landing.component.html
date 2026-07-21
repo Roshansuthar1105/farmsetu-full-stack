@@ -8,7 +8,7 @@
     </span>
     <div class="relative w-full overflow-hidden flex items-center">
       <div class="animate-marquee flex items-center gap-8 whitespace-nowrap">
-        <span *ngFor="let item of tickerCommodities" class="flex items-center gap-2">
+        <span *ngFor="let item of tickerCommodities()" class="flex items-center gap-2">
           <span class="font-bold text-gray-100">{{ item.name }}</span>
           <span class="text-gray-500">({{ item.location }})</span>
           <span class="font-bold telemetry-val text-emerald-300">{{ item.price }}</span>
@@ -18,7 +18,7 @@
           </span>
         </span>
         <!-- Duplicate for seamless looping -->
-        <span *ngFor="let item of tickerCommodities" class="flex items-center gap-2">
+        <span *ngFor="let item of tickerCommodities()" class="flex items-center gap-2">
           <span class="font-bold text-gray-100">{{ item.name }}</span>
           <span class="text-gray-500">({{ item.location }})</span>
           <span class="font-bold telemetry-val text-emerald-300">{{ item.price }}</span>

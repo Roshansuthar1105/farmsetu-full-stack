@@ -353,6 +353,57 @@ public class MandiBhaavService {
         return response;
     }
 
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTickerPrices() {
+        List<Mandi> allMandis = mandiRepository.findAll();
+        if (allMandis.isEmpty()) {
+            return List.of();
+        }
+        List<Long> mandiIds = allMandis.stream().map(Mandi::getId).limit(10).toList();
+        List<DailyPrice> prices = dailyPriceRepository.findLatestPricesForMandis(mandiIds);
+
+        List<Map<String, Object>> tickerList = new ArrayList<>();
+        for (DailyPrice dp : prices) {
+            Map<String, Object> item = new LinkedHashMap<>();
+
+            String localName = dp.getCommodity().getLocalName();
+            String displayName = dp.getCommodity().getName();
+            if (localName != null && !localName.isBlank() && !localName.equalsIgnoreCase(displayName)) {
+                displayName += " (" + localName + ")";
+            }
+            item.put("name", displayName);
+            item.put("location", dp.getMandi().getName());
+            item.put("price", "₹" + String.format("%,d", dp.getModalPrice().longValue()));
+
+            LocalDate yesterday = dp.getPriceDate().minusDays(1);
+            List<DailyPrice> yList = dailyPriceRepository.findByCommodityIdAndPriceDateBetweenOrderByPriceDateAsc(
+                    dp.getCommodity().getId(), yesterday, yesterday);
+
+            double pctChange = 0.0;
+            if (!yList.isEmpty()) {
+                DailyPrice yDp = yList.stream().filter(y -> y.getMandi().getId().equals(dp.getMandi().getId())).findFirst().orElse(null);
+                if (yDp != null && yDp.getModalPrice().doubleValue() > 0) {
+                    double diff = dp.getModalPrice().doubleValue() - yDp.getModalPrice().doubleValue();
+                    pctChange = (diff / yDp.getModalPrice().doubleValue()) * 100.0;
+                }
+            }
+            if (pctChange == 0.0 && dp.getMaxPrice() != null && dp.getMinPrice() != null) {
+                double spread = dp.getMaxPrice().doubleValue() - dp.getMinPrice().doubleValue();
+                if (spread > 0) {
+                    pctChange = ((dp.getModalPrice().doubleValue() - dp.getMinPrice().doubleValue()) / spread - 0.5) * 5.0;
+                }
+            }
+
+            boolean isUp = pctChange >= 0;
+            String changeStr = String.format("%s%.1f%%", isUp ? "+" : "", pctChange);
+            item.put("change", changeStr);
+            item.put("up", isUp);
+
+            tickerList.add(item);
+        }
+        return tickerList;
+    }
+
     @Transactional
     public List<DailyPrice> importBulkDailyPrices(List<Map<String, String>> rawList) {
         List<DailyPrice> saved = new ArrayList<>();

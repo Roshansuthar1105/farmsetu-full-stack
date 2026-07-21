@@ -23,6 +23,11 @@ public class MandiBhaavController {
         return ApiResponse.ok(mandiBhaavService.getCommodities());
     }
 
+    @GetMapping("/ticker")
+    public ApiResponse<List<Map<String, Object>>> ticker() {
+        return ApiResponse.ok(mandiBhaavService.getTickerPrices());
+    }
+
     @GetMapping("/latest")
     public ApiResponse<List<Map<String, Object>>> latestPrices(
             @RequestParam(required = false) Double lat,

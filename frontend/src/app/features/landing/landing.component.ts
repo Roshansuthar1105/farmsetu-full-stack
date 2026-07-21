@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed } from '@angular/core';
+import { Component, HostListener, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -17,6 +17,7 @@ import {
 import { I18nService } from '../../core/services/i18n.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
 
 interface CropConfig {
   name: string;
@@ -24,6 +25,14 @@ interface CropConfig {
   baseYield: number; // Quintals per acre
   pricePerQl: number; // INR
   costPerAcre: number; // INR
+}
+
+export interface TickerCommodity {
+  name: string;
+  price: string;
+  change: string;
+  up: boolean;
+  location: string;
 }
 
 @Component({
@@ -47,10 +56,12 @@ interface CropConfig {
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
   readonly auth = inject(AuthService);
+  private readonly api = inject(ApiService);
+
   isScrolled = signal(false);
   readonly currentYear = new Date().getFullYear();
 
@@ -101,8 +112,8 @@ export class LandingComponent {
     };
   });
 
-  // Simulated live ticker commodities
-  readonly tickerCommodities = [
+  // Dynamic live ticker commodities with daily caching
+  readonly tickerCommodities = signal<TickerCommodity[]>([
     { name: 'Wheat (गेहूं)', price: '₹2,450', change: '+2.4%', up: true, location: 'Khanna Mandi' },
     { name: 'Paddy (धान)', price: '₹2,300', change: '+1.8%', up: true, location: 'Karnal Mandi' },
     { name: 'Mustard (सरसों)', price: '₹5,650', change: '-0.5%', up: false, location: 'Alwar Mandi' },
@@ -110,7 +121,45 @@ export class LandingComponent {
     { name: 'Potato (आलू)', price: '₹1,450', change: '+5.2%', up: true, location: 'Agra Mandi' },
     { name: 'Onion (प्याज)', price: '₹2,100', change: '-4.3%', up: false, location: 'Lasalgaon Mandi' },
     { name: 'Soyabean (सोयाबीन)', price: '₹4,800', change: '+0.7%', up: true, location: 'Indore Mandi' }
-  ];
+  ]);
+
+  ngOnInit(): void {
+    this.loadDailyMandiTicker();
+  }
+
+  private loadDailyMandiTicker(): void {
+    if (typeof window === 'undefined') return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const cachedDate = localStorage.getItem('fs_mandi_ticker_date');
+    const cachedData = localStorage.getItem('fs_mandi_ticker_cache');
+
+    if (cachedDate === todayStr && cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.tickerCommodities.set(parsed);
+          return;
+        }
+      } catch (e) {
+        // Fallback to fresh fetch if cache parse fails
+      }
+    }
+
+    // Fetch fresh dynamic ticker once per day
+    this.api.get<TickerCommodity[]>('/api/mandi-bhaav/ticker').subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.tickerCommodities.set(res);
+          localStorage.setItem('fs_mandi_ticker_cache', JSON.stringify(res));
+          localStorage.setItem('fs_mandi_ticker_date', todayStr);
+        }
+      },
+      error: (err) => {
+        console.warn('Could not fetch dynamic Mandi ticker, using default static feed.', err);
+      }
+    });
+  }
 
   // Features description
   readonly features = [
