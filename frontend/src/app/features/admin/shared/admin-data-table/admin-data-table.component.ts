@@ -161,13 +161,54 @@ export interface FilterOption {
             <!-- Loading Skeleton -->
             @if (loading) {
               @for (i of skeletonRows; track i) {
-                <tr class="animate-pulse">
-                  @if (selectable) { <td class="px-5 py-4.5"><div class="h-4 w-4 bg-slate-200 dark:bg-slate-800 rounded"></div></td> }
-                  @for (col of visibleColumns(); track col.key) {
-                    <td class="px-6 py-4.5">
-                      <div class="h-3.5 bg-slate-200 dark:bg-slate-800 rounded-lg" [style.width]="getSkeletonWidth(col)"></div>
-                    </td>
-                  }
+                <tr class="relative overflow-hidden"
+                  [style.animation-delay]="(i * 80) + 'ms'"
+                  style="animation: skeletonFadeIn 0.5s ease-out both;">
+                  <!-- Shimmer sweep overlay -->
+                  <td [attr.colspan]="visibleColumns().length + (selectable ? 1 : 0)" class="p-0 border-b border-slate-100/40 dark:border-slate-800/30" style="position:relative;">
+                    <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 dark:via-slate-600/10 to-transparent pointer-events-none z-10" style="animation: shimmerSweep 1.8s ease-in-out infinite; animation-delay: {{i * 150}}ms;"></div>
+                    <div class="flex items-center gap-0 w-full">
+                      <!-- Checkbox placeholder -->
+                      @if (selectable) {
+                        <div class="px-5 py-4.5 shrink-0">
+                          <div class="h-4 w-4 bg-slate-200/70 dark:bg-slate-800/70 rounded-[5px]"></div>
+                        </div>
+                      }
+                      <!-- Column cells -->
+                      @for (col of visibleColumns(); track col.key) {
+                        <div class="px-6 py-4.5 flex-1" [style.max-width]="col.width || 'none'">
+                          @switch (col.type) {
+                            @case ('image') {
+                              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-700/80 border border-slate-200/50 dark:border-slate-700/40"></div>
+                            }
+                            @case ('badge') {
+                              <div class="h-5 rounded-full bg-gradient-to-r from-emerald-100/80 to-emerald-50/50 dark:from-emerald-900/20 dark:to-emerald-950/10 border border-emerald-200/40 dark:border-emerald-800/30" [style.width]="(55 + i * 8) + 'px'"></div>
+                            }
+                            @case ('boolean') {
+                              <div class="h-5 w-11 rounded-full bg-gradient-to-r from-slate-200/80 to-slate-100 dark:from-slate-800/80 dark:to-slate-700/50 border border-slate-200/50 dark:border-slate-700/40"></div>
+                            }
+                            @case ('actions') {
+                              <div class="flex items-center justify-end gap-2">
+                                <div class="h-6 w-14 rounded-lg bg-slate-200/60 dark:bg-slate-800/60 border border-slate-200/30 dark:border-slate-700/30"></div>
+                                <div class="h-6 w-14 rounded-lg bg-slate-200/40 dark:bg-slate-800/40 border border-slate-200/20 dark:border-slate-700/20"></div>
+                              </div>
+                            }
+                            @case ('currency') {
+                              <div class="h-3.5 rounded-md bg-gradient-to-r from-slate-300/70 to-slate-200/50 dark:from-slate-700/70 dark:to-slate-800/50" [style.width]="(60 + i * 10) + 'px'"></div>
+                            }
+                            @default {
+                              <div class="space-y-1.5">
+                                <div class="h-3.5 rounded-md bg-gradient-to-r from-slate-200/80 to-slate-100/50 dark:from-slate-700/80 dark:to-slate-800/50" [style.width]="getSkeletonWidth(col)"></div>
+                                @if ($index < 2) {
+                                  <div class="h-2.5 rounded-md bg-slate-100/80 dark:bg-slate-800/40" [style.width]="(30 + i * 5) + '%'"></div>
+                                }
+                              </div>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+                  </td>
                 </tr>
               }
             }
@@ -372,6 +413,14 @@ export interface FilterOption {
     }
     .animate-pulse-subtle {
       animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes shimmerSweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    @keyframes skeletonFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })

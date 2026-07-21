@@ -86,16 +86,63 @@ import { CommonModule } from '@angular/common';
       </div>
 
       <!-- 3. TABLE SKELETON -->
-      <div *ngIf="type === 'table'" class="bg-white/70 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-sm backdrop-blur-md overflow-hidden p-5 space-y-4">
-        <div class="h-10 w-full bg-slate-200/70 dark:bg-slate-800/70 rounded-2xl animate-pulse mb-2"></div>
-        @for (item of items; track $index) {
-          <div class="h-12 w-full bg-slate-100/80 dark:bg-slate-800/40 rounded-xl animate-pulse flex items-center justify-between px-5">
-            <div class="h-4 w-1/4 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
-            <div class="h-4 w-1/5 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
-            <div class="h-4 w-1/6 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
-            <div class="h-6 w-16 bg-emerald-500/20 rounded-full"></div>
+      <div *ngIf="type === 'table'" class="bg-white/70 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/80 rounded-3xl shadow-sm backdrop-blur-md overflow-hidden">
+        <!-- Top accent bar -->
+        <div class="h-[2.5px] bg-gradient-to-r from-emerald-550 via-teal-500 to-emerald-600"></div>
+
+        <!-- Table Header Row Skeleton -->
+        <div class="bg-slate-50/40 dark:bg-slate-950/20 border-b border-slate-200/50 dark:border-slate-800/60 px-5 py-3.5 flex items-center gap-6">
+          <div class="h-3 w-16 bg-slate-200/80 dark:bg-slate-800/80 rounded-md"></div>
+          <div class="h-3 w-24 bg-slate-200/70 dark:bg-slate-800/70 rounded-md"></div>
+          <div class="h-3 w-20 bg-slate-200/60 dark:bg-slate-800/60 rounded-md hidden sm:block"></div>
+          <div class="flex-1"></div>
+          <div class="h-3 w-14 bg-slate-200/50 dark:bg-slate-800/50 rounded-md hidden sm:block"></div>
+          <div class="h-3 w-14 bg-emerald-200/50 dark:bg-emerald-800/30 rounded-md"></div>
+        </div>
+
+        <!-- Table Body Rows -->
+        <div class="divide-y divide-slate-100/50 dark:divide-slate-800/30">
+          @for (item of items; track $index) {
+            <div class="px-5 py-4 flex items-center gap-5 relative overflow-hidden"
+              [style.animation]="'skeletonRowIn 0.4s ease-out ' + ($index * 60) + 'ms both'">
+
+              <!-- Shimmer overlay -->
+              <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 dark:via-slate-600/8 to-transparent pointer-events-none"
+                [style.animation]="'shimmer 2s ease-in-out infinite ' + ($index * 120) + 'ms'"></div>
+
+              <!-- Avatar/Image placeholder -->
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-700/80 border border-slate-200/50 dark:border-slate-700/40 shrink-0"></div>
+
+              <!-- Primary + secondary text -->
+              <div class="flex-1 space-y-1.5 min-w-0">
+                <div class="h-3.5 bg-gradient-to-r from-slate-200/90 to-slate-100/50 dark:from-slate-700/90 dark:to-slate-800/50 rounded-md"
+                  [style.width]="(45 + $index * 8) + '%'"></div>
+                <div class="h-2.5 bg-slate-100/90 dark:bg-slate-800/50 rounded-md"
+                  [style.width]="(25 + $index * 5) + '%'"></div>
+              </div>
+
+              <!-- Badge placeholder -->
+              <div class="h-5 rounded-full bg-gradient-to-r from-emerald-100/70 to-emerald-50/40 dark:from-emerald-900/20 dark:to-emerald-950/10 border border-emerald-200/30 dark:border-emerald-800/20 shrink-0 hidden sm:block"
+                [style.width]="(52 + $index * 7) + 'px'"></div>
+
+              <!-- Value/number placeholder -->
+              <div class="h-3.5 w-16 bg-slate-200/70 dark:bg-slate-800/60 rounded-md shrink-0 hidden sm:block"></div>
+
+              <!-- Action button placeholder -->
+              <div class="h-7 w-16 bg-slate-200/50 dark:bg-slate-800/40 rounded-lg border border-slate-200/30 dark:border-slate-700/30 shrink-0"></div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination footer skeleton -->
+        <div class="bg-slate-50/30 dark:bg-slate-950/15 border-t border-slate-200/40 dark:border-slate-800/50 px-5 py-3.5 flex items-center justify-between">
+          <div class="h-3 w-36 bg-slate-200/60 dark:bg-slate-800/50 rounded-md"></div>
+          <div class="flex gap-1.5">
+            <div class="w-7 h-7 bg-slate-200/50 dark:bg-slate-800/40 rounded-lg"></div>
+            <div class="w-7 h-7 bg-emerald-200/40 dark:bg-emerald-900/20 rounded-lg"></div>
+            <div class="w-7 h-7 bg-slate-200/50 dark:bg-slate-800/40 rounded-lg"></div>
           </div>
-        }
+        </div>
       </div>
 
       <!-- 4. DETAIL PAGE SKELETON -->
@@ -135,6 +182,10 @@ import { CommonModule } from '@angular/common';
     }
     .animate-shimmer {
       animation: shimmer 2s infinite;
+    }
+    @keyframes skeletonRowIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
