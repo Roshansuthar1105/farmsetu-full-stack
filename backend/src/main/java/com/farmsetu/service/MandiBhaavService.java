@@ -35,8 +35,9 @@ public class MandiBhaavService {
         return commodityRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Map<String, Object>> getLatestPrices(Double lat, Double lng, Double radiusKm, Long userId) {
+        ensureUpToDateDailyPrices();
         double queryLat = lat != null ? lat : DEFAULT_LAT;
         double queryLng = lng != null ? lng : DEFAULT_LNG;
         double queryRadius = radiusKm != null ? radiusKm : 100.0;
@@ -93,16 +94,15 @@ public class MandiBhaavService {
             map.put("priceDate", dp.getPriceDate().toString());
             map.put("distance", Math.round(calculateDistance(queryLat, queryLng, dp.getMandi().getLatitude(), dp.getMandi().getLongitude()) * 10.0) / 10.0);
             
-            // Try to fetch yesterday's price to compute trend
-            LocalDate yesterday = dp.getPriceDate().minusDays(1);
-            List<DailyPrice> yPriceList = dailyPriceRepository.findByCommodityIdAndPriceDateBetweenOrderByPriceDateAsc(
-                    dp.getCommodity().getId(), yesterday, yesterday);
+            // Fetch previous price record before this entry to compute trend
+            DailyPrice yesterdayDp = dailyPriceRepository
+                    .findTopByCommodityIdAndMandiIdAndPriceDateBeforeOrderByPriceDateDesc(
+                            dp.getCommodity().getId(), dp.getMandi().getId(), dp.getPriceDate())
+                    .orElse(null);
+
             BigDecimal change = BigDecimal.ZERO;
-            if (!yPriceList.isEmpty()) {
-                DailyPrice yesterdayDp = yPriceList.stream().filter(y -> y.getMandi().getId().equals(dp.getMandi().getId())).findFirst().orElse(null);
-                if (yesterdayDp != null) {
-                    change = dp.getModalPrice().subtract(yesterdayDp.getModalPrice());
-                }
+            if (yesterdayDp != null) {
+                change = dp.getModalPrice().subtract(yesterdayDp.getModalPrice());
             }
             map.put("priceChange", change);
             response.add(map);
@@ -353,8 +353,9 @@ public class MandiBhaavService {
         return response;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Map<String, Object>> getTickerPrices() {
+        ensureUpToDateDailyPrices();
         List<Mandi> allMandis = mandiRepository.findAll();
         if (allMandis.isEmpty()) {
             return List.of();
@@ -375,17 +376,15 @@ public class MandiBhaavService {
             item.put("location", dp.getMandi().getName());
             item.put("price", "₹" + String.format("%,d", dp.getModalPrice().longValue()));
 
-            LocalDate yesterday = dp.getPriceDate().minusDays(1);
-            List<DailyPrice> yList = dailyPriceRepository.findByCommodityIdAndPriceDateBetweenOrderByPriceDateAsc(
-                    dp.getCommodity().getId(), yesterday, yesterday);
+            DailyPrice yDp = dailyPriceRepository
+                    .findTopByCommodityIdAndMandiIdAndPriceDateBeforeOrderByPriceDateDesc(
+                            dp.getCommodity().getId(), dp.getMandi().getId(), dp.getPriceDate())
+                    .orElse(null);
 
             double pctChange = 0.0;
-            if (!yList.isEmpty()) {
-                DailyPrice yDp = yList.stream().filter(y -> y.getMandi().getId().equals(dp.getMandi().getId())).findFirst().orElse(null);
-                if (yDp != null && yDp.getModalPrice().doubleValue() > 0) {
-                    double diff = dp.getModalPrice().doubleValue() - yDp.getModalPrice().doubleValue();
-                    pctChange = (diff / yDp.getModalPrice().doubleValue()) * 100.0;
-                }
+            if (yDp != null && yDp.getModalPrice().doubleValue() > 0) {
+                double diff = dp.getModalPrice().doubleValue() - yDp.getModalPrice().doubleValue();
+                pctChange = (diff / yDp.getModalPrice().doubleValue()) * 100.0;
             }
             if (pctChange == 0.0 && dp.getMaxPrice() != null && dp.getMinPrice() != null) {
                 double spread = dp.getMaxPrice().doubleValue() - dp.getMinPrice().doubleValue();
@@ -402,6 +401,74 @@ public class MandiBhaavService {
             tickerList.add(item);
         }
         return tickerList;
+    }
+
+    @Transactional
+    public void ensureUpToDateDailyPrices() {
+        LocalDate today = LocalDate.now();
+        Optional<LocalDate> maxDateOpt = dailyPriceRepository.findLatestPriceDate();
+        if (maxDateOpt.isEmpty()) {
+            return;
+        }
+
+        LocalDate lastDate = maxDateOpt.get();
+        if (!lastDate.isBefore(today)) {
+            return;
+        }
+
+        long missingDays = java.time.temporal.ChronoUnit.DAYS.between(lastDate, today);
+        if (missingDays <= 0) return;
+
+        log.info("Lazy catch-up triggered: last daily price date is {}, missing {} days up to today ({})", lastDate, missingDays, today);
+        long daysToCatchUp = Math.min(missingDays, 7);
+
+        List<Mandi> mandis = mandiRepository.findAll();
+        if (mandis.isEmpty()) return;
+
+        List<Long> mandiIds = mandis.stream().map(Mandi::getId).toList();
+        List<DailyPrice> basePrices = dailyPriceRepository.findLatestPricesForMandis(mandiIds);
+        if (basePrices.isEmpty()) return;
+
+        for (int i = 1; i <= daysToCatchUp; i++) {
+            LocalDate targetDate = lastDate.plusDays(i);
+            Random random = new Random(targetDate.toEpochDay());
+            List<DailyPrice> nextBasePrices = new ArrayList<>();
+
+            for (DailyPrice baseDp : basePrices) {
+                // Avoid duplicating if entry for targetDate & commodity & mandi already exists
+                Optional<DailyPrice> prevBeforeTarget = dailyPriceRepository
+                        .findTopByCommodityIdAndMandiIdAndPriceDateBeforeOrderByPriceDateDesc(
+                                baseDp.getCommodity().getId(), baseDp.getMandi().getId(), targetDate.plusDays(1));
+
+                if (prevBeforeTarget.isPresent() && prevBeforeTarget.get().getPriceDate().equals(targetDate)) {
+                    nextBasePrices.add(prevBeforeTarget.get());
+                    continue;
+                }
+
+                // Random fluctuation between -2.0% and +2.5%
+                double factor = 1.0 + (random.nextDouble() * 0.045 - 0.02);
+                BigDecimal newModal = baseDp.getModalPrice().multiply(BigDecimal.valueOf(factor)).setScale(0, RoundingMode.HALF_UP);
+                BigDecimal newMin = baseDp.getMinPrice().multiply(BigDecimal.valueOf(factor)).setScale(0, RoundingMode.HALF_UP);
+                BigDecimal newMax = baseDp.getMaxPrice().multiply(BigDecimal.valueOf(factor)).setScale(0, RoundingMode.HALF_UP);
+                if (newMin.compareTo(newModal) > 0) newMin = newModal;
+                if (newMax.compareTo(newModal) < 0) newMax = newModal;
+
+                DailyPrice newDp = DailyPrice.builder()
+                        .mandi(baseDp.getMandi())
+                        .commodity(baseDp.getCommodity())
+                        .minPrice(newMin)
+                        .maxPrice(newMax)
+                        .modalPrice(newModal)
+                        .arrivalVolume(baseDp.getArrivalVolume())
+                        .priceDate(targetDate)
+                        .build();
+
+                DailyPrice savedDp = dailyPriceRepository.save(newDp);
+                nextBasePrices.add(savedDp);
+            }
+            basePrices = nextBasePrices;
+        }
+        log.info("Lazy catch-up complete up to {}", today);
     }
 
     @Transactional

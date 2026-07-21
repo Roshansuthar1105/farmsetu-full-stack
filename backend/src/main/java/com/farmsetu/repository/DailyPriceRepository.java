@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface DailyPriceRepository extends JpaRepository<DailyPrice, Long> {
 
@@ -19,4 +20,9 @@ public interface DailyPriceRepository extends JpaRepository<DailyPrice, Long> {
     List<DailyPrice> findLatestPricesForCommodityInMandis(@Param("commodityId") Long commodityId, @Param("mandiIds") List<Long> mandiIds);
 
     List<DailyPrice> findByCommodityIdOrderByPriceDateDesc(Long commodityId);
+
+    Optional<DailyPrice> findTopByCommodityIdAndMandiIdAndPriceDateBeforeOrderByPriceDateDesc(Long commodityId, Long mandiId, LocalDate priceDate);
+
+    @Query("SELECT MAX(dp.priceDate) FROM DailyPrice dp")
+    Optional<LocalDate> findLatestPriceDate();
 }
