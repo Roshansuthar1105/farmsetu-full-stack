@@ -58,4 +58,15 @@ public class AdminWaterQueueController {
         waterQueueService.deleteSource(id);
         return ApiResponse.ok(null);
     }
+
+    @PostMapping("/sources/bulk")
+    public ApiResponse<List<WaterSource>> createSourcesBulk(@RequestBody List<Map<String, Object>> list) {
+        return ApiResponse.ok(waterQueueService.addSourcesBulk(list));
+    }
+
+    @DeleteMapping("/sources/batch")
+    public ApiResponse<Void> deleteSourcesBatch(@RequestBody List<Long> ids) {
+        waterQueueService.deleteSourcesBatch(ids);
+        return ApiResponse.ok(null);
+    }
 }

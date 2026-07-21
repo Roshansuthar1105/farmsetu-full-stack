@@ -647,6 +647,21 @@ public class AdminService {
         mandiRepository.deleteById(id);
     }
 
+    @Transactional
+    public List<Mandi> createMandisBulk(List<Mandi> mandis) {
+        if (mandis == null || mandis.isEmpty()) {
+            return List.of();
+        }
+        return mandiRepository.saveAll(mandis);
+    }
+
+    @Transactional
+    public void deleteMandisBatch(List<Long> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            mandiRepository.deleteAllByIdInBatch(ids);
+        }
+    }
+
     // News CRUD
     public Map<String, Object> listNews(int page, int size) {
         Page<News> pageResult = newsRepository.findAll(PageRequest.of(page, size));

@@ -244,6 +244,17 @@ public class AdminController {
         return ApiResponse.ok(null);
     }
 
+    @PostMapping("/mandis/bulk")
+    public ApiResponse<List<Mandi>> createMandisBulk(@RequestBody List<Mandi> mandis) {
+        return ApiResponse.ok(adminService.createMandisBulk(mandis));
+    }
+
+    @DeleteMapping("/mandis/batch")
+    public ApiResponse<Void> deleteMandisBatch(@RequestBody List<Long> ids) {
+        adminService.deleteMandisBatch(ids);
+        return ApiResponse.ok(null);
+    }
+
     // News
     @GetMapping("/news")
     public ApiResponse<Map<String, Object>> listNews(

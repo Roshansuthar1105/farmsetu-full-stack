@@ -353,6 +353,61 @@ public class MandiBhaavService {
         return response;
     }
 
+    @Transactional
+    public List<DailyPrice> importBulkDailyPrices(List<Map<String, String>> rawList) {
+        List<DailyPrice> saved = new ArrayList<>();
+        if (rawList == null || rawList.isEmpty()) return saved;
+
+        for (Map<String, String> raw : rawList) {
+            String mandiName = raw.getOrDefault("mandiName", raw.get("mandi"));
+            String commodityName = raw.getOrDefault("commodityName", raw.get("commodity"));
+            String minStr = raw.getOrDefault("minPrice", "2000");
+            String maxStr = raw.getOrDefault("maxPrice", "3000");
+            String modalStr = raw.getOrDefault("modalPrice", raw.getOrDefault("price", "2500"));
+            String volumeStr = raw.getOrDefault("arrivalVolume", "500");
+            String dateStr = raw.getOrDefault("priceDate", raw.getOrDefault("date", LocalDate.now().toString()));
+
+            if (mandiName == null || commodityName == null) continue;
+
+            Mandi mandi = mandiRepository.findByNameIgnoreCase(mandiName)
+                    .orElseGet(() -> mandiRepository.save(Mandi.builder()
+                            .name(mandiName)
+                            .state(raw.getOrDefault("state", "Punjab"))
+                            .district(raw.getOrDefault("district", "Default"))
+                            .latitude(28.6)
+                            .longitude(77.2)
+                            .operatingHours("08:00 AM - 05:00 PM")
+                            .build()));
+
+            Commodity commodity = commodityRepository.findByNameIgnoreCase(commodityName)
+                    .orElseGet(() -> commodityRepository.save(Commodity.builder()
+                            .name(commodityName)
+                            .category(raw.getOrDefault("category", "Grains"))
+                            .localName(commodityName)
+                            .build()));
+
+            DailyPrice dp = DailyPrice.builder()
+                    .mandi(mandi)
+                    .commodity(commodity)
+                    .minPrice(new BigDecimal(minStr))
+                    .maxPrice(new BigDecimal(maxStr))
+                    .modalPrice(new BigDecimal(modalStr))
+                    .arrivalVolume(new BigDecimal(volumeStr))
+                    .priceDate(LocalDate.parse(dateStr))
+                    .build();
+
+            saved.add(dailyPriceRepository.save(dp));
+        }
+        return saved;
+    }
+
+    @Transactional
+    public void deleteDailyPricesBatch(List<Long> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            dailyPriceRepository.deleteAllByIdInBatch(ids);
+        }
+    }
+
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         double earthRadius = 6371; // Kilometers
         double dLat = Math.toRadians(lat2 - lat1);

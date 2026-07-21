@@ -72,6 +72,12 @@ public class MarketAnalysisController {
         return ApiResponse.ok(null);
     }
 
+    @DeleteMapping("/prices/batch")
+    public ApiResponse<Void> deletePricesBatch(@RequestBody List<Long> ids) {
+        marketAnalysisService.deletePricesBatch(ids);
+        return ApiResponse.ok(null);
+    }
+
     @PostMapping("/prices/bulk")
     public ApiResponse<List<MarketPrice>> bulkUploadPrices(@RequestBody List<Map<String, String>> rawPrices) {
         return ApiResponse.ok(marketAnalysisService.importBulkPrices(rawPrices));

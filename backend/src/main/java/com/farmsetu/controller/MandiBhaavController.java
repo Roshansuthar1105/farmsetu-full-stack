@@ -76,4 +76,15 @@ public class MandiBhaavController {
             @RequestParam(required = false) Integer days) {
         return ApiResponse.ok(mandiBhaavService.getForecast(commodityId, days));
     }
+
+    @PostMapping("/bulk")
+    public ApiResponse<List<com.farmsetu.model.entity.DailyPrice>> importBulkDailyPrices(@RequestBody List<Map<String, String>> rawList) {
+        return ApiResponse.ok(mandiBhaavService.importBulkDailyPrices(rawList));
+    }
+
+    @DeleteMapping("/batch")
+    public ApiResponse<Void> deleteDailyPricesBatch(@RequestBody List<Long> ids) {
+        mandiBhaavService.deleteDailyPricesBatch(ids);
+        return ApiResponse.ok(null);
+    }
 }

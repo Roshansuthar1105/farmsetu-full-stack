@@ -21,6 +21,7 @@ public interface MandiRepository extends JpaRepository<Mandi, Long> {
 
     @Query(value = "SELECT * FROM mandis LIMIT :limit OFFSET :offset", nativeQuery = true)
     java.util.List<java.util.Map<String, Object>> findAllNative(@Param("limit") int limit, @Param("offset") int offset);
+    java.util.Optional<Mandi> findByNameIgnoreCase(String name);
 }
 
 

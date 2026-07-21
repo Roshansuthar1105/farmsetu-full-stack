@@ -88,6 +88,23 @@ public class WaterQueueService {
         waterSourceRepository.deleteById(id);
     }
 
+    @Transactional
+    public List<WaterSource> addSourcesBulk(List<Map<String, Object>> list) {
+        if (list == null || list.isEmpty()) return List.of();
+        List<WaterSource> result = new java.util.ArrayList<>();
+        for (Map<String, Object> body : list) {
+            result.add(addSource(body));
+        }
+        return result;
+    }
+
+    @Transactional
+    public void deleteSourcesBatch(List<Long> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            waterSourceRepository.deleteAllByIdInBatch(ids);
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getUserBookings(Long userId) {
         return waterBookingRepository.findByFarmerIdOrderByCreatedAtDesc(userId)

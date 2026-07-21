@@ -190,7 +190,10 @@ export class AdminService {
     return this.api.put<T>(`${endpoint}/${id}`, body);
   }
 
-  remove(endpoint: string, id: number): Observable<void> {
-    return this.api.delete<void>(`${endpoint}/${id}`);
+  remove(endpoint: string, idOrBody?: number | unknown): Observable<void> {
+    if (typeof idOrBody === 'number' || typeof idOrBody === 'string') {
+      return this.api.delete<void>(`${endpoint}/${idOrBody}`);
+    }
+    return this.api.delete<void>(endpoint, idOrBody);
   }
 }

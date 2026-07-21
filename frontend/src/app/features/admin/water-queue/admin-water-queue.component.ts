@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ApiService } from '../../../core/services/api.service';
 
@@ -38,7 +38,7 @@ interface WaterBooking {
 @Component({
   selector: 'fs-admin-water-queue',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './admin-water-queue.component.html',
   styleUrl: './admin-water-queue.component.scss'
 })
@@ -53,12 +53,22 @@ export class AdminWaterQueueComponent implements OnInit {
   // Signals
   readonly bookings = signal<WaterBooking[]>([]);
   readonly sources = signal<WaterSource[]>([]);
+  readonly stagedSources = signal<any[]>([]);
+  readonly selectedSourceIds = signal<Set<number>>(new Set());
+
   readonly loading = signal(false);
+  readonly uploadingStaged = signal(false);
+  readonly deletingBatch = signal(false);
 
   // Form for new water source
   sourceForm!: FormGroup;
   showAddSourceForm = signal(false);
   editingSourceId = signal<number | null>(null);
+
+  // Generator parameters
+  genCount = 5;
+  genType = 'Tube-well';
+  jsonInput = '';
 
   readonly totalWaterSupplied = computed(() => {
     return this.bookings()
@@ -95,7 +105,7 @@ export class AdminWaterQueueComponent implements OnInit {
     this.loading.set(true);
     this.api.get<WaterBooking[]>('/api/admin/water-queue/bookings').subscribe({
       next: (res) => {
-        this.bookings.set(res);
+        this.bookings.set(res || []);
         this.loading.set(false);
       },
       error: () => {
@@ -107,7 +117,7 @@ export class AdminWaterQueueComponent implements OnInit {
 
   loadSources(): void {
     this.api.get<WaterSource[]>('/api/admin/water-queue/sources').subscribe({
-      next: (res) => this.sources.set(res),
+      next: (res) => this.sources.set(res || []),
       error: () => this.toastr.error('Failed to load water sources')
     });
   }
@@ -135,6 +145,143 @@ export class AdminWaterQueueComponent implements OnInit {
     });
   }
 
+  // --- WATER SOURCES DUMMY GENERATOR & BULK UPLOAD ---
+  generateDummyWaterSources(): void {
+    const types = ['Borewell', 'Tube-well', 'Canal', 'Pond', 'Solar Pump', 'River Lift'];
+    const locations = [
+      'Chomu Irrigation Zone A, Jaipur',
+      'Muhana Mandi Ground, Jaipur',
+      'Sikar Road Agro Cluster',
+      'Bassi Shared Reservoir',
+      'Noida Sector 62 Farm Canal',
+      'Faridabad NIT Irrigation Tube',
+      'Bhopal Karond Shared Pump'
+    ];
+
+    const count = Math.max(1, Math.min(50, this.genCount));
+    const newItems: any[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const type = this.genType || types[Math.floor(Math.random() * types.length)];
+      const loc = locations[Math.floor(Math.random() * locations.length)];
+      const name = `${loc.split(',')[0]} ${type} ${Math.floor(Math.random() * 89) + 10}`;
+
+      const lat = 26.8 + (Math.random() - 0.5) * 2;
+      const lng = 75.7 + (Math.random() - 0.5) * 2;
+      const flowRate = (Math.floor(Math.random() * 20) + 10) * 1000;
+
+      newItems.push({
+        id: 'staged_ws_' + Math.random().toString(36).substr(2, 8),
+        name: name,
+        type: type,
+        location: loc,
+        latitude: Number(lat.toFixed(6)),
+        longitude: Number(lng.toFixed(6)),
+        flowRateLph: flowRate,
+        status: 'ACTIVE'
+      });
+    }
+
+    this.stagedSources.update(curr => [...curr, ...newItems]);
+    this.toastr.success(`Generated ${count} Water Sources into Staging Table`, 'Staging Ready');
+  }
+
+  parseJsonSourcesToStaging(): void {
+    try {
+      const parsed = JSON.parse(this.jsonInput);
+      if (!Array.isArray(parsed)) throw new Error('JSON root must be an array [ ... ]');
+
+      const items = parsed.map((item: any, idx: number) => ({
+        id: 'staged_json_ws_' + idx + '_' + Date.now(),
+        name: item.name || 'Water Source ' + (idx + 1),
+        type: item.type || 'Tube-well',
+        location: item.location || 'Community Zone',
+        latitude: Number(item.latitude || 26.88),
+        longitude: Number(item.longitude || 75.75),
+        flowRateLph: Number(item.flowRateLph || 15000),
+        status: 'ACTIVE'
+      }));
+
+      this.stagedSources.update(curr => [...curr, ...items]);
+      this.jsonInput = '';
+      this.toastr.success(`Parsed ${items.length} water sources to staging`, 'Success');
+    } catch (e: any) {
+      this.toastr.error('JSON Error: ' + e.message, 'Parse Failed');
+    }
+  }
+
+  removeStagedSource(id: string): void {
+    this.stagedSources.update(items => items.filter(i => i.id !== id));
+  }
+
+  commitStagedSourcesToDb(): void {
+    const items = this.stagedSources();
+    if (items.length === 0) return;
+
+    this.uploadingStaged.set(true);
+    this.api.post<WaterSource[]>('/api/admin/water-queue/sources/bulk', items).subscribe({
+      next: (res) => {
+        this.toastr.success(`Successfully saved ${res.length} Water Sources to Database!`, 'Complete');
+        this.stagedSources.set([]);
+        this.loadSources();
+        this.uploadingStaged.set(false);
+      },
+      error: (err) => {
+        this.toastr.error('Failed to save water sources', 'Error');
+        this.uploadingStaged.set(false);
+      }
+    });
+  }
+
+  // --- MULTI SELECT & BATCH DELETE FOR SOURCES ---
+  isSourceSelected(id: number): boolean {
+    return this.selectedSourceIds().has(id);
+  }
+
+  toggleSelectSource(id: number): void {
+    const set = new Set(this.selectedSourceIds());
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    this.selectedSourceIds.set(set);
+  }
+
+  isAllSourcesSelected(): boolean {
+    const visible = this.sources();
+    if (visible.length === 0) return false;
+    return visible.every(s => this.selectedSourceIds().has(s.id));
+  }
+
+  toggleSelectAllSources(event: any): void {
+    const checked = event.target.checked;
+    const set = new Set(this.selectedSourceIds());
+    const visible = this.sources();
+    if (checked) visible.forEach(s => set.add(s.id));
+    else visible.forEach(s => set.delete(s.id));
+    this.selectedSourceIds.set(set);
+  }
+
+  onDeleteSelectedSourcesBatch(): void {
+    const ids = Array.from(this.selectedSourceIds());
+    if (ids.length === 0) return;
+
+    if (confirm(`Delete ${ids.length} selected Water Sources?`)) {
+      this.deletingBatch.set(true);
+      this.api.delete('/api/admin/water-queue/sources/batch', ids).subscribe({
+        next: () => {
+          this.toastr.success(`Successfully deleted ${ids.length} Water Sources`);
+          this.selectedSourceIds.set(new Set());
+          this.loadSources();
+          this.deletingBatch.set(false);
+        },
+        error: () => {
+          this.toastr.error('Failed to delete selected water sources');
+          this.deletingBatch.set(false);
+        }
+      });
+    }
+  }
+
+  // --- SINGLE SOURCE CRUD ---
   onSaveSource(): void {
     if (this.sourceForm.invalid) {
       this.sourceForm.markAllAsTouched();
@@ -193,7 +340,7 @@ export class AdminWaterQueueComponent implements OnInit {
   }
 
   onDeleteSource(id: number): void {
-    if (!confirm('Are you sure you want to delete this water source? All associated bookings will remain but won\'t map to active sources.')) return;
+    if (!confirm('Are you sure you want to delete this water source?')) return;
 
     this.api.delete<void>(`/api/admin/water-queue/sources/${id}`).subscribe({
       next: () => {

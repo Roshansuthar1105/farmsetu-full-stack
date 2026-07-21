@@ -26,6 +26,13 @@ public class MarketAnalysisService {
         return pageResult.getContent().stream().map(mp -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", mp.getId());
+            map.put("cropName", mp.getCrop() != null ? mp.getCrop().getName() : "Unknown");
+            if (mp.getCrop() != null) {
+                Map<String, Object> cropMap = new java.util.HashMap<>();
+                cropMap.put("id", mp.getCrop().getId());
+                cropMap.put("name", mp.getCrop().getName());
+                map.put("crop", cropMap);
+            }
             map.put("mandiName", mp.getMandiName());
             map.put("state", mp.getState());
             map.put("district", mp.getDistrict());
@@ -44,6 +51,13 @@ public class MarketAnalysisService {
         return prices.stream().map(mp -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", mp.getId());
+            map.put("cropName", mp.getCrop() != null ? mp.getCrop().getName() : "Unknown");
+            if (mp.getCrop() != null) {
+                Map<String, Object> cropMap = new java.util.HashMap<>();
+                cropMap.put("id", mp.getCrop().getId());
+                cropMap.put("name", mp.getCrop().getName());
+                map.put("crop", cropMap);
+            }
             map.put("mandiName", mp.getMandiName());
             map.put("state", mp.getState());
             map.put("district", mp.getDistrict());
@@ -109,6 +123,13 @@ public class MarketAnalysisService {
     }
 
     @Transactional
+    public void deletePricesBatch(List<Long> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            marketPriceRepository.deleteAllByIdInBatch(ids);
+        }
+    }
+
+    @Transactional
     public List<MarketPrice> importBulkPrices(List<Map<String, String>> rawPrices) {
         java.util.List<MarketPrice> saved = new java.util.ArrayList<>();
         for (Map<String, String> raw : rawPrices) {
@@ -135,11 +156,14 @@ public class MarketAnalysisService {
                 return cropRepository.save(newCrop);
             });
 
+            String state = raw.getOrDefault("state", "Punjab");
+            String district = raw.getOrDefault("district", "Default");
+
             MarketPrice marketPrice = MarketPrice.builder()
                     .crop(crop)
-                    .mandiName(market)
-                    .state("Punjab")
-                    .district("Default")
+                    .mandiName(market != null ? market : "General Mandi")
+                    .state(state != null && !state.isBlank() ? state : "Punjab")
+                    .district(district != null && !district.isBlank() ? district : "Default")
                     .pricePerQuintal(new BigDecimal(price))
                     .minPrice(new BigDecimal(minPrice))
                     .maxPrice(new BigDecimal(maxPrice))

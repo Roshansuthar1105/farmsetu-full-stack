@@ -174,13 +174,90 @@
     <!-- Action header -->
     <div class="flex justify-between items-center">
       <h3 class="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider">
-        Community Water Sources
+        Community Water Sources Directory & Bulk Operations
       </h3>
-      <button (click)="showAddSourceForm.set(!showAddSourceForm()); editingSourceId.set(null); sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590, flowRateLph: 15000 })"
-              class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 text-xs flex items-center gap-1">
-        <span class="material-icons text-sm">{{ showAddSourceForm() ? 'remove' : 'add' }}</span>
-        {{ showAddSourceForm() ? 'Hide Form' : 'Add Water Source' }}
-      </button>
+      <div class="flex gap-2">
+        <button (click)="showAddSourceForm.set(!showAddSourceForm()); editingSourceId.set(null); sourceForm.reset({ type: 'Borewell', latitude: 26.8809, longitude: 75.7590, flowRateLph: 15000 })"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 text-xs flex items-center gap-1">
+          <span class="material-icons text-sm">{{ showAddSourceForm() ? 'remove' : 'add' }}</span>
+          {{ showAddSourceForm() ? 'Hide Form' : 'Add Single Source' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- BULK GENERATOR & UPLOAD TOOLBAR -->
+    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+      <h4 class="font-extrabold text-xs text-gray-500 uppercase tracking-wider border-b pb-2 flex items-center gap-1.5">
+        <span class="material-icons text-base text-blue-500">auto_awesome</span>
+        Water Sources Dummy Generator & Bulk Upload
+      </h4>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Source Type</label>
+          <select [(ngModel)]="genType" class="w-full bg-gray-50 dark:bg-gray-900 border rounded-xl p-2 text-xs dark:text-white">
+            <option value="Tube-well">Tube-well</option>
+            <option value="Borewell">Borewell</option>
+            <option value="Canal">Canal</option>
+            <option value="Pond">Pond</option>
+            <option value="Solar Pump">Solar Pump</option>
+            <option value="River Lift">River Lift</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Count to Generate</label>
+          <input type="number" [(ngModel)]="genCount" min="1" max="50" class="w-full bg-gray-50 dark:bg-gray-900 border rounded-xl p-2 text-xs font-bold dark:text-white" />
+        </div>
+
+        <div class="sm:col-span-2 flex items-end justify-end gap-2">
+          <button (click)="generateDummyWaterSources()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold rounded-xl shadow transition">
+            Generate & Stage {{ genCount }} Sources
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRAFT STAGING TABLE FOR SOURCES -->
+    <div *ngIf="stagedSources().length > 0" class="bg-amber-50/40 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-900/40 rounded-2xl p-5 space-y-4 animate-scale-up">
+      <div class="flex justify-between items-center pb-2 border-b border-amber-200">
+        <h4 class="text-xs font-extrabold text-amber-900 dark:text-amber-300 uppercase">
+          Draft Staging Table (Inspect {{ stagedSources().length }} Sources Before DB Save)
+        </h4>
+        <div class="flex gap-2">
+          <button (click)="stagedSources.set([])" class="px-3 py-1 border border-amber-300 text-amber-800 text-xs font-bold rounded-xl">Clear</button>
+          <button (click)="commitStagedSourcesToDb()" [disabled]="uploadingStaged()" class="px-5 py-2 bg-emerald-600 text-white text-xs font-black rounded-xl">
+            {{ uploadingStaged() ? 'Saving...' : 'Save All Staged to DB' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto max-h-60 overflow-y-auto rounded-xl bg-white dark:bg-gray-800 border border-amber-200">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-amber-100/80 dark:bg-amber-950/80 sticky top-0">
+            <tr class="text-amber-900 dark:text-amber-200 uppercase text-[10px] font-bold">
+              <th class="p-2">Name</th>
+              <th class="p-2">Type</th>
+              <th class="p-2">Location</th>
+              <th class="p-2">Flow Rate</th>
+              <th class="p-2 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of stagedSources()" class="border-b border-gray-100 dark:border-gray-700/50">
+              <td class="p-2 font-bold">{{ item.name }}</td>
+              <td class="p-2">{{ item.type }}</td>
+              <td class="p-2">{{ item.location }}</td>
+              <td class="p-2 font-mono text-[11px] text-blue-600">{{ item.flowRateLph | number }} L/h</td>
+              <td class="p-2 text-right">
+                <button (click)="removeStagedSource(item.id)" class="text-red-500 p-1 rounded hover:bg-red-50">
+                  <span class="material-icons text-sm">close</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Create/Edit Form -->
@@ -238,12 +315,23 @@
       </form>
     </div>
 
+    <!-- BATCH DELETION BANNER FOR SOURCES -->
+    <div *ngIf="selectedSourceIds().size > 0" class="flex justify-between items-center bg-red-50 dark:bg-red-950/40 p-3 rounded-xl border border-red-200">
+      <span class="text-xs font-bold text-red-700 dark:text-red-400">{{ selectedSourceIds().size }} water sources selected</span>
+      <button (click)="onDeleteSelectedSourcesBatch()" [disabled]="deletingBatch()" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold rounded-xl shadow transition">
+        {{ deletingBatch() ? 'Deleting...' : 'Delete Selected (' + selectedSourceIds().size + ')' }}
+      </button>
+    </div>
+
     <!-- Sources Table -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-gray-50 dark:bg-gray-900/50 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase border-b border-gray-200 dark:border-gray-700">
+              <th class="py-3 px-4 w-8">
+                <input type="checkbox" [checked]="isAllSourcesSelected()" (change)="toggleSelectAllSources($event)">
+              </th>
               <th class="py-3 px-4">Name</th>
               <th class="py-3 px-4">Type</th>
               <th class="py-3 px-4">Location</th>
@@ -253,7 +341,10 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-150 dark:divide-gray-700/50">
-            <tr *ngFor="let s of sources()" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 text-gray-700 dark:text-gray-300 transition">
+            <tr *ngFor="let s of sources()" [class.bg-blue-50]="isSourceSelected(s.id)" class="hover:bg-gray-50 dark:hover:bg-gray-800/30 text-gray-700 dark:text-gray-300 transition">
+              <td class="py-3.5 px-4">
+                <input type="checkbox" [checked]="isSourceSelected(s.id)" (change)="toggleSelectSource(s.id)">
+              </td>
               <td class="py-3.5 px-4 font-extrabold text-gray-950 dark:text-white">
                 <span class="material-icons text-xs text-blue-500 align-middle">water_drop</span> {{ s.name }}
                 <span *ngIf="s.flowRateLph" class="block text-[10px] text-blue-600 dark:text-blue-400 font-bold mt-0.5"><span class="material-icons text-[10px] text-amber-500 align-middle">bolt</span> {{ s.flowRateLph | number }} L/hr</span>
