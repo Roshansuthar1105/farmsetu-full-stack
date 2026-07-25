@@ -18,6 +18,7 @@ import { I18nService } from '../../core/services/i18n.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
+import { HeroParticlesComponent } from '../../shared/components/hero-particles/hero-particles.component';
 
 interface CropConfig {
   name: string;
@@ -51,7 +52,8 @@ export interface TickerCommodity {
     LucideCloudRain,
     LucideUsers,
     LucideBanknote,
-    LucideDynamicIcon
+    LucideDynamicIcon,
+    HeroParticlesComponent
   ],
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss']

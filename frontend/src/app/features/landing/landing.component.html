@@ -126,7 +126,10 @@
 
   <!-- Hero Section -->
   <section class="relative pt-40 pb-16 lg:pt-52 lg:pb-28">
-    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center">
+    <!-- Three.js 3D Particle Ecosystem Background -->
+    <fs-hero-particles [darkMode]="theme.darkMode()"></fs-hero-particles>
+
+    <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10">
 
       <!-- Hero Left: Text & CTA -->
       <div class="lg:col-span-7 space-y-6 text-center lg:text-left">

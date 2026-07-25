@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
+import { FarmTwin3dComponent } from '../../shared/components/farm-twin-3d/farm-twin-3d.component';
 import { ToastrService } from 'ngx-toastr';
 import * as L from 'leaflet';
 
@@ -51,7 +52,7 @@ interface DashboardResponse {
 @Component({
   selector: 'fs-farm-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, LoadingSkeletonComponent, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, LoadingSkeletonComponent, FarmTwin3dComponent, RouterLink],
   templateUrl: './farm-dashboard.component.html',
   styleUrl: './farm-dashboard.component.scss'
 })
