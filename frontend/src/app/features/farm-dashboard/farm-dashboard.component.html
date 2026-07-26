@@ -287,11 +287,21 @@
               </span>
             </div>
             <fs-farm-twin-3d
-              [moisture]="selectedFarm()?.humidity ?? 65"
-              [nitrogen]="selectedFarm()?.nitrogen ?? 80"
-              [phosphorus]="selectedFarm()?.phosphorus ?? 50"
-              [potassium]="selectedFarm()?.potassium ?? 100"
-              [farmArea]="selectedFarm()?.farmArea ?? 2">
+              [farmName]="selectedFarm()?.name ?? ''"
+              [farmArea]="selectedFarm()?.farmArea ?? 0"
+              [calculatedArea]="selectedFarm()?.calculatedArea ?? 0"
+              [farmingType]="selectedFarm()?.farmingType ?? ''"
+              [soilType]="selectedFarm()?.soilType ?? ''"
+              [soilPh]="selectedFarm()?.soilPh ?? null"
+              [farmBoundary]="selectedFarm()?.farmBoundary ?? ''"
+              [waterSource]="selectedFarm()?.waterSource ?? ''"
+              [waterLevel]="selectedFarm()?.waterLevel ?? null"
+              [temperature]="selectedFarm()?.temperature ?? null"
+              [humidity]="selectedFarm()?.humidity ?? null"
+              [rainfall]="selectedFarm()?.rainfall ?? null"
+              [nitrogen]="selectedFarm()?.nitrogen ?? null"
+              [phosphorus]="selectedFarm()?.phosphorus ?? null"
+              [potassium]="selectedFarm()?.potassium ?? null">
             </fs-farm-twin-3d>
           </div>
 
