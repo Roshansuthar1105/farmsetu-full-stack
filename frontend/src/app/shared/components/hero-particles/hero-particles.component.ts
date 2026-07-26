@@ -98,10 +98,10 @@ void main() {
 
   vec3 pos = position;
 
-  // Layered noise → organic rolling hills
-  float e  = snoise(vec3(pos.x * 0.055, pos.y * 0.055, uTime * 0.10)) * 2.8;
-  e       += snoise(vec3(pos.x * 0.11 + 5.0, pos.y * 0.09 + 3.0, uTime * 0.07)) * 1.4;
-  e       += snoise(vec3(pos.x * 0.22 + 10.0, pos.y * 0.18 + 7.0, uTime * 0.04)) * 0.6;
+  // Layered noise → dramatic rolling hills
+  float e  = snoise(vec3(pos.x * 0.05, pos.y * 0.05, uTime * 0.10)) * 3.5;
+  e       += snoise(vec3(pos.x * 0.10 + 5.0, pos.y * 0.08 + 3.0, uTime * 0.07)) * 1.8;
+  e       += snoise(vec3(pos.x * 0.20 + 10.0, pos.y * 0.16 + 7.0, uTime * 0.04)) * 0.8;
 
   pos.z      = e;
   vElevation = e;
@@ -119,53 +119,61 @@ uniform float uTime;
 uniform float uOpacity;
 
 void main() {
-  // ── Grid Lines ──
-  float gridFreq  = 0.35;
-  float lineWidth = 0.022;
+  // ── Grid Lines (thicker, more vibrant) ──
+  float gridFreq  = 0.32;
+  float lineWidth = 0.032;
 
   float gx = abs(fract(vLocalPos.x * gridFreq + 0.5) - 0.5);
   float gy = abs(fract(vLocalPos.y * gridFreq + 0.5) - 0.5);
   float gridLine = min(gx, gy);
   float grid = 1.0 - smoothstep(0.0, lineWidth, gridLine);
 
-  // Major grid (every 5th line) — slightly thicker
+  // Major grid (every 5th line) — thicker and brighter
   float majorFreq = gridFreq * 0.2;
   float mgx = abs(fract(vLocalPos.x * majorFreq + 0.5) - 0.5);
   float mgy = abs(fract(vLocalPos.y * majorFreq + 0.5) - 0.5);
   float majorLine = min(mgx, mgy);
-  float major = 1.0 - smoothstep(0.0, lineWidth * 1.6, majorLine);
-  grid = max(grid, major);
+  float major = 1.0 - smoothstep(0.0, lineWidth * 2.0, majorLine);
+  grid = max(grid, major * 1.2);
 
-  // ── Elevation Color ──
-  float normElev = clamp((vElevation + 3.5) / 7.0, 0.0, 1.0);
+  // ── Elevation Color (punchier palette) ──
+  float normElev = clamp((vElevation + 4.0) / 8.0, 0.0, 1.0);
 
-  vec3 deepGreen = vec3(0.02, 0.09, 0.06);
-  vec3 emerald   = vec3(0.13, 0.77, 0.37);
-  vec3 teal      = vec3(0.10, 0.58, 0.52);
-  vec3 amber     = vec3(0.96, 0.72, 0.14);
+  vec3 deepGreen = vec3(0.01, 0.06, 0.04);
+  vec3 emerald   = vec3(0.18, 0.85, 0.42);
+  vec3 teal      = vec3(0.08, 0.65, 0.55);
+  vec3 amber     = vec3(1.0, 0.76, 0.18);
+  vec3 mint      = vec3(0.25, 0.95, 0.65);
 
-  vec3 baseColor = mix(deepGreen, teal, normElev * 0.5);
+  vec3 baseColor = mix(deepGreen, teal, normElev * 0.6);
   vec3 gridColor = mix(teal, emerald, normElev);
 
+  // Mint highlights at mid-range for extra vibrancy
+  float mintMix = smoothstep(0.35, 0.55, normElev) * (1.0 - smoothstep(0.55, 0.75, normElev)) * 0.3;
+  gridColor = mix(gridColor, mint, mintMix);
+
   // Amber highlights on peaks
-  float amberMix = smoothstep(0.62, 0.85, normElev) * 0.35;
+  float amberMix = smoothstep(0.60, 0.82, normElev) * 0.45;
   gridColor = mix(gridColor, amber, amberMix);
 
-  // Soft glow halo around grid lines
-  float gridGlow  = 1.0 - smoothstep(0.0, lineWidth * 5.0, gridLine);
-  vec3  glowColor = gridColor * 0.3;
+  // Strong glow halo around grid lines
+  float gridGlow  = 1.0 - smoothstep(0.0, lineWidth * 6.0, gridLine);
+  vec3  glowColor = gridColor * 0.5;
 
-  vec3 finalColor = baseColor * 0.08 + gridColor * grid + glowColor * gridGlow * 0.18;
+  // Surface luminosity — subtle terrain fill between lines
+  float surfaceLight = normElev * 0.12;
 
-  // ── Edge Fade (elliptical) ──
+  vec3 finalColor = baseColor * 0.10 + gridColor * grid * 1.15 + glowColor * gridGlow * 0.28 + emerald * surfaceLight;
+
+  // ── Edge Fade (wider coverage) ──
   vec2  centered = vUv - 0.5;
-  float edgeDist = length(centered * vec2(1.5, 1.25));
-  float edgeFade = 1.0 - smoothstep(0.30, 0.52, edgeDist);
+  float edgeDist = length(centered * vec2(1.35, 1.1));
+  float edgeFade = 1.0 - smoothstep(0.38, 0.58, edgeDist);
 
-  // Subtle scan pulse for "alive" feel
-  float scan = sin(vLocalPos.y * 1.5 + uTime * 0.35) * 0.04 + 0.96;
+  // Scan pulse for "alive" feel
+  float scan = sin(vLocalPos.y * 1.2 + uTime * 0.35) * 0.05 + 0.95;
 
-  float alpha = (0.03 + grid * 0.48 + gridGlow * 0.07) * edgeFade * scan * uOpacity;
+  float alpha = (0.05 + grid * 0.65 + gridGlow * 0.15) * edgeFade * scan * uOpacity;
 
   gl_FragColor = vec4(finalColor, alpha);
 }
@@ -183,7 +191,7 @@ varying vec3 vColor;
 void main() {
   vColor = aColor;
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-  gl_PointSize = aSize * (180.0 / -mvPosition.z);
+  gl_PointSize = aSize * (260.0 / -mvPosition.z);
   gl_Position  = projectionMatrix * mvPosition;
 }
 `;
@@ -196,9 +204,9 @@ void main() {
   if (dist > 0.5) discard;
 
   float glow = 1.0 - smoothstep(0.0, 0.5, dist);
-  glow = pow(glow, 1.8);
+  glow = pow(glow, 1.5);
 
-  gl_FragColor = vec4(vColor * 1.2, glow * 0.6);
+  gl_FragColor = vec4(vColor * 1.5, glow * 0.85);
 }
 `;
 
@@ -342,11 +350,11 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     // Renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: !isMobile,
+      antialias: true,
       alpha: true,
       powerPreference: 'high-performance',
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(window.devicePixelRatio || 1);
     this.renderer.setSize(width, height, false);
     this.renderer.setClearColor(0x000000, 0);
 
@@ -354,9 +362,9 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     this.scene = new THREE.Scene();
 
     // Camera — positioned above, angled down to view rolling terrain
-    this.camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 200);
-    this.camera.position.set(0, 18, 28);
-    this.camera.lookAt(0, -2, -5);
+    this.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 200);
+    this.camera.position.set(0, 14, 22);
+    this.camera.lookAt(0, -3, -8);
 
     this.createTerrain(isMobile);
     this.createAccentParticles(isMobile);
@@ -369,9 +377,9 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
   // ── Terrain Mesh ────────────────────────────────────────
 
   private createTerrain(isMobile: boolean): void {
-    const segX = isMobile ? 50 : 100;
-    const segY = isMobile ? 30 : 60;
-    const geometry = new THREE.PlaneGeometry(80, 55, segX, segY);
+    const segX = isMobile ? 60 : 140;
+    const segY = isMobile ? 40 : 90;
+    const geometry = new THREE.PlaneGeometry(100, 70, segX, segY);
 
     this.terrainUniforms = {
       uTime: { value: 0 },
@@ -390,14 +398,14 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     this.terrainMesh = new THREE.Mesh(geometry, material);
     // Rotate plane from X-Y to X-Z (lies flat, faces upward)
     this.terrainMesh.rotation.x = -Math.PI / 2;
-    this.terrainMesh.position.y = -3;
+    this.terrainMesh.position.y = -5;
     this.scene.add(this.terrainMesh);
   }
 
   // ── Accent Particles (circular glow orbs) ───────────────
 
   private createAccentParticles(isMobile: boolean): void {
-    this.particleCount = isMobile ? 15 : 30;
+    this.particleCount = isMobile ? 20 : 45;
     const count = this.particleCount;
 
     this.particlePositions = new Float32Array(count * 3);
@@ -437,7 +445,7 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
         colors[i3 + 2] = 0.14;
       }
 
-      sizes[i] = Math.random() * 3 + 1.5;
+      sizes[i] = Math.random() * 4.5 + 2.0;
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -473,9 +481,9 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     this.mouseY += (this.targetMouseY - this.mouseY) * 0.04;
 
     // Camera parallax
-    this.camera.position.x += (this.mouseX * 3 - this.camera.position.x) * 0.02;
-    this.camera.position.y += (18 - this.mouseY * 2 - this.camera.position.y) * 0.02;
-    this.camera.lookAt(0, -2, -5);
+    this.camera.position.x += (this.mouseX * 4 - this.camera.position.x) * 0.025;
+    this.camera.position.y += (14 - this.mouseY * 2.5 - this.camera.position.y) * 0.025;
+    this.camera.lookAt(0, -3, -8);
 
     // Update particles
     this.updateParticles(elapsed);
