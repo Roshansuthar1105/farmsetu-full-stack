@@ -10,15 +10,212 @@ import {
 } from '@angular/core';
 import * as THREE from 'three';
 
+// ────────────────────────────────────────────────────────────
+// GLSL: Simplex 3D Noise (Ashima Arts / Stefan Gustavson, MIT)
+// ────────────────────────────────────────────────────────────
+const SIMPLEX_NOISE_GLSL = /* glsl */ `
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x * 34.0) + 10.0) * x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+  const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
+  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+
+  vec3 i  = floor(v + dot(v, C.yyy));
+  vec3 x0 = v - i + dot(i, C.xxx);
+
+  vec3 g  = step(x0.yzx, x0.xyz);
+  vec3 l  = 1.0 - g;
+  vec3 i1 = min(g.xyz, l.zxy);
+  vec3 i2 = max(g.xyz, l.zxy);
+
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+
+  i = mod289(i);
+  vec4 p = permute(permute(permute(
+    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+
+  float n_ = 0.142857142857;
+  vec3  ns = n_ * D.wyz - D.xzx;
+
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_);
+
+  vec4 x = x_ * ns.x + ns.yyyy;
+  vec4 y = y_ * ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+
+  vec4 b0 = vec4(x.xy, y.xy);
+  vec4 b1 = vec4(x.zw, y.zw);
+
+  vec4 s0 = floor(b0) * 2.0 + 1.0;
+  vec4 s1 = floor(b1) * 2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+
+  vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+
+  vec3 p0 = vec3(a0.xy, h.x);
+  vec3 p1 = vec3(a0.zw, h.y);
+  vec3 p2 = vec3(a1.xy, h.z);
+  vec3 p3 = vec3(a1.zw, h.w);
+
+  vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+
+  vec4 m = max(0.5 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+  m = m * m;
+  return 105.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+`;
+
+// ────────────────────────────────────────────────────────────
+// Terrain Shaders
+// ────────────────────────────────────────────────────────────
+const TERRAIN_VERTEX = /* glsl */ `
+uniform float uTime;
+
+varying float vElevation;
+varying vec2  vUv;
+varying vec2  vLocalPos;
+
+${SIMPLEX_NOISE_GLSL}
+
+void main() {
+  vUv       = uv;
+  vLocalPos = position.xy;
+
+  vec3 pos = position;
+
+  // Layered noise → organic rolling hills
+  float e  = snoise(vec3(pos.x * 0.055, pos.y * 0.055, uTime * 0.10)) * 2.8;
+  e       += snoise(vec3(pos.x * 0.11 + 5.0, pos.y * 0.09 + 3.0, uTime * 0.07)) * 1.4;
+  e       += snoise(vec3(pos.x * 0.22 + 10.0, pos.y * 0.18 + 7.0, uTime * 0.04)) * 0.6;
+
+  pos.z      = e;
+  vElevation = e;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+}
+`;
+
+const TERRAIN_FRAGMENT = /* glsl */ `
+varying float vElevation;
+varying vec2  vUv;
+varying vec2  vLocalPos;
+
+uniform float uTime;
+uniform float uOpacity;
+
+void main() {
+  // ── Grid Lines ──
+  float gridFreq  = 0.35;
+  float lineWidth = 0.022;
+
+  float gx = abs(fract(vLocalPos.x * gridFreq + 0.5) - 0.5);
+  float gy = abs(fract(vLocalPos.y * gridFreq + 0.5) - 0.5);
+  float gridLine = min(gx, gy);
+  float grid = 1.0 - smoothstep(0.0, lineWidth, gridLine);
+
+  // Major grid (every 5th line) — slightly thicker
+  float majorFreq = gridFreq * 0.2;
+  float mgx = abs(fract(vLocalPos.x * majorFreq + 0.5) - 0.5);
+  float mgy = abs(fract(vLocalPos.y * majorFreq + 0.5) - 0.5);
+  float majorLine = min(mgx, mgy);
+  float major = 1.0 - smoothstep(0.0, lineWidth * 1.6, majorLine);
+  grid = max(grid, major);
+
+  // ── Elevation Color ──
+  float normElev = clamp((vElevation + 3.5) / 7.0, 0.0, 1.0);
+
+  vec3 deepGreen = vec3(0.02, 0.09, 0.06);
+  vec3 emerald   = vec3(0.13, 0.77, 0.37);
+  vec3 teal      = vec3(0.10, 0.58, 0.52);
+  vec3 amber     = vec3(0.96, 0.72, 0.14);
+
+  vec3 baseColor = mix(deepGreen, teal, normElev * 0.5);
+  vec3 gridColor = mix(teal, emerald, normElev);
+
+  // Amber highlights on peaks
+  float amberMix = smoothstep(0.62, 0.85, normElev) * 0.35;
+  gridColor = mix(gridColor, amber, amberMix);
+
+  // Soft glow halo around grid lines
+  float gridGlow  = 1.0 - smoothstep(0.0, lineWidth * 5.0, gridLine);
+  vec3  glowColor = gridColor * 0.3;
+
+  vec3 finalColor = baseColor * 0.08 + gridColor * grid + glowColor * gridGlow * 0.18;
+
+  // ── Edge Fade (elliptical) ──
+  vec2  centered = vUv - 0.5;
+  float edgeDist = length(centered * vec2(1.5, 1.25));
+  float edgeFade = 1.0 - smoothstep(0.30, 0.52, edgeDist);
+
+  // Subtle scan pulse for "alive" feel
+  float scan = sin(vLocalPos.y * 1.5 + uTime * 0.35) * 0.04 + 0.96;
+
+  float alpha = (0.03 + grid * 0.48 + gridGlow * 0.07) * edgeFade * scan * uOpacity;
+
+  gl_FragColor = vec4(finalColor, alpha);
+}
+`;
+
+// ────────────────────────────────────────────────────────────
+// Accent Particle Shaders (circular glow, NOT squares)
+// ────────────────────────────────────────────────────────────
+const PARTICLE_VERTEX = /* glsl */ `
+attribute float aSize;
+attribute vec3  aColor;
+
+varying vec3 vColor;
+
+void main() {
+  vColor = aColor;
+  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+  gl_PointSize = aSize * (180.0 / -mvPosition.z);
+  gl_Position  = projectionMatrix * mvPosition;
+}
+`;
+
+const PARTICLE_FRAGMENT = /* glsl */ `
+varying vec3 vColor;
+
+void main() {
+  float dist = length(gl_PointCoord - vec2(0.5));
+  if (dist > 0.5) discard;
+
+  float glow = 1.0 - smoothstep(0.0, 0.5, dist);
+  glow = pow(glow, 1.8);
+
+  gl_FragColor = vec4(vColor * 1.2, glow * 0.6);
+}
+`;
+
+// ════════════════════════════════════════════════════════════
+// Component
+// ════════════════════════════════════════════════════════════
+
 /**
- * 3D floating organic particle ecosystem for the Landing Page hero.
+ * 3D organic farmland terrain background for the Landing Page hero.
  *
  * Features:
- * - Soft glowing particles floating with organic sine-wave motion
- * - Connecting lines between nearby particles (constellation effect)
- * - Mouse/touch parallax interaction
+ * - Rolling terrain mesh with simplex-noise vertex displacement
+ * - Glowing emerald/teal grid lines with amber peak accents
+ * - Circular glowing accent particles drifting upward
+ * - Mouse/touch parallax camera interaction
+ * - Smooth elliptical edge fade to transparent
  * - Adaptive quality for mobile devices
- * - Fully transparent background to overlay behind hero text
  */
 @Component({
   selector: 'fs-hero-particles',
@@ -65,17 +262,15 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private destroyed = false;
 
-  // Particle system
+  // Terrain
+  private terrainMesh!: THREE.Mesh;
+  private terrainUniforms!: Record<string, THREE.IUniform>;
+
+  // Accent particles
   private particlesMesh!: THREE.Points;
   private particleCount = 0;
   private particlePositions!: Float32Array;
   private particleVelocities!: Float32Array;
-  private particleSizes!: Float32Array;
-
-  // Connection lines
-  private linesMesh!: THREE.LineSegments;
-  private linesGeometry!: THREE.BufferGeometry;
-  private maxConnections = 0;
 
   // Mouse / touch parallax
   private mouseX = 0;
@@ -107,10 +302,12 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     }
     if (this.scene) {
       this.scene.traverse((obj) => {
-        if (obj instanceof THREE.Points || obj instanceof THREE.LineSegments) {
+        if (obj instanceof THREE.Mesh || obj instanceof THREE.Points) {
           obj.geometry?.dispose();
-          if (obj.material instanceof THREE.Material) {
-            obj.material.dispose();
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((m) => m.dispose());
+          } else if (obj.material) {
+            (obj.material as THREE.Material).dispose();
           }
         }
       });
@@ -122,7 +319,6 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
   onMouseMove(event: MouseEvent): void {
     const { width, height } = this.getSize();
     if (width === 0 || height === 0) return;
-    // Normalize to -1 to 1
     this.targetMouseX = (event.clientX / width - 0.5) * 2;
     this.targetMouseY = (event.clientY / height - 0.5) * 2;
   }
@@ -136,14 +332,12 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     this.targetMouseY = (event.touches[0].clientY / height - 0.5) * 2;
   }
 
+  // ── Initialisation ──────────────────────────────────────
+
   private init(): void {
     const canvas = this.canvasRef.nativeElement;
     const { width, height } = this.getSize();
     const isMobile = width < 768;
-
-    // Adaptive quality
-    this.particleCount = isMobile ? 40 : 80;
-    this.maxConnections = isMobile ? 60 : 150;
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -159,213 +353,170 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
     // Scene
     this.scene = new THREE.Scene();
 
-    // Camera
-    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    this.camera.position.z = 30;
+    // Camera — positioned above, angled down to view rolling terrain
+    this.camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 200);
+    this.camera.position.set(0, 18, 28);
+    this.camera.lookAt(0, -2, -5);
 
-    // Create particles
-    this.createParticles();
-
-    // Create connection lines
-    this.createLines();
+    this.createTerrain(isMobile);
+    this.createAccentParticles(isMobile);
 
     // Resize observer
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
     this.resizeObserver.observe(this.containerRef.nativeElement);
   }
 
-  private createParticles(): void {
+  // ── Terrain Mesh ────────────────────────────────────────
+
+  private createTerrain(isMobile: boolean): void {
+    const segX = isMobile ? 50 : 100;
+    const segY = isMobile ? 30 : 60;
+    const geometry = new THREE.PlaneGeometry(80, 55, segX, segY);
+
+    this.terrainUniforms = {
+      uTime: { value: 0 },
+      uOpacity: { value: 1.0 },
+    };
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: TERRAIN_VERTEX,
+      fragmentShader: TERRAIN_FRAGMENT,
+      uniforms: this.terrainUniforms,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+
+    this.terrainMesh = new THREE.Mesh(geometry, material);
+    // Rotate plane from X-Y to X-Z (lies flat, faces upward)
+    this.terrainMesh.rotation.x = -Math.PI / 2;
+    this.terrainMesh.position.y = -3;
+    this.scene.add(this.terrainMesh);
+  }
+
+  // ── Accent Particles (circular glow orbs) ───────────────
+
+  private createAccentParticles(isMobile: boolean): void {
+    this.particleCount = isMobile ? 15 : 30;
     const count = this.particleCount;
+
     this.particlePositions = new Float32Array(count * 3);
     this.particleVelocities = new Float32Array(count * 3);
-    this.particleSizes = new Float32Array(count);
     const colors = new Float32Array(count * 3);
-
-    const spread = 40;
+    const sizes = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Random positions in a wide spread
-      this.particlePositions[i3] = (Math.random() - 0.5) * spread;
-      this.particlePositions[i3 + 1] = (Math.random() - 0.5) * spread * 0.6;
-      this.particlePositions[i3 + 2] = (Math.random() - 0.5) * 15;
+      // Spread across terrain footprint in world space
+      this.particlePositions[i3] = (Math.random() - 0.5) * 60; // X
+      this.particlePositions[i3 + 1] = Math.random() * 8 - 1; // Y (above terrain)
+      this.particlePositions[i3 + 2] = (Math.random() - 0.5) * 40; // Z
 
-      // Gentle random velocities
-      this.particleVelocities[i3] = (Math.random() - 0.5) * 0.02;
-      this.particleVelocities[i3 + 1] = (Math.random() - 0.5) * 0.015;
-      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
+      // Gentle upward drift
+      this.particleVelocities[i3] = (Math.random() - 0.5) * 0.008;
+      this.particleVelocities[i3 + 1] = Math.random() * 0.015 + 0.005;
+      this.particleVelocities[i3 + 2] = (Math.random() - 0.5) * 0.006;
 
-      // Random sizes
-      this.particleSizes[i] = Math.random() * 3 + 1.5;
-
-      // Color palette: emerald green variations
-      const colorChoice = Math.random();
-      if (colorChoice < 0.5) {
-        // Emerald green
-        colors[i3] = 0.133 + Math.random() * 0.05;
-        colors[i3 + 1] = 0.773 + Math.random() * 0.1;
-        colors[i3 + 2] = 0.369 + Math.random() * 0.1;
-      } else if (colorChoice < 0.75) {
+      // Colour palette: emerald / teal / amber
+      const roll = Math.random();
+      if (roll < 0.5) {
+        // Emerald
+        colors[i3] = 0.13;
+        colors[i3 + 1] = 0.77;
+        colors[i3 + 2] = 0.37;
+      } else if (roll < 0.8) {
         // Teal
-        colors[i3] = 0.12 + Math.random() * 0.05;
-        colors[i3 + 1] = 0.63 + Math.random() * 0.1;
-        colors[i3 + 2] = 0.56 + Math.random() * 0.1;
+        colors[i3] = 0.10;
+        colors[i3 + 1] = 0.58;
+        colors[i3 + 2] = 0.52;
       } else {
-        // Amber accent
+        // Amber
         colors[i3] = 0.96;
-        colors[i3 + 1] = 0.62 + Math.random() * 0.1;
-        colors[i3 + 2] = 0.04 + Math.random() * 0.05;
+        colors[i3 + 1] = 0.72;
+        colors[i3 + 2] = 0.14;
       }
+
+      sizes[i] = Math.random() * 3 + 1.5;
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(this.particlePositions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(this.particleSizes, 1));
+    geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
 
-    // Custom shader material for soft glowing dots
-    const material = new THREE.PointsMaterial({
-      size: 2.5,
-      vertexColors: true,
+    const material = new THREE.ShaderMaterial({
+      vertexShader: PARTICLE_VERTEX,
+      fragmentShader: PARTICLE_FRAGMENT,
       transparent: true,
-      opacity: 0.7,
-      blending: THREE.AdditiveBlending,
       depthWrite: false,
-      sizeAttenuation: true,
+      blending: THREE.AdditiveBlending,
     });
 
     this.particlesMesh = new THREE.Points(geometry, material);
     this.scene.add(this.particlesMesh);
   }
 
-  private createLines(): void {
-    // Pre-allocate buffer for connection lines
-    const maxLineVertices = this.maxConnections * 2 * 3; // 2 vertices per line, 3 coords each
-    const linePositions = new Float32Array(maxLineVertices);
-    const lineColors = new Float32Array(maxLineVertices);
-
-    this.linesGeometry = new THREE.BufferGeometry();
-    this.linesGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-    this.linesGeometry.setAttribute('color', new THREE.BufferAttribute(lineColors, 3));
-    this.linesGeometry.setDrawRange(0, 0);
-
-    const lineMaterial = new THREE.LineBasicMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-
-    this.linesMesh = new THREE.LineSegments(this.linesGeometry, lineMaterial);
-    this.scene.add(this.linesMesh);
-  }
+  // ── Animation Loop ──────────────────────────────────────
 
   private animate(): void {
     if (this.destroyed) return;
     this.animationId = requestAnimationFrame(() => this.animate());
 
     const elapsed = this.clock.getElapsedTime();
-    const count = this.particleCount;
-    const spread = 40;
+
+    // Drive terrain undulation
+    this.terrainUniforms['uTime'].value = elapsed;
 
     // Smooth mouse follow
-    this.mouseX += (this.targetMouseX - this.mouseX) * 0.05;
-    this.mouseY += (this.targetMouseY - this.mouseY) * 0.05;
+    this.mouseX += (this.targetMouseX - this.mouseX) * 0.04;
+    this.mouseY += (this.targetMouseY - this.mouseY) * 0.04;
 
-    // Update particle positions with organic sine wave
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
+    // Camera parallax
+    this.camera.position.x += (this.mouseX * 3 - this.camera.position.x) * 0.02;
+    this.camera.position.y += (18 - this.mouseY * 2 - this.camera.position.y) * 0.02;
+    this.camera.lookAt(0, -2, -5);
 
-      // Organic float motion
-      this.particlePositions[i3] +=
-        this.particleVelocities[i3] + Math.sin(elapsed * 0.3 + i * 0.5) * 0.005;
-      this.particlePositions[i3 + 1] +=
-        this.particleVelocities[i3 + 1] + Math.cos(elapsed * 0.2 + i * 0.7) * 0.004;
-      this.particlePositions[i3 + 2] +=
-        this.particleVelocities[i3 + 2] + Math.sin(elapsed * 0.15 + i * 0.3) * 0.003;
-
-      // Wrap around boundaries
-      const halfSpread = spread / 2;
-      if (this.particlePositions[i3] > halfSpread) this.particlePositions[i3] = -halfSpread;
-      if (this.particlePositions[i3] < -halfSpread) this.particlePositions[i3] = halfSpread;
-      if (this.particlePositions[i3 + 1] > halfSpread * 0.6)
-        this.particlePositions[i3 + 1] = -halfSpread * 0.6;
-      if (this.particlePositions[i3 + 1] < -halfSpread * 0.6)
-        this.particlePositions[i3 + 1] = halfSpread * 0.6;
-      if (this.particlePositions[i3 + 2] > 7.5) this.particlePositions[i3 + 2] = -7.5;
-      if (this.particlePositions[i3 + 2] < -7.5) this.particlePositions[i3 + 2] = 7.5;
-    }
-
-    (this.particlesMesh.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate =
-      true;
-
-    // Update connection lines between nearby particles
-    this.updateLines();
-
-    // Mouse parallax on camera
-    this.camera.position.x += (this.mouseX * 2 - this.camera.position.x) * 0.02;
-    this.camera.position.y += (-this.mouseY * 1.5 - this.camera.position.y) * 0.02;
-    this.camera.lookAt(0, 0, 0);
-
-    // Slow overall rotation
-    this.particlesMesh.rotation.y = elapsed * 0.015;
+    // Update particles
+    this.updateParticles(elapsed);
 
     this.renderer.render(this.scene, this.camera);
   }
 
-  private updateLines(): void {
-    const positions = this.linesGeometry.getAttribute('position') as THREE.BufferAttribute;
-    const colors = this.linesGeometry.getAttribute('color') as THREE.BufferAttribute;
+  private updateParticles(elapsed: number): void {
     const count = this.particleCount;
-    const maxDist = 8; // Connection distance threshold
-    let lineIndex = 0;
-    const maxLines = this.maxConnections;
 
-    for (let i = 0; i < count && lineIndex < maxLines; i++) {
-      for (let j = i + 1; j < count && lineIndex < maxLines; j++) {
-        const i3 = i * 3;
-        const j3 = j * 3;
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
 
-        const dx = this.particlePositions[i3] - this.particlePositions[j3];
-        const dy = this.particlePositions[i3 + 1] - this.particlePositions[j3 + 1];
-        const dz = this.particlePositions[i3 + 2] - this.particlePositions[j3 + 2];
-        const distSq = dx * dx + dy * dy + dz * dz;
+      // Velocity + organic sine drift
+      this.particlePositions[i3] +=
+        this.particleVelocities[i3] + Math.sin(elapsed * 0.3 + i * 1.7) * 0.003;
+      this.particlePositions[i3 + 1] += this.particleVelocities[i3 + 1];
+      this.particlePositions[i3 + 2] +=
+        this.particleVelocities[i3 + 2] + Math.cos(elapsed * 0.2 + i * 2.3) * 0.002;
 
-        if (distSq < maxDist * maxDist) {
-          const dist = Math.sqrt(distSq);
-          const alpha = 1 - dist / maxDist;
-          const li = lineIndex * 6; // 2 vertices * 3 coords
+      // Reset when too high → respawn near terrain surface
+      if (this.particlePositions[i3 + 1] > 12) {
+        this.particlePositions[i3] = (Math.random() - 0.5) * 60;
+        this.particlePositions[i3 + 1] = -1 + Math.random() * 2;
+        this.particlePositions[i3 + 2] = (Math.random() - 0.5) * 40;
+      }
 
-          // Vertex 1
-          positions.array[li] = this.particlePositions[i3];
-          positions.array[li + 1] = this.particlePositions[i3 + 1];
-          positions.array[li + 2] = this.particlePositions[i3 + 2];
-
-          // Vertex 2
-          positions.array[li + 3] = this.particlePositions[j3];
-          positions.array[li + 4] = this.particlePositions[j3 + 1];
-          positions.array[li + 5] = this.particlePositions[j3 + 2];
-
-          // Green-ish color with alpha-based intensity
-          const greenIntensity = 0.5 * alpha;
-          colors.array[li] = 0.13 * alpha;
-          colors.array[li + 1] = greenIntensity;
-          colors.array[li + 2] = 0.37 * alpha;
-          colors.array[li + 3] = 0.13 * alpha;
-          colors.array[li + 4] = greenIntensity;
-          colors.array[li + 5] = 0.37 * alpha;
-
-          lineIndex++;
-        }
+      // Soft X / Z boundary wrapping
+      if (Math.abs(this.particlePositions[i3]) > 35) {
+        this.particlePositions[i3] *= -0.8;
+      }
+      if (Math.abs(this.particlePositions[i3 + 2]) > 25) {
+        this.particlePositions[i3 + 2] *= -0.8;
       }
     }
 
-    this.linesGeometry.setDrawRange(0, lineIndex * 2);
-    positions.needsUpdate = true;
-    colors.needsUpdate = true;
+    (this.particlesMesh.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate =
+      true;
   }
+
+  // ── Resize ──────────────────────────────────────────────
 
   private handleResize(): void {
     if (this.destroyed) return;
