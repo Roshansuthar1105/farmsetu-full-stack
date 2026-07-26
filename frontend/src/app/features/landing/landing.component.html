@@ -47,9 +47,9 @@
   </div>
 
   <!-- Sticky Header -->
-  <header class="fixed top-9 w-full z-50 transition-all duration-300 border-b" [ngClass]="{
-            'bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg shadow-md border-gray-200 dark:border-slate-800 py-3': isScrolled(), 
-            'bg-transparent border-transparent py-5': !isScrolled()
+  <header class="fixed w-full z-50 transition-all duration-300 border-b" [ngClass]="{
+            'top-0 bg-white/85 dark:bg-slate-950/85 backdrop-blur-lg shadow-md border-gray-200 dark:border-slate-800 py-3': isScrolled(), 
+            'top-9 bg-transparent border-transparent py-5': !isScrolled()
           }">
     <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
       <a routerLink="/" class="flex items-center group">
@@ -73,14 +73,34 @@
 
       <!-- Language + Auth Actions -->
       <div class="flex items-center gap-4">
-        <!-- Language Switcher Dropdown -->
-        <div class="relative flex items-center">
-          <span class="material-icons text-base text-gray-400 mr-1.5 pointer-events-none">translate</span>
-          <select [value]="i18n.lang()" (change)="i18n.setLang($any($event.target).value)"
-            class="text-xs bg-white/60 dark:bg-slate-900/60 border border-gray-250 dark:border-slate-800 rounded-xl px-2.5 py-1.5 outline-none cursor-pointer hover:border-gray-400 dark:hover:border-slate-700 transition focus:border-emerald-500">
-            <option value="en">English</option>
-            <option value="hi">हिंदी</option>
-          </select>
+        <!-- Language Switcher Button + Custom Dropdown -->
+        <div class="relative">
+          <button type="button" (click)="toggleLangDropdown($event)" title="Switch Language"
+            class="w-9 h-9 rounded-xl border border-gray-250 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center transition active:scale-95 focus:outline-none"
+            [class.text-emerald-600]="showLangDropdown()" [class.dark:text-emerald-400]="showLangDropdown()">
+            <svg lucideLanguages size="18" class="stroke-[2]"></svg>
+          </button>
+
+          @if (showLangDropdown()) {
+          <div (click)="$event.stopPropagation()"
+            class="lang-dropdown absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto scrollbar-thin">
+            <div class="p-2">
+              <p class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
+                Select Language
+              </p>
+              @for (lang of availableLanguages; track lang.code) {
+              <button (click)="setLanguage(lang.code)"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors flex items-center justify-between group"
+                [ngClass]="i18n.lang() === lang.code ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                <span>{{ lang.label }}</span>
+                @if (i18n.lang() === lang.code) {
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                }
+              </button>
+              }
+            </div>
+          </div>
+          }
         </div>
 
         <!-- Theme Toggle Controller -->
@@ -148,7 +168,7 @@
         </h1>
 
         <p
-          class="text-base sm:text-lg text-gray-600 dark:text-gray-350 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200">
+          class="text-base sm:text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-fade-in-up animation-delay-200 p-4 sm:p-5 rounded-2xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-gray-250/70 dark:border-slate-800/80 shadow-sm shadow-emerald-500/5">
           {{ i18n.t('landing.tagline') }}. Join thousands of farmers leveraging AI-driven analytics, a secure community
           marketplace, real-time weather advice, and crop health diagnostic models to maximize yields.
         </p>

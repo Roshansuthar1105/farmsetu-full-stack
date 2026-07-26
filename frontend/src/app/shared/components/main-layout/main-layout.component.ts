@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, signal, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet, Router, NavigationEnd, Event } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -113,6 +113,14 @@ export class MainLayoutComponent {
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showLangDropdown() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.showLangDropdown.set(false);
+    }
+  }
 
   readonly currentUrl = signal<string>('');
   readonly searchQuery = signal<string>('');

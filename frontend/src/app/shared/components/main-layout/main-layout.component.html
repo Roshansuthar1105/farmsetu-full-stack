@@ -166,7 +166,7 @@
           }
         </button>
 
-        <button type="button" (click)="toggleLangDropdown()" title="Switch Language"
+        <button type="button" (click)="toggleLangDropdown(); $event.stopPropagation()" title="Switch Language"
           class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
           [class.bg-slate-100]="showLangDropdown()" [class.dark:bg-slate-800]="showLangDropdown()"
           [class.text-blue-500]="showLangDropdown()" [class.dark:text-blue-400]="showLangDropdown()">
@@ -217,14 +217,35 @@
 
       <!-- Toolbar Quick Actions -->
       <div class="flex items-center gap-3">
-        <!-- Language Switcher -->
+        <!-- Language Switcher Button + Custom Dropdown -->
         <div class="relative">
-          <select
-            class="text-xs border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 bg-white dark:bg-slate-900 text-slate-955 dark:text-white outline-none cursor-pointer hover:border-slate-350 dark:hover:border-slate-700 transition focus:border-green-600 font-medium"
-            (change)="i18n.setLang($any($event.target).value)">
-            <option value="en">English</option>
-            <option value="hi">हिंदी</option>
-          </select>
+          <button type="button" (click)="toggleLangDropdown(); $event.stopPropagation()" title="Switch Language"
+            class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition duration-200 active:scale-95 focus:outline-none"
+            [class.bg-slate-100]="showLangDropdown()" [class.dark:bg-slate-800]="showLangDropdown()"
+            [class.text-blue-500]="showLangDropdown()" [class.dark:text-blue-400]="showLangDropdown()">
+            <svg lucideLanguages size="16" class="stroke-[2]"></svg>
+          </button>
+
+          @if (showLangDropdown()) {
+          <div (click)="$event.stopPropagation()"
+            class="lang-dropdown absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto scrollbar-thin">
+            <div class="p-2">
+              <p
+                class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
+                Select Language</p>
+              @for (lang of availableLanguages; track lang.code) {
+              <button (click)="setLanguage(lang.code)"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors flex items-center justify-between group"
+                [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold' : 'text-slate-700 dark:text-slate-300'">
+                <span>{{ lang.label }}</span>
+                @if (i18n.lang() === lang.code) {
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                }
+              </button>
+              }
+            </div>
+          </div>
+          }
         </div>
 
         <!-- If Authenticated: show Cart, Notifications and Profile -->
@@ -581,7 +602,7 @@
             }
           </button>
 
-          <button type="button" (click)="toggleLangDropdown()" title="Switch Language"
+          <button type="button" (click)="toggleLangDropdown(); $event.stopPropagation()" title="Switch Language"
             class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 flex items-center justify-center transition duration-200 active:scale-[0.98] focus:outline-none"
             [class.bg-slate-100]="showLangDropdown()" [class.dark:bg-slate-800]="showLangDropdown()"
             [class.text-blue-500]="showLangDropdown()" [class.dark:text-blue-400]="showLangDropdown()">

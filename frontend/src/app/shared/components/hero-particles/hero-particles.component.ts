@@ -286,7 +286,7 @@ export class HeroParticlesComponent implements AfterViewInit, OnDestroy {
   private targetMouseX = 0;
   private targetMouseY = 0;
 
-  constructor(private ngZone: NgZone) {}
+  constructor(private ngZone: NgZone) { }
 
   ngAfterViewInit(): void {
     this.ngZone.runOutsideAngular(() => {

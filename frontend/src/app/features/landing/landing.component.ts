@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -12,7 +12,8 @@ import {
   LucideCloudRain,
   LucideUsers,
   LucideBanknote,
-  LucideDynamicIcon
+  LucideDynamicIcon,
+  LucideLanguages
 } from '@lucide/angular';
 import { I18nService } from '../../core/services/i18n.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -53,6 +54,7 @@ export interface TickerCommodity {
     LucideUsers,
     LucideBanknote,
     LucideDynamicIcon,
+    LucideLanguages,
     HeroParticlesComponent
   ],
   templateUrl: './landing.component.html',
@@ -63,6 +65,41 @@ export class LandingComponent implements OnInit {
   readonly theme = inject(ThemeService);
   readonly auth = inject(AuthService);
   private readonly api = inject(ApiService);
+  private readonly elementRef = inject(ElementRef);
+
+  readonly showLangDropdown = signal(false);
+
+  readonly availableLanguages = [
+    { code: 'en', label: 'English' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'mr', label: 'मराठी (Marathi)' },
+    { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
+    { code: 'te', label: 'తెలుగు (Telugu)' },
+    { code: 'ta', label: 'தமிழ் (Tamil)' },
+    { code: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+    { code: 'ml', label: 'മലയാളം (Malayalam)' },
+    { code: 'bn', label: 'বাংলা (Bengali)' },
+    { code: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)' },
+    { code: 'or', label: 'ଓଡ଼ିଆ (Odia)' },
+    { code: 'as', label: 'অসমীয়া (Assamese)' }
+  ];
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showLangDropdown() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.showLangDropdown.set(false);
+    }
+  }
+
+  toggleLangDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.showLangDropdown.update(v => !v);
+  }
+
+  setLanguage(lang: string): void {
+    this.i18n.setLang(lang as any);
+    this.showLangDropdown.set(false);
+  }
 
   isScrolled = signal(false);
   readonly currentYear = new Date().getFullYear();

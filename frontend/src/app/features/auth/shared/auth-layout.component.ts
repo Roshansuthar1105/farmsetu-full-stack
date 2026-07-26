@@ -1,13 +1,14 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { LucideLanguages } from '@lucide/angular';
 import { I18nService } from '../../../core/services/i18n.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'fs-auth-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LucideLanguages],
   template: `
     <div class="min-h-screen flex bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       
@@ -102,15 +103,34 @@ import { ThemeService } from '../../../core/services/theme.service';
               <span class="material-icons text-sm">{{ theme.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
             </button>
 
-            <!-- Language Switcher Dropdown (aligned right) -->
-            <div class="flex items-center">
-              <span class="material-icons text-sm text-gray-400 dark:text-gray-500 mr-1 hidden sm:inline">translate</span>
-              <select [value]="i18n.lang()"
-                      (change)="i18n.setLang($any($event.target).value)"
-                      class="text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:border-gray-400 dark:hover:border-gray-600 transition focus:border-green-500 text-gray-700 dark:text-gray-300">
-                <option value="en">English</option>
-                <option value="hi">हिंदी</option>
-              </select>
+            <!-- Language Switcher Button + Custom Dropdown -->
+            <div class="relative">
+              <button type="button" (click)="toggleLangDropdown($event)" title="Switch Language"
+                class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 flex items-center justify-center transition active:scale-95 focus:outline-none"
+                [class.text-green-600]="showLangDropdown()" [class.dark:text-green-400]="showLangDropdown()">
+                <svg lucideLanguages size="18" class="stroke-[2]"></svg>
+              </button>
+
+              @if (showLangDropdown()) {
+              <div (click)="$event.stopPropagation()"
+                class="lang-dropdown absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 max-h-72 overflow-y-auto scrollbar-thin">
+                <div class="p-2">
+                  <p class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider px-2 mb-2 font-display">
+                    Select Language
+                  </p>
+                  @for (lang of availableLanguages; track lang.code) {
+                  <button (click)="setLanguage(lang.code)"
+                    class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors flex items-center justify-between group"
+                    [ngClass]="i18n.lang() === lang.code ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                    <span>{{ lang.label }}</span>
+                    @if (i18n.lang() === lang.code) {
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    }
+                  </button>
+                  }
+                </div>
+              </div>
+              }
             </div>
           </div>
         </div>
@@ -144,9 +164,44 @@ import { ThemeService } from '../../../core/services/theme.service';
     }
   `]
 })
-export class AuthLayoutComponent implements OnInit {
+export class AuthLayoutComponent implements OnInit, OnDestroy {
   readonly i18n = inject(I18nService);
   readonly theme = inject(ThemeService);
+  private readonly elementRef = inject(ElementRef);
+
+  readonly showLangDropdown = signal(false);
+
+  readonly availableLanguages = [
+    { code: 'en', label: 'English' },
+    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'mr', label: 'मराठी (Marathi)' },
+    { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
+    { code: 'te', label: 'తెలుగు (Telugu)' },
+    { code: 'ta', label: 'தமிழ் (Tamil)' },
+    { code: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+    { code: 'ml', label: 'മലയാളം (Malayalam)' },
+    { code: 'bn', label: 'বাংলা (Bengali)' },
+    { code: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)' },
+    { code: 'or', label: 'ଓଡ଼ିଆ (Odia)' },
+    { code: 'as', label: 'অসমীয়া (Assamese)' }
+  ];
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showLangDropdown() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.showLangDropdown.set(false);
+    }
+  }
+
+  toggleLangDropdown(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.showLangDropdown.update(v => !v);
+  }
+
+  setLanguage(lang: string): void {
+    this.i18n.setLang(lang as any);
+    this.showLangDropdown.set(false);
+  }
 
   activeSlide = signal(0);
   slides = [
